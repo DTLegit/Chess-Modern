@@ -147,7 +147,7 @@
     transition: all 120ms ease;
   }
   .scrub-btn:hover {
-    background: rgba(110, 74, 42, 0.08);
+    background: color-mix(in oklab, var(--c-accent-mid) 12%, transparent);
     color: var(--c-ink);
   }
   .scrub-btn:active {
@@ -174,10 +174,10 @@
     display: grid;
     grid-template-columns: 36px 1fr 1fr;
     align-items: stretch;
-    border-bottom: 1px solid rgba(110, 74, 42, 0.04);
+    border-bottom: 1px solid color-mix(in oklab, var(--c-accent-mid) 8%, var(--hairline));
   }
   .row:nth-child(even) {
-    background: rgba(110, 74, 42, 0.025);
+    background: color-mix(in oklab, var(--c-accent-mid) 5%, transparent);
   }
   .num {
     display: grid;
@@ -197,11 +197,11 @@
     transition: background-color 100ms ease;
   }
   .ply:hover:not(:disabled) {
-    background: rgba(110, 74, 42, 0.1);
+    background: color-mix(in oklab, var(--c-accent-mid) 14%, transparent);
   }
   .ply.active {
-    background: var(--c-walnut);
-    color: var(--c-bg-elev);
+    background: linear-gradient(180deg, var(--c-accent-mid) 0%, var(--c-accent) 100%);
+    color: var(--c-accent-ink);
     box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.18);
   }
   .ply:disabled {

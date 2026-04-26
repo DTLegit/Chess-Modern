@@ -74,17 +74,17 @@
   }
 
   .variant-primary {
-    background: linear-gradient(180deg, #c2933b 0%, #a87a28 100%);
-    color: #fffaee;
+    background: linear-gradient(180deg, var(--c-accent-mid) 0%, var(--c-accent) 100%);
+    color: var(--c-accent-ink);
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.18),
-      0 1px 2px rgba(70, 45, 12, 0.2);
-    border-color: rgba(70, 45, 12, 0.18);
+      inset 0 1px 0 rgba(255, 255, 255, 0.2),
+      0 1px 2px color-mix(in oklab, var(--c-accent) 35%, transparent);
+    border-color: color-mix(in oklab, var(--c-accent) 45%, transparent);
   }
   .variant-primary:not(:disabled):hover {
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.22),
-      0 4px 10px rgba(70, 45, 12, 0.22);
+      inset 0 1px 0 rgba(255, 255, 255, 0.24),
+      0 4px 12px color-mix(in oklab, var(--c-accent-mid) 40%, transparent);
   }
 
   .variant-ghost {
@@ -93,8 +93,8 @@
     border-color: var(--hairline-strong);
   }
   .variant-ghost:not(:disabled):hover {
-    background: rgba(110, 74, 42, 0.06);
-    border-color: var(--c-walnut);
+    background: color-mix(in oklab, var(--c-accent-mid) 12%, transparent);
+    border-color: color-mix(in oklab, var(--c-accent-mid) 55%, var(--hairline));
   }
 
   .variant-subtle {
@@ -102,7 +102,7 @@
     color: var(--c-ink-soft);
   }
   .variant-subtle:not(:disabled):hover {
-    background: rgba(110, 74, 42, 0.08);
+    background: color-mix(in oklab, var(--c-accent-mid) 10%, transparent);
     color: var(--c-ink);
   }
 

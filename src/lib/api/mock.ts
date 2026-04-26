@@ -99,8 +99,10 @@ interface MockGame {
 
 const games = new Map<GameId, MockGame>();
 const settings: Settings = {
+  app_theme: "light",
   board_theme: "wood",
-  piece_set: "classic",
+  piece_set: "merida",
+  accent: "walnut",
   sound_enabled: true,
   sound_volume: 0.6,
   show_legal_moves: true,
@@ -277,6 +279,8 @@ export const mockApi: ChessApi = {
   },
   async setSettings(s) {
     Object.assign(settings, s);
+    settings.piece_set = "merida";
+    if (!settings.accent) settings.accent = "walnut";
     return settings;
   },
   async onMoveMade(h) {

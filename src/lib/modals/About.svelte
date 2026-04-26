@@ -1,6 +1,7 @@
 <script lang="ts">
   import Modal from "../ui/Modal.svelte";
   import Button from "../ui/Button.svelte";
+  import GameLogo from "../ui/GameLogo.svelte";
 
   interface Props {
     open: boolean;
@@ -11,26 +12,7 @@
 
 <Modal {open} {onclose} title="About" width="380px">
   <div class="about">
-    <div class="logo">
-      <svg viewBox="0 0 64 64" aria-hidden="true">
-        <defs>
-          <linearGradient id="lg" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stop-color="#c2933b" />
-            <stop offset="100%" stop-color="#7a5018" />
-          </linearGradient>
-        </defs>
-        <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#lg)" />
-        <text
-          x="32"
-          y="44"
-          text-anchor="middle"
-          font-family="New York, Iowan Old Style, Georgia, serif"
-          font-size="40"
-          fill="#fffaef"
-          font-weight="500"
-        >♚</text>
-      </svg>
-    </div>
+    <GameLogo size={64} showWordmark={false} />
 
     <h2 class="serif name">Chess</h2>
     <p class="version">version 0.1.0 — early preview</p>
@@ -50,13 +32,8 @@
     text-align: center;
     padding: 6px 0;
   }
-  .logo {
-    width: 64px;
-    height: 64px;
-    margin: 0 auto 14px;
-    box-shadow: var(--shadow-md);
-    border-radius: 14px;
-    overflow: hidden;
+  .about :global(.logo-wrap) {
+    margin-bottom: 14px;
   }
   .name {
     margin: 0;

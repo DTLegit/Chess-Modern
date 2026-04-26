@@ -171,6 +171,11 @@ pub enum BoardTheme {
     Slate,
     WoodRealistic,
     SlateRealistic,
+    Marble,
+    Emerald,
+    Obsidian,
+    Sandstone,
+    Midnight,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, PartialEq, Eq)]
@@ -190,11 +195,24 @@ pub enum PieceSet {
     Minimal,
 }
 
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, PartialEq, Eq, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum Accent {
+    #[default]
+    Walnut,
+    Forest,
+    Violet,
+    Teal,
+    Rose,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct Settings {
     pub app_theme: AppTheme,
     pub board_theme: BoardTheme,
     pub piece_set: PieceSet,
+    #[serde(default)]
+    pub accent: Accent,
     pub sound_enabled: bool,
     pub sound_volume: f32,
     pub show_legal_moves: bool,
@@ -207,7 +225,8 @@ impl Default for Settings {
         Self {
             app_theme: AppTheme::Light,
             board_theme: BoardTheme::Wood,
-            piece_set: PieceSet::Classic,
+            piece_set: PieceSet::Merida,
+            accent: Accent::Walnut,
             sound_enabled: true,
             sound_volume: 0.6,
             show_legal_moves: true,

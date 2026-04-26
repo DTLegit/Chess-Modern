@@ -298,7 +298,7 @@
           class:dragging={dragging?.id === p.id}
           style:transform={pieceTransform(p)}
         >
-          <Piece kind={p.kind} color={p.color} set={settings.piece_set} />
+          <Piece kind={p.kind} color={p.color} />
         </div>
       {/each}
 
@@ -349,6 +349,31 @@
     background:
       radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
       linear-gradient(155deg, #4a525d 0%, #2a2f36 100%);
+  }
+  .theme-marble .board-outer {
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.16), transparent 60%),
+      linear-gradient(155deg, #919cac 0%, #5e6878 100%);
+  }
+  .theme-emerald .board-outer {
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.08), transparent 60%),
+      linear-gradient(155deg, #245343 0%, #13362b 100%);
+  }
+  .theme-obsidian .board-outer {
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.05), transparent 60%),
+      linear-gradient(155deg, #2e3542 0%, #131820 100%);
+  }
+  .theme-sandstone .board-outer {
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(255, 250, 235, 0.2), transparent 60%),
+      linear-gradient(155deg, #b4885a 0%, #7a5738 100%);
+  }
+  .theme-midnight .board-outer {
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(124, 151, 210, 0.18), transparent 60%),
+      linear-gradient(155deg, #1c2d50 0%, #0b1323 100%);
   }
   .theme-wood-realistic .board-outer {
     background:
@@ -462,6 +487,58 @@
       rgba(0, 0, 0, 0.16)
     );
   }
+  .theme-marble .square.light {
+    --sq-fill: #eceff3;
+    --sq-grain:
+      radial-gradient(circle at 18% 25%, rgba(255, 255, 255, 0.5), transparent 35%),
+      repeating-linear-gradient(130deg, rgba(120, 130, 145, 0.09) 0 2px, transparent 2px 8px);
+  }
+  .theme-marble .square.dark {
+    --sq-fill: #8b939f;
+    --sq-grain:
+      radial-gradient(circle at 22% 20%, rgba(255, 255, 255, 0.12), transparent 45%),
+      repeating-linear-gradient(130deg, rgba(25, 30, 40, 0.16) 0 2px, transparent 2px 9px);
+  }
+  .theme-emerald .square.light {
+    --sq-fill: #d8efe3;
+    --sq-grain:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.22), rgba(0, 0, 0, 0.03)),
+      repeating-linear-gradient(90deg, rgba(45, 111, 86, 0.08) 0 1px, transparent 1px 6px);
+  }
+  .theme-emerald .square.dark {
+    --sq-fill: #2f6f56;
+    --sq-grain:
+      linear-gradient(155deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.2)),
+      repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.1) 0 1px, transparent 1px 7px);
+  }
+  .theme-obsidian .square.light {
+    --sq-fill: #7b8797;
+    --sq-grain: linear-gradient(155deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.08));
+  }
+  .theme-obsidian .square.dark {
+    --sq-fill: #151b26;
+    --sq-grain: linear-gradient(155deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.28));
+  }
+  .theme-sandstone .square.light {
+    --sq-fill: #efd8b8;
+    --sq-grain:
+      radial-gradient(circle at 20% 22%, rgba(255, 250, 240, 0.24), transparent 42%),
+      repeating-linear-gradient(95deg, rgba(125, 90, 45, 0.08) 0 1px, transparent 1px 6px);
+  }
+  .theme-sandstone .square.dark {
+    --sq-fill: #b58959;
+    --sq-grain:
+      radial-gradient(circle at 20% 22%, rgba(255, 238, 205, 0.1), transparent 42%),
+      repeating-linear-gradient(95deg, rgba(75, 45, 20, 0.14) 0 1px, transparent 1px 7px);
+  }
+  .theme-midnight .square.light {
+    --sq-fill: #4b5f86;
+    --sq-grain: linear-gradient(150deg, rgba(185, 208, 255, 0.2), rgba(7, 14, 24, 0.05));
+  }
+  .theme-midnight .square.dark {
+    --sq-fill: #101a30;
+    --sq-grain: linear-gradient(150deg, rgba(169, 201, 255, 0.07), rgba(0, 0, 0, 0.34));
+  }
 
   .theme-wood-realistic .square.light {
     --sq-fill: var(--sq-light-wood);
@@ -486,7 +563,9 @@
     mix-blend-mode: multiply;
   }
   .theme-slate .square.last-move::after,
-  .theme-slate-realistic .square.last-move::after {
+  .theme-slate-realistic .square.last-move::after,
+  .theme-obsidian .square.last-move::after,
+  .theme-midnight .square.last-move::after {
     mix-blend-mode: normal;
     background: rgba(204, 162, 56, 0.32);
   }
@@ -495,7 +574,9 @@
     mix-blend-mode: multiply;
   }
   .theme-slate .square.selected::after,
-  .theme-slate-realistic .square.selected::after {
+  .theme-slate-realistic .square.selected::after,
+  .theme-obsidian .square.selected::after,
+  .theme-midnight .square.selected::after {
     mix-blend-mode: normal;
     background: rgba(120, 153, 82, 0.42);
   }
@@ -540,6 +621,16 @@
   .theme-slate-realistic .square.light .coord { color: var(--sq-dark-slate-2); }
   .theme-slate .square.dark .coord,
   .theme-slate-realistic .square.dark .coord { color: var(--sq-light-slate); }
+  .theme-marble .square.light .coord { color: #5e6878; }
+  .theme-marble .square.dark .coord { color: #eceff3; }
+  .theme-emerald .square.light .coord { color: #2f6f56; }
+  .theme-emerald .square.dark .coord { color: #d8efe3; }
+  .theme-obsidian .square.light .coord { color: #192132; }
+  .theme-obsidian .square.dark .coord { color: #9fb2cb; }
+  .theme-sandstone .square.light .coord { color: #7a5738; }
+  .theme-sandstone .square.dark .coord { color: #f4dfc4; }
+  .theme-midnight .square.light .coord { color: #101a30; }
+  .theme-midnight .square.dark .coord { color: #a9c0e9; }
 
   .piece-wrap {
     position: absolute;

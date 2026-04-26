@@ -33,6 +33,8 @@ export const events = {
 };
 
 /* Types */
+export type Accent = "walnut" | "forest" | "violet" | "teal" | "rose";
+
 export type AiProgressEvent = {
 	game_id: string,
 	depth: number,
@@ -44,7 +46,7 @@ export type ApiError = { kind: "GameNotFound"; message: string } | { kind: "Ille
 
 export type AppTheme = "light" | "dark" | "blue";
 
-export type BoardTheme = "wood" | "slate" | "wood_realistic" | "slate_realistic";
+export type BoardTheme = "wood" | "slate" | "wood_realistic" | "slate_realistic" | "marble" | "emerald" | "obsidian" | "sandstone" | "midnight";
 
 export type ClockState = {
 	white_ms: number,
@@ -144,6 +146,7 @@ export type Settings = {
 	app_theme: AppTheme,
 	board_theme: BoardTheme,
 	piece_set: PieceSet,
+	accent?: Accent,
 	sound_enabled: boolean,
 	sound_volume: number,
 	show_legal_moves: boolean,

@@ -80,7 +80,7 @@
       0 0 24px rgba(194, 147, 59, 0.18);
   }
   .clock.active .time {
-    color: var(--c-walnut-deep);
+    color: var(--c-accent-mid);
   }
   .clock.low .time {
     color: var(--c-red-soft);

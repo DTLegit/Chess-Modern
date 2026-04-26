@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Color, PieceKind } from "../api/contract";
   import { game } from "../stores/gameStore.svelte";
-  import { settingsStore } from "../stores/settingsStore.svelte";
   import Piece from "../pieces/Piece.svelte";
 
   interface Props {
@@ -47,14 +46,13 @@
   });
   const delta = $derived(myValue - oppValue);
 
-  const set = $derived(settingsStore.settings.piece_set);
   const oppColor = $derived<Color>(side === "w" ? "b" : "w");
 </script>
 
 <div class="captures" data-side={side}>
   <div class="row">
     {#each captured as k, i (i + "-" + k)}
-      <span class="cap"><Piece kind={k} color={oppColor} {set} /></span>
+      <span class="cap"><Piece kind={k} color={oppColor} /></span>
     {/each}
     {#if delta > 0}
       <span class="delta">+{delta}</span>

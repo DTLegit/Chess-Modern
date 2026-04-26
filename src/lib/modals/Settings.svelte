@@ -1,8 +1,9 @@
 <script lang="ts">
   import Modal from "../ui/Modal.svelte";
   import Button from "../ui/Button.svelte";
+  import BoardThemePreview from "../board/BoardThemePreview.svelte";
   import { settingsStore } from "../stores/settingsStore.svelte";
-  import type { AppTheme, BoardTheme, PieceSet } from "../api/contract";
+  import type { Accent, AppTheme, BoardTheme } from "../api/contract";
 
   interface Props {
     open: boolean;
@@ -11,15 +12,20 @@
   const { open, onclose }: Props = $props();
 
   const s = $derived(settingsStore.settings);
+  const accent = $derived(s.accent ?? "walnut");
+
+  let hoverBoard = $state<BoardTheme | null>(null);
+  const previewBoard = $derived(hoverBoard ?? s.board_theme);
 
   function setAppTheme(t: AppTheme) {
     void settingsStore.update({ app_theme: t });
   }
   function setTheme(t: BoardTheme) {
+    hoverBoard = null;
     void settingsStore.update({ board_theme: t });
   }
-  function setPieces(p: PieceSet) {
-    void settingsStore.update({ piece_set: p });
+  function setAccent(a: Accent) {
+    void settingsStore.update({ accent: a });
   }
   function setSound(v: boolean) {
     void settingsStore.update({ sound_enabled: v });
@@ -32,7 +38,7 @@
   }
 </script>
 
-<Modal {open} {onclose} title="Settings" width="480px">
+<Modal {open} {onclose} title="Settings" width="780px">
   <div class="grid">
     <section class="row">
       <div class="row-head">
@@ -57,13 +63,53 @@
 
     <section class="row">
       <div class="row-head">
+        <h3>Accent color</h3>
+        <p>Buttons, toggles, and focus rings follow this accent.</p>
+      </div>
+      <div class="seg accent-row">
+        <label class:active={accent === "walnut"}>
+          <input type="radio" name="accent" checked={accent === "walnut"} onchange={() => setAccent("walnut")} />
+          Walnut
+        </label>
+        <label class:active={accent === "forest"}>
+          <input type="radio" name="accent" checked={accent === "forest"} onchange={() => setAccent("forest")} />
+          Forest
+        </label>
+        <label class:active={accent === "violet"}>
+          <input type="radio" name="accent" checked={accent === "violet"} onchange={() => setAccent("violet")} />
+          Violet
+        </label>
+        <label class:active={accent === "teal"}>
+          <input type="radio" name="accent" checked={accent === "teal"} onchange={() => setAccent("teal")} />
+          Teal
+        </label>
+        <label class:active={accent === "rose"}>
+          <input type="radio" name="accent" checked={accent === "rose"} onchange={() => setAccent("rose")} />
+          Rose
+        </label>
+      </div>
+    </section>
+
+    <section class="row board-section">
+      <div class="row-head">
         <h3>Board theme</h3>
-        <p>Wood is warm and traditional. Slate is modern and crisp.</p>
+        <p>Preview updates as you point at a style; click to apply.</p>
+      </div>
+      <div
+        class="preview-wrap"
+        role="presentation"
+        onmouseleave={() => {
+          hoverBoard = null;
+        }}
+      >
+        <BoardThemePreview theme={previewBoard} />
       </div>
       <div class="theme-pickers">
         <button
+          type="button"
           class="theme-card theme-wood"
           class:active={s.board_theme === "wood"}
+          onmouseenter={() => (hoverBoard = "wood")}
           onclick={() => setTheme("wood")}
         >
           <div class="swatch sw-wood">
@@ -73,8 +119,10 @@
           <span>Wood (Stylized)</span>
         </button>
         <button
+          type="button"
           class="theme-card theme-wood-realistic"
           class:active={s.board_theme === "wood_realistic"}
+          onmouseenter={() => (hoverBoard = "wood_realistic")}
           onclick={() => setTheme("wood_realistic")}
         >
           <div class="swatch sw-wood-realistic">
@@ -84,8 +132,10 @@
           <span>Wood (Realistic)</span>
         </button>
         <button
+          type="button"
           class="theme-card theme-slate"
           class:active={s.board_theme === "slate"}
+          onmouseenter={() => (hoverBoard = "slate")}
           onclick={() => setTheme("slate")}
         >
           <div class="swatch sw-slate">
@@ -95,8 +145,10 @@
           <span>Slate (Stylized)</span>
         </button>
         <button
+          type="button"
           class="theme-card theme-slate-realistic"
           class:active={s.board_theme === "slate_realistic"}
+          onmouseenter={() => (hoverBoard = "slate_realistic")}
           onclick={() => setTheme("slate_realistic")}
         >
           <div class="swatch sw-slate-realistic">
@@ -105,31 +157,71 @@
           </div>
           <span>Slate (Realistic)</span>
         </button>
-      </div>
-    </section>
-
-    <section class="row">
-      <div class="row-head">
-        <h3>Piece set</h3>
-        <p>Choose from Classic, Modern, Merida, or Minimal.</p>
-      </div>
-      <div class="seg">
-        <label class:active={s.piece_set === "classic"}>
-          <input type="radio" name="set" checked={s.piece_set === "classic"} onchange={() => setPieces("classic")} />
-          Classic
-        </label>
-        <label class:active={s.piece_set === "modern"}>
-          <input type="radio" name="set" checked={s.piece_set === "modern"} onchange={() => setPieces("modern")} />
-          Modern
-        </label>
-        <label class:active={s.piece_set === "merida"}>
-          <input type="radio" name="set" checked={s.piece_set === "merida"} onchange={() => setPieces("merida")} />
-          Merida
-        </label>
-        <label class:active={s.piece_set === "minimal"}>
-          <input type="radio" name="set" checked={s.piece_set === "minimal"} onchange={() => setPieces("minimal")} />
-          Minimal
-        </label>
+        <button
+          type="button"
+          class="theme-card theme-marble"
+          class:active={s.board_theme === "marble"}
+          onmouseenter={() => (hoverBoard = "marble")}
+          onclick={() => setTheme("marble")}
+        >
+          <div class="swatch sw-marble">
+            <span class="sq light"></span>
+            <span class="sq dark"></span>
+          </div>
+          <span>Marble</span>
+        </button>
+        <button
+          type="button"
+          class="theme-card theme-emerald"
+          class:active={s.board_theme === "emerald"}
+          onmouseenter={() => (hoverBoard = "emerald")}
+          onclick={() => setTheme("emerald")}
+        >
+          <div class="swatch sw-emerald">
+            <span class="sq light"></span>
+            <span class="sq dark"></span>
+          </div>
+          <span>Emerald</span>
+        </button>
+        <button
+          type="button"
+          class="theme-card theme-obsidian"
+          class:active={s.board_theme === "obsidian"}
+          onmouseenter={() => (hoverBoard = "obsidian")}
+          onclick={() => setTheme("obsidian")}
+        >
+          <div class="swatch sw-obsidian">
+            <span class="sq light"></span>
+            <span class="sq dark"></span>
+          </div>
+          <span>Obsidian</span>
+        </button>
+        <button
+          type="button"
+          class="theme-card theme-sandstone"
+          class:active={s.board_theme === "sandstone"}
+          onmouseenter={() => (hoverBoard = "sandstone")}
+          onclick={() => setTheme("sandstone")}
+        >
+          <div class="swatch sw-sandstone">
+            <span class="sq light"></span>
+            <span class="sq dark"></span>
+          </div>
+          <span>Sandstone</span>
+        </button>
+        <button
+          type="button"
+          class="theme-card theme-midnight"
+          class:active={s.board_theme === "midnight"}
+          onmouseenter={() => (hoverBoard = "midnight")}
+          onclick={() => setTheme("midnight")}
+        >
+          <div class="swatch sw-midnight">
+            <span class="sq light"></span>
+            <span class="sq dark"></span>
+          </div>
+          <span>Midnight</span>
+        </button>
       </div>
     </section>
 
@@ -149,7 +241,9 @@
         </label>
         <input
           type="range"
-          min="0" max="1" step="0.05"
+          min="0"
+          max="1"
+          step="0.05"
           value={s.sound_volume}
           disabled={!s.sound_enabled}
           oninput={(e) => setVolume(parseFloat((e.target as HTMLInputElement).value))}
@@ -205,6 +299,9 @@
     display: grid;
     gap: 10px;
   }
+  .board-section {
+    gap: 12px;
+  }
   .row-head h3 {
     margin: 0 0 2px;
     font-size: 13px;
@@ -217,9 +314,13 @@
     color: var(--c-ink-mute);
   }
 
+  .preview-wrap {
+    max-width: 320px;
+  }
+
   .theme-pickers {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 10px;
   }
   .theme-card {
@@ -235,10 +336,12 @@
     font-size: 13px;
     font-weight: 500;
   }
-  .theme-card:hover { border-color: var(--c-walnut); }
+  .theme-card:hover {
+    border-color: color-mix(in oklab, var(--c-accent-mid) 65%, var(--hairline));
+  }
   .theme-card.active {
-    border-color: var(--c-walnut-deep);
-    box-shadow: 0 0 0 1px var(--c-walnut-deep);
+    border-color: var(--c-accent-mid);
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--c-accent-mid) 45%, transparent);
     color: var(--c-ink);
   }
   .swatch {
@@ -248,10 +351,32 @@
     border-radius: 6px;
     overflow: hidden;
   }
-  .sw-wood .light, .sw-wood-realistic .light { background: var(--sq-light-wood); }
-  .sw-wood .dark, .sw-wood-realistic .dark { background: var(--sq-dark-wood); }
-  .sw-slate .light, .sw-slate-realistic .light { background: var(--sq-light-slate); }
-  .sw-slate .dark, .sw-slate-realistic .dark { background: var(--sq-dark-slate); }
+  .sw-wood .light,
+  .sw-wood-realistic .light {
+    background: var(--sq-light-wood);
+  }
+  .sw-wood .dark,
+  .sw-wood-realistic .dark {
+    background: var(--sq-dark-wood);
+  }
+  .sw-slate .light,
+  .sw-slate-realistic .light {
+    background: var(--sq-light-slate);
+  }
+  .sw-slate .dark,
+  .sw-slate-realistic .dark {
+    background: var(--sq-dark-slate);
+  }
+  .sw-marble .light { background: #eceff3; }
+  .sw-marble .dark { background: #8b939f; }
+  .sw-emerald .light { background: #d8efe3; }
+  .sw-emerald .dark { background: #2f6f56; }
+  .sw-obsidian .light { background: #7b8797; }
+  .sw-obsidian .dark { background: #151b26; }
+  .sw-sandstone .light { background: #efd8b8; }
+  .sw-sandstone .dark { background: #b58959; }
+  .sw-midnight .light { background: #4b5f86; }
+  .sw-midnight .dark { background: #101a30; }
 
   .seg {
     display: grid;
@@ -261,6 +386,9 @@
     border: 1px solid var(--hairline);
     border-radius: 10px;
     padding: 4px;
+  }
+  .accent-row {
+    grid-template-columns: repeat(auto-fit, minmax(72px, 1fr));
   }
   .seg label {
     display: block;
@@ -276,10 +404,14 @@
   }
   .seg label.active {
     background: var(--c-bg-elev);
-    color: var(--c-walnut-deep);
-    box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--hairline);
+    color: var(--c-ink);
+    box-shadow: inset 0 0 0 2px var(--c-accent-mid);
   }
-  .seg input { position: absolute; opacity: 0; pointer-events: none; }
+  .seg input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
 
   .sound-row {
     display: grid;
@@ -287,7 +419,9 @@
     gap: 16px;
     align-items: center;
   }
-  .switch input { display: none; }
+  .switch input {
+    display: none;
+  }
   .switch .track {
     width: 38px;
     height: 22px;
@@ -309,7 +443,7 @@
     transition: transform 160ms var(--ease-out);
   }
   .switch input:checked + .track {
-    background: var(--c-walnut);
+    background: var(--c-accent-mid);
   }
   .switch input:checked + .track .thumb {
     transform: translateX(16px);
@@ -327,11 +461,13 @@
     width: 16px;
     height: 16px;
     background: var(--c-bg-elev);
-    border: 2px solid var(--c-walnut);
+    border: 2px solid var(--c-accent-mid);
     border-radius: 50%;
     cursor: pointer;
   }
-  .vol:disabled { opacity: 0.4; }
+  .vol:disabled {
+    opacity: 0.4;
+  }
 
   .checks {
     display: grid;
@@ -350,10 +486,18 @@
     cursor: pointer;
     transition: all 120ms ease;
   }
-  .checks label:hover { border-color: var(--c-walnut); }
+  .checks label:hover {
+    border-color: color-mix(in oklab, var(--c-accent-mid) 55%, var(--hairline));
+  }
   .checks input[type="checkbox"] {
     width: 16px;
     height: 16px;
-    accent-color: var(--c-walnut);
+    accent-color: var(--c-accent-mid);
+  }
+
+  @media (max-width: 820px) {
+    .theme-pickers {
+      grid-template-columns: 1fr 1fr;
+    }
   }
 </style>

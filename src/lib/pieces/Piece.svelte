@@ -1,6 +1,6 @@
 {#if shape}
   <svg
-    class="piece-svg piece-{color} set-{set}"
+    class="piece-svg piece-{color}"
     viewBox="0 0 100 100"
     aria-hidden="true"
     style:--piece-fill={fill}
@@ -32,26 +32,16 @@
 {/if}
 
 <script lang="ts">
-  import type { Color, PieceKind, PieceSet } from "../api/contract";
-  import { CLASSIC } from "./classic";
-  import { MODERN } from "./modern";
+  import type { Color, PieceKind } from "../api/contract";
   import { MERIDA } from "./merida";
-  import { MINIMAL } from "./minimal";
 
   interface Props {
     kind: PieceKind;
     color: Color;
-    set?: PieceSet;
   }
-  const { kind, color, set = "classic" }: Props = $props();
+  const { kind, color }: Props = $props();
 
-  const shapes = $derived(
-    set === "modern" ? MODERN :
-    set === "merida" ? MERIDA :
-    set === "minimal" ? MINIMAL :
-    CLASSIC
-  );
-  const shape = $derived(shapes[kind]);
+  const shape = $derived(MERIDA[kind]);
 
   // Color tokens. White pieces use a warm cream fill with a deep walnut
   // outline; black pieces invert that for crisp contrast on either theme.

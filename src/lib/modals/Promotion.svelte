@@ -1,7 +1,6 @@
 <script lang="ts">
   import type { Color, PieceKind, Promotion as Promo } from "../api/contract";
   import { game } from "../stores/gameStore.svelte";
-  import { settingsStore } from "../stores/settingsStore.svelte";
   import { squareXY } from "../util/squares";
   import Piece from "../pieces/Piece.svelte";
 
@@ -56,11 +55,7 @@
           onclick={() => pick(p.promo)}
           aria-label={p.kind}
         >
-          <Piece
-            kind={p.kind}
-            color={pending.color as Color}
-            set={settingsStore.settings.piece_set}
-          />
+          <Piece kind={p.kind} color={pending.color as Color} />
         </button>
       {/each}
     </div>

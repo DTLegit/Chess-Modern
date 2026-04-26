@@ -8,6 +8,8 @@
   import GameOver from "./lib/modals/GameOver.svelte";
   import Settings from "./lib/modals/Settings.svelte";
   import About from "./lib/modals/About.svelte";
+  import WelcomeScreen from "./lib/modals/WelcomeScreen.svelte";
+  import GameLogo from "./lib/ui/GameLogo.svelte";
   import Modal from "./lib/ui/Modal.svelte";
   import Button from "./lib/ui/Button.svelte";
   import { game } from "./lib/stores/gameStore.svelte";
@@ -18,6 +20,7 @@
   let showSettings = $state(false);
   let showAbout = $state(false);
   let showGameOver = $state(false);
+  let showWelcome = $state(true);
   let dismissedGameOverFor = $state<string | null>(null);
 
   $effect(() => {
@@ -25,14 +28,6 @@
     void game.init();
     unlockAudioOnGesture();
     const off = game.onSound((kind) => playSound(kind));
-
-    // Auto-start a casual HvH game so the board renders on first launch.
-    void game.newGame({
-      mode: "hvh",
-      ai_difficulty: null,
-      human_color: "w",
-      time_control: null,
-    });
 
     return () => off();
   });
@@ -58,6 +53,7 @@
         target && (target.tagName === "INPUT" || target.tagName === "TEXTAREA");
       if (inField) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (showWelcome) return;
 
       if (e.key === "Escape") {
         if (game.illegalMoveNotice) {
@@ -105,6 +101,7 @@
 
   function startNewGame(opts: NewGameOpts) {
     showNewGame = false;
+    showWelcome = false;
     showGameOver = false;
     dismissedGameOverFor = null;
     void game.newGame(opts);
@@ -116,6 +113,7 @@
   }
 
   const turnLabel = $derived.by(() => {
+    if (showWelcome) return "Choose how to play";
     if (!game.live) return "";
     if (game.live.status !== "active") return "Game over";
     return game.live.turn === "w" ? "White to move" : "Black to move";
@@ -123,27 +121,27 @@
 
   $effect(() => {
     document.documentElement.setAttribute("data-theme", settingsStore.settings.app_theme);
+    document.documentElement.setAttribute(
+      "data-accent",
+      settingsStore.settings.accent ?? "walnut",
+    );
   });
 </script>
 
-<div class="app">
+<WelcomeScreen
+  open={showWelcome}
+  onopennewgame={() => {
+    showNewGame = true;
+  }}
+  onopensettings={() => {
+    showSettings = true;
+  }}
+/>
+
+<div class="app" class:dimmed={showWelcome}>
   <header class="topbar">
     <div class="brand">
-      <div class="logo-mark" aria-hidden="true">
-        <svg viewBox="0 0 32 32">
-          <rect x="1" y="1" width="30" height="30" rx="7" fill="#3a2515" />
-          <text
-            x="16"
-            y="23"
-            text-anchor="middle"
-            font-family="New York, Iowan Old Style, Georgia, serif"
-            font-size="20"
-            fill="#c2933b"
-            font-weight="500"
-          >♛</text>
-        </svg>
-      </div>
-      <h1 class="serif wordmark">Chess</h1>
+      <GameLogo size={28} />
       <span class="dot">·</span>
       <span class="turn">{turnLabel}</span>
     </div>
@@ -151,6 +149,9 @@
     <nav class="actions">
       <Button variant="ghost" size="sm" onclick={() => (showNewGame = true)} title="New game (N)">
         New game
+      </Button>
+      <Button variant="subtle" size="sm" onclick={() => (showWelcome = true)} title="Return to start screen">
+        Start screen
       </Button>
       <Button
         variant="subtle"
@@ -280,6 +281,10 @@
     display: grid;
     grid-template-rows: auto 1fr auto;
   }
+  .app.dimmed {
+    pointer-events: none;
+    user-select: none;
+  }
 
   .topbar {
     display: flex;
@@ -298,21 +303,8 @@
     align-items: center;
     gap: 10px;
   }
-  .logo-mark {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-  }
-  .logo-mark svg { display: block; width: 100%; height: 100%; }
-  .wordmark {
-    margin: 0;
-    font-family: var(--font-serif);
+  .brand :global(.wordmark) {
     font-size: 20px;
-    font-weight: 500;
-    letter-spacing: -0.012em;
-    color: var(--c-ink);
   }
   .dot {
     color: var(--c-ink-faint);
@@ -440,8 +432,8 @@
     left: 50%;
     transform: translateX(-50%);
     padding: 4px 12px;
-    background: rgba(110, 74, 42, 0.92);
-    color: var(--c-bg-elev);
+    background: color-mix(in oklab, var(--c-accent) 88%, black);
+    color: var(--c-accent-ink);
     border-radius: 6px;
     font-size: 12px;
     display: flex;

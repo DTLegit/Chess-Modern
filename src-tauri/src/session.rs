@@ -177,7 +177,9 @@ impl SessionManager {
         self.inner.settings.read().clone()
     }
 
-    pub fn set_settings(&self, s: Settings) {
+    pub fn set_settings(&self, mut s: Settings) {
+        // Merida is the only supported piece style in the UI; keep persisted value consistent.
+        s.piece_set = crate::api::PieceSet::Merida;
         *self.inner.settings.write() = s;
         self.persist_settings();
     }
@@ -258,7 +260,8 @@ impl SessionManager {
         let Ok(bytes) = fs::read(path) else {
             return;
         };
-        if let Ok(settings) = serde_json::from_slice::<Settings>(&bytes) {
+        if let Ok(mut settings) = serde_json::from_slice::<Settings>(&bytes) {
+            settings.piece_set = crate::api::PieceSet::Merida;
             *self.inner.settings.write() = settings;
         }
     }

@@ -1,5 +1,6 @@
 <script lang="ts">
   import type {
+    BoardTheme,
     GameMode,
     HumanColorChoice,
     NewGameOpts,
@@ -7,6 +8,8 @@
   } from "../api/contract";
   import Modal from "../ui/Modal.svelte";
   import Button from "../ui/Button.svelte";
+  import BoardThemePreview from "../board/BoardThemePreview.svelte";
+  import { settingsStore } from "../stores/settingsStore.svelte";
 
   interface Props {
     open: boolean;
@@ -21,6 +24,8 @@
   let tc = $state<string>("none");
   let customMin = $state(10);
   let customInc = $state(0);
+  let boardTheme = $state<BoardTheme>("wood");
+  let hoverBoard = $state<BoardTheme | null>(null);
 
   const TC_OPTIONS = [
     { id: "none",    label: "Casual",         tc: null as TimeControl | null },
@@ -44,6 +49,21 @@
     9: "International master",
     10: "Grandmaster",
   };
+  const BOARD_OPTIONS: { value: BoardTheme; label: string; swatch: string }[] = [
+    { value: "wood", label: "Wood (Stylized)", swatch: "sw-wood" },
+    { value: "wood_realistic", label: "Wood (Realistic)", swatch: "sw-wood-realistic" },
+    { value: "slate", label: "Slate (Stylized)", swatch: "sw-slate" },
+    { value: "slate_realistic", label: "Slate (Realistic)", swatch: "sw-slate-realistic" },
+    { value: "marble", label: "Marble", swatch: "sw-marble" },
+    { value: "emerald", label: "Emerald", swatch: "sw-emerald" },
+    { value: "obsidian", label: "Obsidian", swatch: "sw-obsidian" },
+    { value: "sandstone", label: "Sandstone", swatch: "sw-sandstone" },
+    { value: "midnight", label: "Midnight", swatch: "sw-midnight" },
+  ];
+
+  $effect(() => {
+    if (open) boardTheme = settingsStore.settings.board_theme;
+  });
 
   function selectedTimeControl(): TimeControl | null {
     const opt = TC_OPTIONS.find((o) => o.id === tc);
@@ -57,7 +77,8 @@
     return opt.tc;
   }
 
-  function start() {
+  async function start() {
+    await settingsStore.update({ board_theme: boardTheme, piece_set: "merida" });
     const opts: NewGameOpts = {
       mode,
       ai_difficulty: mode === "hva" ? difficulty : null,
@@ -68,6 +89,7 @@
   }
 
   const difficultyTrackPct = $derived(((difficulty - 1) / 9) * 100);
+  const previewBoard = $derived(hoverBoard ?? boardTheme);
 </script>
 
 <Modal {open} {onclose} title="New game" width="520px">
@@ -157,6 +179,33 @@
         </div>
       {/if}
     </fieldset>
+
+    <fieldset class="field board-field">
+      <legend>Board theme</legend>
+      <div class="board-preview-wrap" role="presentation" onmouseleave={() => (hoverBoard = null)}>
+        <BoardThemePreview theme={previewBoard} />
+      </div>
+      <div class="board-grid">
+        {#each BOARD_OPTIONS as o}
+          <button
+            type="button"
+            class="board-card {o.swatch}"
+            class:active={boardTheme === o.value}
+            onmouseenter={() => (hoverBoard = o.value)}
+            onclick={() => {
+              hoverBoard = null;
+              boardTheme = o.value;
+            }}
+          >
+            <div class="board-swatch">
+              <span class="light"></span>
+              <span class="dark"></span>
+            </div>
+            <span>{o.label}</span>
+          </button>
+        {/each}
+      </div>
+    </fieldset>
   </div>
 
   {#snippet footer()}
@@ -216,8 +265,8 @@
   }
   .seg label.active {
     background: var(--c-bg-elev);
-    color: var(--c-walnut-deep);
-    box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--hairline);
+    color: var(--c-ink);
+    box-shadow: var(--shadow-sm), inset 0 0 0 2px var(--c-accent-mid);
   }
 
   .slider-row {
@@ -239,7 +288,7 @@
     height: 4px;
     background: linear-gradient(
       to right,
-      var(--c-walnut) 0% var(--p, 50%),
+      var(--c-accent-mid) 0% var(--p, 50%),
       var(--hairline) var(--p, 50%) 100%
     );
     border-radius: 999px;
@@ -251,14 +300,14 @@
   }
   .slider::-moz-range-progress {
     height: 4px;
-    background: var(--c-walnut);
+    background: var(--c-accent-mid);
     border-radius: 999px;
   }
   .slider:focus-visible::-webkit-slider-thumb {
-    box-shadow: 0 0 0 3px rgba(112, 78, 38, 0.4), var(--shadow-sm);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--c-accent-mid) 45%, transparent), var(--shadow-sm);
   }
   .slider:focus-visible::-moz-range-thumb {
-    box-shadow: 0 0 0 3px rgba(112, 78, 38, 0.4), var(--shadow-sm);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--c-accent-mid) 45%, transparent), var(--shadow-sm);
   }
   .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
@@ -266,7 +315,7 @@
     height: 18px;
     margin-top: -7px;
     background: var(--c-bg-elev);
-    border: 2px solid var(--c-walnut);
+    border: 2px solid var(--c-accent-mid);
     border-radius: 50%;
     cursor: pointer;
     box-shadow: var(--shadow-sm);
@@ -277,7 +326,7 @@
     width: 18px;
     height: 18px;
     background: var(--c-bg-elev);
-    border: 2px solid var(--c-walnut);
+    border: 2px solid var(--c-accent-mid);
     border-radius: 50%;
     cursor: pointer;
   }
@@ -290,7 +339,7 @@
     display: block;
     font-size: 22px;
     font-weight: 500;
-    color: var(--c-walnut-deep);
+    color: var(--c-accent-mid);
     line-height: 1;
   }
   .diff-label {
@@ -320,11 +369,14 @@
     transition: all 120ms ease;
   }
   .tc-pill input { display: none; }
-  .tc-pill:hover { border-color: var(--c-walnut); color: var(--c-ink); }
+  .tc-pill:hover {
+    border-color: color-mix(in oklab, var(--c-accent-mid) 65%, var(--hairline));
+    color: var(--c-ink);
+  }
   .tc-pill.active {
-    background: var(--c-walnut);
-    color: var(--c-bg-elev);
-    border-color: var(--c-walnut-deep);
+    background: linear-gradient(180deg, var(--c-accent-mid) 0%, var(--c-accent) 100%);
+    color: var(--c-accent-ink);
+    border-color: color-mix(in oklab, var(--c-accent) 55%, transparent);
   }
 
   .custom-tc {
@@ -352,6 +404,65 @@
   }
   .num-input:focus {
     outline: none;
-    border-color: var(--c-walnut);
+    border-color: var(--c-accent-mid);
   }
+
+  .board-field {
+    display: grid;
+    gap: 10px;
+  }
+  .board-preview-wrap {
+    max-width: 220px;
+  }
+  .board-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    gap: 8px;
+  }
+  .board-card {
+    display: grid;
+    gap: 7px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--hairline);
+    background: var(--c-bg-card);
+    color: var(--c-ink-soft);
+    text-align: left;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 120ms ease;
+  }
+  .board-card:hover {
+    border-color: color-mix(in oklab, var(--c-accent-mid) 65%, var(--hairline));
+  }
+  .board-card.active {
+    border-color: var(--c-accent-mid);
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--c-accent-mid) 40%, transparent);
+    color: var(--c-ink);
+  }
+  .board-swatch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 38px;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .sw-wood .light,
+  .sw-wood-realistic .light { background: var(--sq-light-wood); }
+  .sw-wood .dark,
+  .sw-wood-realistic .dark { background: var(--sq-dark-wood); }
+  .sw-slate .light,
+  .sw-slate-realistic .light { background: var(--sq-light-slate); }
+  .sw-slate .dark,
+  .sw-slate-realistic .dark { background: var(--sq-dark-slate); }
+  .sw-marble .light { background: #eceff3; }
+  .sw-marble .dark { background: #8b939f; }
+  .sw-emerald .light { background: #d8efe3; }
+  .sw-emerald .dark { background: #2f6f56; }
+  .sw-obsidian .light { background: #7b8797; }
+  .sw-obsidian .dark { background: #151b26; }
+  .sw-sandstone .light { background: #efd8b8; }
+  .sw-sandstone .dark { background: #b58959; }
+  .sw-midnight .light { background: #4b5f86; }
+  .sw-midnight .dark { background: #101a30; }
 </style>

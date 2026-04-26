@@ -86,7 +86,7 @@
     backdrop-filter: blur(2px);
     display: grid;
     place-items: center;
-    z-index: 100;
+    z-index: 220;
     padding: 24px;
     animation: fade-in 180ms var(--ease-out);
   }
@@ -127,7 +127,7 @@
     transition: all 120ms ease;
   }
   .close:hover {
-    background: rgba(110, 74, 42, 0.08);
+    background: color-mix(in oklab, var(--c-accent-mid) 14%, transparent);
     color: var(--c-ink);
   }
   .modal-body {

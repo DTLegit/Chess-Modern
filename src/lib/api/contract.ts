@@ -85,14 +85,27 @@ export interface MoveResult {
   snapshot: GameSnapshot;
 }
 
-export type BoardTheme = "wood" | "slate" | "wood_realistic" | "slate_realistic";
+export type BoardTheme =
+  | "wood"
+  | "slate"
+  | "wood_realistic"
+  | "slate_realistic"
+  | "marble"
+  | "emerald"
+  | "obsidian"
+  | "sandstone"
+  | "midnight";
 export type PieceSet = "classic" | "modern" | "merida" | "minimal";
 export type AppTheme = "light" | "dark" | "blue";
+/** UI accent preset (buttons, active controls, links). */
+export type Accent = "walnut" | "forest" | "violet" | "teal" | "rose";
 
 export interface Settings {
   app_theme: AppTheme;
   board_theme: BoardTheme;
   piece_set: PieceSet;
+  /** Optional for older saved settings; clients should default to `"walnut"`. */
+  accent?: Accent;
   sound_enabled: boolean;
   sound_volume: number;
   show_legal_moves: boolean;
