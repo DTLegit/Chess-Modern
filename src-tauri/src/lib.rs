@@ -5,27 +5,12 @@
 //! debug build, then runs the Tauri app.
 
 pub mod api;
+pub mod ai;
+pub mod clock;
 pub mod commands;
+pub mod engine;
+pub mod pgn;
 pub mod session;
-
-// Modules owned by the backend subagent. Stubs live behind `pub mod` so the
-// crate compiles end-to-end during scaffolding.
-pub mod engine {
-    //! Chess rules, board representation, FEN/SAN/UCI conversion.
-    //! Backend subagent owns this module.
-}
-pub mod ai {
-    //! Hybrid AI: custom minimax engine + Stockfish UCI sidecar wrapper.
-    //! Backend subagent owns this module.
-}
-pub mod pgn {
-    //! PGN import/export.
-    //! Backend subagent owns this module.
-}
-pub mod clock {
-    //! Per-game chess clock.
-    //! Backend subagent owns this module.
-}
 
 use tauri_specta::{collect_commands, collect_events, Builder};
 
@@ -68,13 +53,16 @@ pub fn run() {
         )
         .expect("Failed to export TypeScript bindings");
 
+    let session_manager = SessionManager::new();
+
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
-        .manage(SessionManager::new())
+        .manage(session_manager.clone_handle())
         .invoke_handler(specta_builder.invoke_handler())
         .setup(move |app| {
+            session_manager.set_app_handle(app.handle().clone());
             specta_builder.mount_events(app);
             Ok(())
         })
