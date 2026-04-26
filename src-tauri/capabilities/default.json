@@ -1,21 +1,12 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Default permissions for the Chess app",
+  "description": "Minimum permissions for the Chess app: typed Tauri commands, event listeners, and the bundled Stockfish sidecar.",
   "windows": ["main"],
   "permissions": [
     "core:default",
     "core:event:allow-listen",
     "core:event:allow-unlisten",
-    "core:window:allow-set-title",
-    "core:window:allow-minimize",
-    "core:window:allow-toggle-maximize",
-    "core:window:allow-close",
-    "shell:allow-open",
-    "dialog:allow-save",
-    "dialog:allow-open",
-    "fs:allow-read-text-file",
-    "fs:allow-write-text-file",
     {
       "identifier": "shell:allow-execute",
       "allow": [

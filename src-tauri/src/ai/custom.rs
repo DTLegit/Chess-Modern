@@ -6,7 +6,7 @@ use rand::{seq::SliceRandom, Rng};
 
 use crate::{
     api::{AiProgressEvent, Color, PieceKind},
-    engine::{opposite, piece_value, ChessMove, Position},
+    engine::{piece_value, ChessMove, Position},
 };
 
 const MATE: i32 = 30_000;
@@ -276,7 +276,3 @@ fn psqt(kind: PieceKind, color: Color, sq: u8) -> i32 {
     }
 }
 
-#[allow(dead_code)]
-fn _side_after_move(color: Color) -> Color {
-    opposite(color)
-}
