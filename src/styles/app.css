@@ -72,6 +72,48 @@
   color-scheme: light;
 }
 
+[data-theme="dark"] {
+  --c-bg: #1a1a1a;
+  --c-bg-soft: #222222;
+  --c-bg-card: #2a2a2a;
+  --c-bg-elev: #333333;
+
+  --c-ink: #e0e0e0;
+  --c-ink-soft: #b0b0b0;
+  --c-ink-mute: #808080;
+  --c-ink-faint: #505050;
+
+  --hairline: rgba(255, 255, 255, 0.1);
+  --hairline-strong: rgba(255, 255, 255, 0.2);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 14px 44px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-board: 0 16px 40px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+
+  color-scheme: dark;
+}
+
+[data-theme="blue"] {
+  --c-bg: #1e293b;
+  --c-bg-soft: #334155;
+  --c-bg-card: #475569;
+  --c-bg-elev: #64748b;
+
+  --c-ink: #f8fafc;
+  --c-ink-soft: #cbd5e1;
+  --c-ink-mute: #94a3b8;
+  --c-ink-faint: #64748b;
+
+  --hairline: rgba(255, 255, 255, 0.1);
+  --hairline-strong: rgba(255, 255, 255, 0.2);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 14px 44px rgba(0, 0, 0, 0.5), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-board: 0 16px 40px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.4);
+
+  color-scheme: dark;
+}
+
 *,
 *::before,
 *::after {

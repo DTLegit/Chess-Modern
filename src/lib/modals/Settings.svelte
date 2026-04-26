@@ -2,7 +2,7 @@
   import Modal from "../ui/Modal.svelte";
   import Button from "../ui/Button.svelte";
   import { settingsStore } from "../stores/settingsStore.svelte";
-  import type { BoardTheme, PieceSet } from "../api/contract";
+  import type { AppTheme, BoardTheme, PieceSet } from "../api/contract";
 
   interface Props {
     open: boolean;
@@ -12,6 +12,9 @@
 
   const s = $derived(settingsStore.settings);
 
+  function setAppTheme(t: AppTheme) {
+    void settingsStore.update({ app_theme: t });
+  }
   function setTheme(t: BoardTheme) {
     void settingsStore.update({ board_theme: t });
   }
@@ -31,6 +34,27 @@
 
 <Modal {open} {onclose} title="Settings" width="480px">
   <div class="grid">
+    <section class="row">
+      <div class="row-head">
+        <h3>App theme</h3>
+        <p>Choose the overall color scheme for the application.</p>
+      </div>
+      <div class="seg">
+        <label class:active={s.app_theme === "light"}>
+          <input type="radio" name="app_theme" checked={s.app_theme === "light"} onchange={() => setAppTheme("light")} />
+          Light
+        </label>
+        <label class:active={s.app_theme === "dark"}>
+          <input type="radio" name="app_theme" checked={s.app_theme === "dark"} onchange={() => setAppTheme("dark")} />
+          Dark
+        </label>
+        <label class:active={s.app_theme === "blue"}>
+          <input type="radio" name="app_theme" checked={s.app_theme === "blue"} onchange={() => setAppTheme("blue")} />
+          Blue
+        </label>
+      </div>
+    </section>
+
     <section class="row">
       <div class="row-head">
         <h3>Board theme</h3>
@@ -231,7 +255,7 @@
 
   .seg {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
     gap: 6px;
     background: var(--c-bg-card);
     border: 1px solid var(--hairline);

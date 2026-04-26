@@ -120,6 +120,10 @@
     if (game.live.status !== "active") return "Game over";
     return game.live.turn === "w" ? "White to move" : "Black to move";
   });
+
+  $effect(() => {
+    document.documentElement.setAttribute("data-theme", settingsStore.settings.app_theme);
+  });
 </script>
 
 <div class="app">

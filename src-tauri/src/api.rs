@@ -175,6 +175,14 @@ pub enum BoardTheme {
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
+pub enum AppTheme {
+    Light,
+    Dark,
+    Blue,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
 pub enum PieceSet {
     Classic,
     Modern,
@@ -184,6 +192,7 @@ pub enum PieceSet {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]
 pub struct Settings {
+    pub app_theme: AppTheme,
     pub board_theme: BoardTheme,
     pub piece_set: PieceSet,
     pub sound_enabled: bool,
@@ -196,6 +205,7 @@ pub struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
+            app_theme: AppTheme::Light,
             board_theme: BoardTheme::Wood,
             piece_set: PieceSet::Classic,
             sound_enabled: true,

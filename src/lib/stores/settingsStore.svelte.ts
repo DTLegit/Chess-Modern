@@ -5,6 +5,7 @@ import { chess } from "../api";
 import type { Settings } from "../api/contract";
 
 const DEFAULT: Settings = {
+  app_theme: "light",
   board_theme: "wood",
   piece_set: "classic",
   sound_enabled: true,

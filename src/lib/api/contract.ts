@@ -87,8 +87,10 @@ export interface MoveResult {
 
 export type BoardTheme = "wood" | "slate" | "wood_realistic" | "slate_realistic";
 export type PieceSet = "classic" | "modern" | "merida" | "minimal";
+export type AppTheme = "light" | "dark" | "blue";
 
 export interface Settings {
+  app_theme: AppTheme;
   board_theme: BoardTheme;
   piece_set: PieceSet;
   sound_enabled: boolean;

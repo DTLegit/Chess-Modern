@@ -42,7 +42,7 @@ export type AiProgressEvent = {
 
 export type ApiError = { kind: "GameNotFound"; message: string } | { kind: "IllegalMove"; message: string } | { kind: "InvalidInput"; message: string } | { kind: "Engine"; message: string } | { kind: "Internal"; message: string };
 
-export type BoardTheme = "wood" | "slate";
+export type BoardTheme = "wood" | "slate" | "wood_realistic" | "slate_realistic";
 
 export type ClockState = {
 	white_ms: number,
@@ -134,7 +134,7 @@ export type Piece = {
 
 export type PieceKind = "p" | "n" | "b" | "r" | "q" | "k";
 
-export type PieceSet = "classic" | "modern";
+export type PieceSet = "classic" | "modern" | "merida" | "minimal";
 
 export type Promotion = "n" | "b" | "r" | "q";
 
