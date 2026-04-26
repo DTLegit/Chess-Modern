@@ -15,7 +15,7 @@ use crate::{
 // Helpers
 // ---------------------------------------------------------------------------
 
-fn api_move_from_engine(game: &GameSession, mv: ChessMove) -> Move {
+pub fn api_move_from_engine(game: &GameSession, mv: ChessMove) -> Move {
     let san = game.position.move_to_san(mv);
     let mut after = game.position.clone();
     after.make_move(mv);
@@ -35,7 +35,7 @@ fn api_move_from_engine(game: &GameSession, mv: ChessMove) -> Move {
     }
 }
 
-fn find_legal_move(
+pub fn find_legal_move(
     game: &mut GameSession,
     from: &str,
     to: &str,
@@ -50,7 +50,7 @@ fn find_legal_move(
         .ok_or_else(|| ApiError::IllegalMove(format!("{from}->{to}")))
 }
 
-fn apply_engine_move(
+pub fn apply_engine_move(
     session: &SessionManager,
     game_id: &str,
     mv: ChessMove,

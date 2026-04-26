@@ -183,6 +183,19 @@ impl SessionManager {
     }
 
     pub fn start_clock_task(&self, game_id: GameId) {
+        let has_clock = self
+            .inner
+            .games
+            .read()
+            .get(&game_id)
+            .is_some_and(|g| g.clock.is_some());
+        if !has_clock {
+            return;
+        }
+        if tokio::runtime::Handle::try_current().is_err() {
+            log::debug!("no tokio runtime; skipping clock task for game {game_id}");
+            return;
+        }
         if self.inner.clock_tasks.write().insert(game_id.clone()) {
             let manager = self.clone();
             tokio::spawn(async move {

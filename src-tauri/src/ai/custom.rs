@@ -63,7 +63,7 @@ pub fn choose_move(
             game_id: game_id.to_string(),
             depth,
             eval_cp: eval,
-            pv_san: pv.iter().map(|m| position.move_to_san(*m)).collect(),
+            pv_san: pv_to_san(position, &pv),
         });
         best = Some(SearchOutput {
             mv,
@@ -73,6 +73,16 @@ pub fn choose_move(
         });
     }
     best
+}
+
+fn pv_to_san(position: &Position, pv: &[ChessMove]) -> Vec<String> {
+    let mut pos = position.clone();
+    let mut sans = Vec::with_capacity(pv.len());
+    for mv in pv {
+        sans.push(pos.move_to_san(*mv));
+        pos.make_move(*mv);
+    }
+    sans
 }
 
 fn search_root(
