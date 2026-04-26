@@ -165,10 +165,12 @@ pub struct NewGameOpts {
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, PartialEq, Eq)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum BoardTheme {
     Wood,
     Slate,
+    WoodRealistic,
+    SlateRealistic,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, PartialEq, Eq)]
@@ -176,6 +178,8 @@ pub enum BoardTheme {
 pub enum PieceSet {
     Classic,
     Modern,
+    Merida,
+    Minimal,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type)]

@@ -237,7 +237,26 @@
 
 <svelte:window onpointermove={pointerMove} onpointerup={pointerUp} />
 
-<div class="board-frame theme-{settings.board_theme}" class:flipped={orientation === "b"}>
+<!-- SVG Definitions for Procedural Textures -->
+<svg width="0" height="0" style="position: absolute; pointer-events: none;">
+  <defs>
+    <!-- Wood grain filter -->
+    <filter id="wood-grain" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.04 0.8" numOctaves="3" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 0.8 0 0 0  0 0.5 0 0 0  0 0 0 0.15 0" in="noise" result="coloredNoise" />
+      <feBlend in="SourceGraphic" in2="coloredNoise" mode="multiply" />
+    </filter>
+    
+    <!-- Slate noise filter -->
+    <filter id="slate-noise" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" result="noise" />
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 1 0 0 0  0 0 0 0.08 0" in="noise" result="coloredNoise" />
+      <feBlend in="SourceGraphic" in2="coloredNoise" mode="multiply" />
+    </filter>
+  </defs>
+</svg>
+
+<div class="board-frame theme-{settings.board_theme.replace('_', '-')}" class:flipped={orientation === "b"}>
   <div class="board-outer">
     <div
       bind:this={boardEl}
@@ -324,7 +343,30 @@
     box-shadow: var(--shadow-board);
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 520ms var(--ease-out);
+    transition: transform 520ms var(--ease-out), background 300ms ease;
+  }
+  .theme-slate .board-outer {
+    background:
+      radial-gradient(ellipse at 30% 0%, rgba(255, 255, 255, 0.04), transparent 60%),
+      linear-gradient(155deg, #4a525d 0%, #2a2f36 100%);
+  }
+  .theme-wood-realistic .board-outer {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%),
+      linear-gradient(155deg, #4a2f1a 0%, #2a180c 100%);
+    box-shadow: 
+      inset 0 2px 4px rgba(255,255,255,0.1),
+      inset 0 -2px 4px rgba(0,0,0,0.4),
+      var(--shadow-board);
+  }
+  .theme-slate-realistic .board-outer {
+    background:
+      linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 40%),
+      linear-gradient(155deg, #3a4049 0%, #22262b 100%);
+    box-shadow: 
+      inset 0 2px 4px rgba(255,255,255,0.1),
+      inset 0 -2px 4px rgba(0,0,0,0.4),
+      var(--shadow-board);
   }
   .board-outer::after {
     content: "";
@@ -366,6 +408,7 @@
     inset: 0;
     background: var(--sq-fill, transparent);
     background-image: var(--sq-grain, none);
+    filter: var(--sq-filter, none);
   }
   .square::after {
     content: "";
@@ -420,11 +463,30 @@
     );
   }
 
+  .theme-wood-realistic .square.light {
+    --sq-fill: var(--sq-light-wood);
+    --sq-filter: url(#wood-grain);
+  }
+  .theme-wood-realistic .square.dark {
+    --sq-fill: var(--sq-dark-wood);
+    --sq-filter: url(#wood-grain);
+  }
+  
+  .theme-slate-realistic .square.light {
+    --sq-fill: var(--sq-light-slate);
+    --sq-filter: url(#slate-noise);
+  }
+  .theme-slate-realistic .square.dark {
+    --sq-fill: var(--sq-dark-slate);
+    --sq-filter: url(#slate-noise);
+  }
+
   .square.last-move::after {
     background: var(--hi-last);
     mix-blend-mode: multiply;
   }
-  .theme-slate .square.last-move::after {
+  .theme-slate .square.last-move::after,
+  .theme-slate-realistic .square.last-move::after {
     mix-blend-mode: normal;
     background: rgba(204, 162, 56, 0.32);
   }
@@ -432,7 +494,8 @@
     background: var(--hi-select);
     mix-blend-mode: multiply;
   }
-  .theme-slate .square.selected::after {
+  .theme-slate .square.selected::after,
+  .theme-slate-realistic .square.selected::after {
     mix-blend-mode: normal;
     background: rgba(120, 153, 82, 0.42);
   }
@@ -468,10 +531,15 @@
     bottom: 3px;
     right: 5px;
   }
-  .theme-wood .square.light .coord { color: var(--sq-dark-wood-2); }
-  .theme-wood .square.dark .coord { color: var(--sq-light-wood); }
-  .theme-slate .square.light .coord { color: var(--sq-dark-slate-2); }
-  .theme-slate .square.dark .coord { color: var(--sq-light-slate); }
+  .theme-wood .square.light .coord,
+  .theme-wood-realistic .square.light .coord { color: var(--sq-dark-wood-2); }
+  .theme-wood .square.dark .coord,
+  .theme-wood-realistic .square.dark .coord { color: var(--sq-light-wood); }
+  
+  .theme-slate .square.light .coord,
+  .theme-slate-realistic .square.light .coord { color: var(--sq-dark-slate-2); }
+  .theme-slate .square.dark .coord,
+  .theme-slate-realistic .square.dark .coord { color: var(--sq-light-slate); }
 
   .piece-wrap {
     position: absolute;

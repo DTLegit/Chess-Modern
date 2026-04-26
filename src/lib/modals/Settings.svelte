@@ -46,7 +46,18 @@
             <span class="sq light"></span>
             <span class="sq dark"></span>
           </div>
-          <span>Classic wood</span>
+          <span>Wood (Stylized)</span>
+        </button>
+        <button
+          class="theme-card theme-wood-realistic"
+          class:active={s.board_theme === "wood_realistic"}
+          onclick={() => setTheme("wood_realistic")}
+        >
+          <div class="swatch sw-wood-realistic">
+            <span class="sq light"></span>
+            <span class="sq dark"></span>
+          </div>
+          <span>Wood (Realistic)</span>
         </button>
         <button
           class="theme-card theme-slate"
@@ -57,7 +68,18 @@
             <span class="sq light"></span>
             <span class="sq dark"></span>
           </div>
-          <span>Slate</span>
+          <span>Slate (Stylized)</span>
+        </button>
+        <button
+          class="theme-card theme-slate-realistic"
+          class:active={s.board_theme === "slate_realistic"}
+          onclick={() => setTheme("slate_realistic")}
+        >
+          <div class="swatch sw-slate-realistic">
+            <span class="sq light"></span>
+            <span class="sq dark"></span>
+          </div>
+          <span>Slate (Realistic)</span>
         </button>
       </div>
     </section>
@@ -65,7 +87,7 @@
     <section class="row">
       <div class="row-head">
         <h3>Piece set</h3>
-        <p>Classic Staunton silhouettes or geometric modern.</p>
+        <p>Choose from Classic, Modern, Merida, or Minimal.</p>
       </div>
       <div class="seg">
         <label class:active={s.piece_set === "classic"}>
@@ -75,6 +97,14 @@
         <label class:active={s.piece_set === "modern"}>
           <input type="radio" name="set" checked={s.piece_set === "modern"} onchange={() => setPieces("modern")} />
           Modern
+        </label>
+        <label class:active={s.piece_set === "merida"}>
+          <input type="radio" name="set" checked={s.piece_set === "merida"} onchange={() => setPieces("merida")} />
+          Merida
+        </label>
+        <label class:active={s.piece_set === "minimal"}>
+          <input type="radio" name="set" checked={s.piece_set === "minimal"} onchange={() => setPieces("minimal")} />
+          Minimal
         </label>
       </div>
     </section>
@@ -194,14 +224,14 @@
     border-radius: 6px;
     overflow: hidden;
   }
-  .sw-wood .light { background: var(--sq-light-wood); }
-  .sw-wood .dark { background: var(--sq-dark-wood); }
-  .sw-slate .light { background: var(--sq-light-slate); }
-  .sw-slate .dark { background: var(--sq-dark-slate); }
+  .sw-wood .light, .sw-wood-realistic .light { background: var(--sq-light-wood); }
+  .sw-wood .dark, .sw-wood-realistic .dark { background: var(--sq-dark-wood); }
+  .sw-slate .light, .sw-slate-realistic .light { background: var(--sq-light-slate); }
+  .sw-slate .dark, .sw-slate-realistic .dark { background: var(--sq-dark-slate); }
 
   .seg {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 6px;
     background: var(--c-bg-card);
     border: 1px solid var(--hairline);

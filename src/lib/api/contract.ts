@@ -85,8 +85,8 @@ export interface MoveResult {
   snapshot: GameSnapshot;
 }
 
-export type BoardTheme = "wood" | "slate";
-export type PieceSet = "classic" | "modern";
+export type BoardTheme = "wood" | "slate" | "wood_realistic" | "slate_realistic";
+export type PieceSet = "classic" | "modern" | "merida" | "minimal";
 
 export interface Settings {
   board_theme: BoardTheme;

@@ -13,9 +13,9 @@
     <ellipse
       cx="50"
       cy="92"
-      rx="28"
-      ry="3.5"
-      fill="rgba(0,0,0,0.18)"
+      rx="30"
+      ry="4.5"
+      fill="rgba(0,0,0,0.25)"
       class="piece-shadow"
     />
     <g
@@ -35,6 +35,8 @@
   import type { Color, PieceKind, PieceSet } from "../api/contract";
   import { CLASSIC } from "./classic";
   import { MODERN } from "./modern";
+  import { MERIDA } from "./merida";
+  import { MINIMAL } from "./minimal";
 
   interface Props {
     kind: PieceKind;
@@ -43,7 +45,12 @@
   }
   const { kind, color, set = "classic" }: Props = $props();
 
-  const shapes = $derived(set === "classic" ? CLASSIC : MODERN);
+  const shapes = $derived(
+    set === "modern" ? MODERN :
+    set === "merida" ? MERIDA :
+    set === "minimal" ? MINIMAL :
+    CLASSIC
+  );
   const shape = $derived(shapes[kind]);
 
   // Color tokens. White pieces use a warm cream fill with a deep walnut
