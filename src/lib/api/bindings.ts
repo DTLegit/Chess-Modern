@@ -42,6 +42,8 @@ export type AiProgressEvent = {
 
 export type ApiError = { kind: "GameNotFound"; message: string } | { kind: "IllegalMove"; message: string } | { kind: "InvalidInput"; message: string } | { kind: "Engine"; message: string } | { kind: "Internal"; message: string };
 
+export type AppTheme = "light" | "dark" | "blue";
+
 export type BoardTheme = "wood" | "slate" | "wood_realistic" | "slate_realistic";
 
 export type ClockState = {
@@ -139,6 +141,7 @@ export type PieceSet = "classic" | "modern" | "merida" | "minimal";
 export type Promotion = "n" | "b" | "r" | "q";
 
 export type Settings = {
+	app_theme: AppTheme,
 	board_theme: BoardTheme,
 	piece_set: PieceSet,
 	sound_enabled: boolean,

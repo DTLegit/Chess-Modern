@@ -287,11 +287,7 @@
     justify-content: space-between;
     padding: 10px 22px;
     border-bottom: 1px solid var(--hairline);
-    background: linear-gradient(
-      180deg,
-      rgba(255, 250, 240, 0.7),
-      rgba(255, 250, 240, 0.4)
-    );
+    background: var(--c-bg-soft);
     backdrop-filter: blur(10px);
     position: sticky;
     top: 0;
@@ -465,6 +461,7 @@
     padding: 8px 22px;
     color: var(--c-ink-mute);
     font-size: 11px;
+    background: var(--c-bg-soft);
     border-top: 1px solid var(--hairline);
   }
   .hotkeys kbd {
