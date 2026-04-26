@@ -16,6 +16,13 @@ import type {
   SquareStr,
 } from "../api/contract";
 import { parseFenBoard } from "../util/fen";
+import {
+  explainIllegalMove,
+  moveRejectedCopy,
+  type IllegalMoveCopy,
+} from "../util/illegalMove";
+
+export type { IllegalMoveCopy };
 
 type SoundKind = "move" | "capture" | "check" | "castle" | "promote" | "end";
 type SoundHandler = (kind: SoundKind) => void;
@@ -43,14 +50,13 @@ class GameStore {
   thinking = $state(false);
   /** Last move (for highlight); null when scrubbing to start. */
   // derived below
-  /** Ephemeral hint (e.g. "Illegal move") shown beneath the board. */
-  hint = $state<string | null>(null);
+  /** Illegal move / rejected move dialog copy. */
+  illegalMoveNotice = $state<IllegalMoveCopy | null>(null);
 
   private soundHandlers = new Set<SoundHandler>();
   private moveUnlisten: (() => void) | null = null;
   private overUnlisten: (() => void) | null = null;
   private clockUnlisten: (() => void) | null = null;
-  private hintTimer: ReturnType<typeof setTimeout> | null = null;
   /** Local clock interpolation (mock has no clock-tick events). */
   private clockTimer: ReturnType<typeof setInterval> | null = null;
   private clockLastTs = 0;
@@ -105,7 +111,7 @@ class GameStore {
   // ------------------------------------------------------------ game lifecycle
 
   async newGame(opts: NewGameOpts) {
-    this.clearHint();
+    this.clearIllegalMoveNotice();
     this.selected = null;
     this.pendingPromotion = null;
     this.scrubIndex = null;
@@ -124,11 +130,17 @@ class GameStore {
   async tryMove(from: SquareStr, to: SquareStr): Promise<boolean> {
     if (!this.live || this.inputLocked) return false;
     const piece = this.board.get(from);
-    if (!piece) return false;
-    if (piece.color !== this.live.turn) return false;
+    if (!piece || piece.color !== this.live.turn) {
+      this.showIllegalMoveNotice(
+        explainIllegalMove(this.live, this.board, from, to),
+      );
+      return false;
+    }
     const legal = this.live.legal_moves[from] ?? [];
     if (!legal.includes(to)) {
-      this.flashHint("Illegal move");
+      this.showIllegalMoveNotice(
+        explainIllegalMove(this.live, this.board, from, to),
+      );
       return false;
     }
     // Detect promotion: pawn moves to last rank.
@@ -163,13 +175,14 @@ class GameStore {
       await chess.makeMove(this.live.game_id, from, to, promotion);
       // The MoveMade event listener actually updates state.
     } catch (err) {
-      this.flashHint("Move rejected");
+      this.showIllegalMoveNotice(moveRejectedCopy());
       console.warn("makeMove failed", err);
     }
   }
 
   private onMoveEvent(e: MoveMadeEvent) {
     if (!this.live || e.game_id !== this.live.game_id) return;
+    this.thinking = false;
     this.live = e.snapshot;
     this.snapshots = [...this.snapshots, e.snapshot];
     this.selected = null;
@@ -181,6 +194,7 @@ class GameStore {
     if (e.mv.promotion) this.fire("promote");
     if (e.mv.is_check && !e.mv.is_mate) this.fire("check");
     this.startClockTimerIfNeeded();
+
     // Trigger AI if it's their turn now.
     if (
       e.snapshot.mode === "hva" &&
@@ -194,6 +208,7 @@ class GameStore {
 
   private onOverEvent(e: GameOverEvent) {
     if (!this.live || e.game_id !== this.live.game_id) return;
+    this.thinking = false;
     this.live = { ...this.live, status: e.reason, result: e.result };
     this.snapshots = [...this.snapshots.slice(0, -1), this.live];
     this.fire("end");
@@ -231,6 +246,22 @@ class GameStore {
         const from = this.selected;
         this.selected = null;
         void this.tryMove(from, sq);
+        return;
+      }
+      const fromSq = this.selected;
+      const moving = this.board.get(fromSq);
+      if (
+        moving &&
+        this.live &&
+        moving.color === this.live.turn &&
+        sq !== fromSq
+      ) {
+        const destPiece = this.board.get(sq);
+        if (destPiece && destPiece.color === this.live.turn) {
+          this.selected = sq;
+          return;
+        }
+        void this.tryMove(fromSq, sq);
         return;
       }
     }
@@ -312,17 +343,12 @@ class GameStore {
     this.orientation = c;
   }
 
-  flashHint(message: string) {
-    this.hint = message;
-    if (this.hintTimer) clearTimeout(this.hintTimer);
-    this.hintTimer = setTimeout(() => {
-      this.hint = null;
-    }, 1600);
+  showIllegalMoveNotice(copy: IllegalMoveCopy) {
+    this.illegalMoveNotice = copy;
   }
 
-  clearHint() {
-    if (this.hintTimer) clearTimeout(this.hintTimer);
-    this.hint = null;
+  clearIllegalMoveNotice() {
+    this.illegalMoveNotice = null;
   }
 
   private async requestAi() {
@@ -331,10 +357,8 @@ class GameStore {
     try {
       await chess.requestAiMove(this.live.game_id);
     } catch (err) {
+      this.thinking = false;
       console.warn("requestAi failed", err);
-    } finally {
-      // The actual move arrives async; clear after a short tick.
-      setTimeout(() => (this.thinking = false), 600);
     }
   }
 

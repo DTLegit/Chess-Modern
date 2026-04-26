@@ -66,6 +66,8 @@
     };
     onstart(opts);
   }
+
+  const difficultyTrackPct = $derived(((difficulty - 1) / 9) * 100);
 </script>
 
 <Modal {open} {onclose} title="New game" width="520px">
@@ -95,6 +97,7 @@
             step="1"
             bind:value={difficulty}
             class="slider"
+            style:--p="{difficultyTrackPct}%"
           />
           <div class="slider-meta tabular">
             <span class="diff-num">{difficulty}</span>
@@ -227,14 +230,29 @@
     width: 100%;
     -webkit-appearance: none;
     appearance: none;
+    height: 18px;
+    background: transparent;
+    border-radius: 999px;
+    outline: none;
+  }
+  .slider::-webkit-slider-runnable-track {
     height: 4px;
     background: linear-gradient(
       to right,
-      var(--c-walnut) 0% calc(var(--p, 50%) * 1),
-      var(--hairline) calc(var(--p, 50%) * 1) 100%
+      var(--c-walnut) 0% var(--p, 50%),
+      var(--hairline) var(--p, 50%) 100%
     );
     border-radius: 999px;
-    outline: none;
+  }
+  .slider::-moz-range-track {
+    height: 4px;
+    background: var(--hairline);
+    border-radius: 999px;
+  }
+  .slider::-moz-range-progress {
+    height: 4px;
+    background: var(--c-walnut);
+    border-radius: 999px;
   }
   .slider:focus-visible::-webkit-slider-thumb {
     box-shadow: 0 0 0 3px rgba(112, 78, 38, 0.4), var(--shadow-sm);
@@ -246,6 +264,7 @@
     -webkit-appearance: none;
     width: 18px;
     height: 18px;
+    margin-top: -7px;
     background: var(--c-bg-elev);
     border: 2px solid var(--c-walnut);
     border-radius: 50%;
@@ -264,7 +283,8 @@
   }
   .slider-meta {
     text-align: right;
-    min-width: 90px;
+    min-width: 148px;
+    flex-shrink: 0;
   }
   .diff-num {
     display: block;
@@ -278,6 +298,8 @@
     font-size: 11px;
     color: var(--c-ink-mute);
     margin-top: 2px;
+    line-height: 1.25;
+    min-height: 2.5em;
   }
 
   .tc-grid {

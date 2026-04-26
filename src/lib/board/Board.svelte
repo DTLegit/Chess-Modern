@@ -28,10 +28,19 @@
   let boardEl: HTMLDivElement | undefined = $state();
   let dragStartSq: SquareStr | null = null;
   let dragMoved = false;
+  let reconcileTimeout: ReturnType<typeof setTimeout> | null = null;
 
   const newId = () => ++nextId;
 
+  function clearReconcileTimeout() {
+    if (reconcileTimeout) {
+      clearTimeout(reconcileTimeout);
+      reconcileTimeout = null;
+    }
+  }
+
   function rebuildFromBoard(board: Map<SquareStr, PieceData>) {
+    clearReconcileTimeout();
     const out: TrackedPiece[] = [];
     for (const [sq, p] of board) {
       out.push({ id: newId(), color: p.color, kind: p.kind, square: sq });
@@ -84,7 +93,11 @@
       if (rook) rook.square = rookTo;
     }
     pieces = next;
-    setTimeout(() => reconcile(board), 280);
+    clearReconcileTimeout();
+    reconcileTimeout = setTimeout(() => {
+      reconcileTimeout = null;
+      reconcile(board);
+    }, 280);
   }
 
   function reconcile(board: Map<SquareStr, PieceData>) {

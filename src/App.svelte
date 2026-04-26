@@ -8,6 +8,7 @@
   import GameOver from "./lib/modals/GameOver.svelte";
   import Settings from "./lib/modals/Settings.svelte";
   import About from "./lib/modals/About.svelte";
+  import Modal from "./lib/ui/Modal.svelte";
   import Button from "./lib/ui/Button.svelte";
   import { game } from "./lib/stores/gameStore.svelte";
   import { settingsStore } from "./lib/stores/settingsStore.svelte";
@@ -59,6 +60,10 @@
       if (e.metaKey || e.ctrlKey || e.altKey) return;
 
       if (e.key === "Escape") {
+        if (game.illegalMoveNotice) {
+          game.clearIllegalMoveNotice();
+          return;
+        }
         if (game.pendingPromotion) {
           game.cancelPromotion();
           return;
@@ -190,9 +195,6 @@
 
       <section class="board-area">
         <Board />
-        {#if game.hint}
-          <div class="hint-toast">{game.hint}</div>
-        {/if}
         {#if !game.isAtLive}
           <div class="scrub-banner">
             Viewing past position
@@ -253,6 +255,20 @@
   onnewgame={() => { dismissGameOver(); showNewGame = true; }}
   onrematch={(opts) => { dismissGameOver(); void game.newGame(opts); }}
 />
+
+<Modal
+  open={!!game.illegalMoveNotice}
+  onclose={() => game.clearIllegalMoveNotice()}
+  title={game.illegalMoveNotice?.title ?? "Illegal move"}
+  width="420px"
+>
+  <p class="illegal-body">{game.illegalMoveNotice?.detail ?? ""}</p>
+  {#snippet footer()}
+    <Button variant="primary" onclick={() => game.clearIllegalMoveNotice()}>
+      OK
+    </Button>
+  {/snippet}
+</Modal>
 
 <style>
   .app {
@@ -412,18 +428,11 @@
     border-radius: 4px;
   }
 
-  .hint-toast {
-    position: absolute;
-    bottom: -36px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 6px 12px;
-    background: var(--c-walnut-deep);
-    color: var(--c-bg-elev);
-    border-radius: 6px;
-    font-size: 12px;
-    box-shadow: var(--shadow-md);
-    animation: toast-in 160ms var(--ease-out);
+  .illegal-body {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--c-ink-soft);
   }
   .scrub-banner {
     position: absolute;
@@ -464,11 +473,6 @@
     border-radius: 4px;
     color: var(--c-ink-soft);
     margin: 0 2px;
-  }
-
-  @keyframes toast-in {
-    from { opacity: 0; transform: translateX(-50%) translateY(-4px); }
-    to   { opacity: 1; transform: translateX(-50%) translateY(0); }
   }
 
   @media (max-width: 1080px) {
