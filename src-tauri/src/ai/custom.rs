@@ -5,6 +5,7 @@ use std::collections::HashMap;
 use rand::{seq::SliceRandom, Rng};
 
 use crate::{
+    ai::difficulty::profile_for,
     api::{AiProgressEvent, Color, PieceKind},
     engine::{piece_value, ChessMove, Position},
 };
@@ -31,11 +32,9 @@ pub fn choose_move(
     difficulty: u8,
     mut progress: impl FnMut(AiProgressEvent),
 ) -> Option<SearchOutput> {
-    let (max_depth, noise) = match difficulty {
-        1 => (2, 0.30),
-        2 => (3, 0.10),
-        _ => (4, 0.0),
-    };
+    let profile = profile_for(difficulty);
+    let max_depth = profile.custom_depth;
+    let noise = profile.custom_noise;
 
     let mut rng = rand::thread_rng();
     let mut root = position.clone();
@@ -175,13 +174,21 @@ fn quiescence(pos: &mut Position, mut alpha: i32, beta: i32, depth: u32) -> i32 
 fn ordered_moves(pos: &mut Position) -> Vec<ChessMove> {
     let mut moves = pos.legal_moves();
     moves.sort_by_key(|mv| {
-        let captured = pos.piece_at(mv.to).map(|p| piece_value(p.kind)).unwrap_or(0);
-        let promo = mv.promotion.map(|p| piece_value(match p {
-            crate::api::Promotion::N => PieceKind::N,
-            crate::api::Promotion::B => PieceKind::B,
-            crate::api::Promotion::R => PieceKind::R,
-            crate::api::Promotion::Q => PieceKind::Q,
-        })).unwrap_or(0);
+        let captured = pos
+            .piece_at(mv.to)
+            .map(|p| piece_value(p.kind))
+            .unwrap_or(0);
+        let promo = mv
+            .promotion
+            .map(|p| {
+                piece_value(match p {
+                    crate::api::Promotion::N => PieceKind::N,
+                    crate::api::Promotion::B => PieceKind::B,
+                    crate::api::Promotion::R => PieceKind::R,
+                    crate::api::Promotion::Q => PieceKind::Q,
+                })
+            })
+            .unwrap_or(0);
         -(captured + promo)
     });
     moves
@@ -275,4 +282,3 @@ fn psqt(kind: PieceKind, color: Color, sq: u8) -> i32 {
         }
     }
 }
-

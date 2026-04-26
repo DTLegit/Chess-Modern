@@ -7,7 +7,10 @@ use tauri::AppHandle;
 use tauri_plugin_shell::{process::CommandEvent, ShellExt};
 
 use crate::{
-    ai::custom::{self, SearchOutput},
+    ai::{
+        custom::{self, SearchOutput},
+        difficulty::profile_for,
+    },
     api::{AiProgressEvent, ApiError, ApiResult},
     engine::Position,
 };
@@ -20,20 +23,50 @@ pub async fn choose_move(
     difficulty: u8,
     mut progress: impl FnMut(AiProgressEvent) + Send + 'static,
 ) -> ApiResult<Option<SearchOutput>> {
+    let fallback_difficulty = profile_for(difficulty).fallback_custom_level;
     let Some(app) = app else {
-        return Ok(custom::choose_move(game_id, position, 3, progress));
+        return Ok(custom::choose_move(
+            game_id,
+            position,
+            fallback_difficulty,
+            progress,
+        ));
     };
     if !sidecar_looks_real() {
         log::warn!("Stockfish sidecar is missing or a placeholder; using custom engine fallback");
-        return Ok(custom::choose_move(game_id, position, 3, progress));
+        return Ok(custom::choose_move(
+            game_id,
+            position,
+            fallback_difficulty,
+            progress,
+        ));
     }
 
-    match run_stockfish(&app, game_id, position, history_uci, difficulty, &mut progress).await {
+    match run_stockfish(
+        &app,
+        game_id,
+        position,
+        history_uci,
+        difficulty,
+        &mut progress,
+    )
+    .await
+    {
         Ok(Some(output)) => Ok(Some(output)),
-        Ok(None) => Ok(custom::choose_move(game_id, position, 3, progress)),
+        Ok(None) => Ok(custom::choose_move(
+            game_id,
+            position,
+            fallback_difficulty,
+            progress,
+        )),
         Err(err) => {
             log::warn!("Stockfish failed ({err}); using custom engine fallback");
-            Ok(custom::choose_move(game_id, position, 3, progress))
+            Ok(custom::choose_move(
+                game_id,
+                position,
+                fallback_difficulty,
+                progress,
+            ))
         }
     }
 }
@@ -46,7 +79,9 @@ async fn run_stockfish(
     difficulty: u8,
     progress: &mut (impl FnMut(AiProgressEvent) + Send + 'static),
 ) -> ApiResult<Option<SearchOutput>> {
-    let (skill, depth) = stockfish_level(difficulty);
+    let (skill, depth) = profile_for(difficulty)
+        .stockfish_settings()
+        .ok_or_else(|| ApiError::Engine(format!("level {difficulty} is not a Stockfish level")))?;
     let (mut rx, mut child) = app
         .shell()
         .sidecar("binaries/stockfish")
@@ -183,19 +218,6 @@ fn parse_info_line(line: &str, position: &Position) -> Option<(u32, i32, Vec<Str
         }
     }
     Some((depth, eval, pv_san))
-}
-
-fn stockfish_level(difficulty: u8) -> (u8, u32) {
-    match difficulty {
-        4 => (5, 6),
-        5 => (8, 8),
-        6 => (11, 10),
-        7 => (14, 12),
-        8 => (17, 14),
-        9 => (20, 18),
-        10 => (20, 22),
-        _ => (5, 6),
-    }
 }
 
 fn sidecar_looks_real() -> bool {
