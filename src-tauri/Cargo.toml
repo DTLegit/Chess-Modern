@@ -5,6 +5,7 @@ description = "A polished, native cross-platform chess game."
 authors = ["gchavezm"]
 edition = "2021"
 rust-version = "1.77"
+default-run = "chess"
 
 [lib]
 name = "chess_lib"
