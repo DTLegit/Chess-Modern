@@ -236,6 +236,12 @@
     border-radius: 999px;
     outline: none;
   }
+  .slider:focus-visible::-webkit-slider-thumb {
+    box-shadow: 0 0 0 3px rgba(112, 78, 38, 0.4), var(--shadow-sm);
+  }
+  .slider:focus-visible::-moz-range-thumb {
+    box-shadow: 0 0 0 3px rgba(112, 78, 38, 0.4), var(--shadow-sm);
+  }
   .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: 18px;

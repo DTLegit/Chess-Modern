@@ -208,6 +208,7 @@ impl Default for Settings {
 // ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, tauri_specta::Event)]
+#[tauri_specta(event_name = "move-made")]
 pub struct MoveMadeEvent {
     pub game_id: GameId,
     pub mv: Move,
@@ -215,6 +216,7 @@ pub struct MoveMadeEvent {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, tauri_specta::Event)]
+#[tauri_specta(event_name = "ai-progress")]
 pub struct AiProgressEvent {
     pub game_id: GameId,
     pub depth: u32,
@@ -223,6 +225,7 @@ pub struct AiProgressEvent {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, tauri_specta::Event)]
+#[tauri_specta(event_name = "game-over")]
 pub struct GameOverEvent {
     pub game_id: GameId,
     pub result: GameResult,
@@ -230,6 +233,7 @@ pub struct GameOverEvent {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Type, tauri_specta::Event)]
+#[tauri_specta(event_name = "clock-tick")]
 pub struct ClockTickEvent {
     pub game_id: GameId,
     pub white_ms: u64,
