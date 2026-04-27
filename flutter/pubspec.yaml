@@ -33,3 +33,8 @@ flutter:
   assets:
     - assets/sounds/
     - assets/pieces/
+    # Stockfish binaries are produced by scripts/build-stockfish-android.sh
+    # into android/app/src/main/assets/stockfish/<abi>/stockfish; they are
+    # referenced from Dart via rootBundle.load('assets/stockfish/<abi>/stockfish')
+    # and ignored when missing (custom-engine fallback kicks in).
+    - assets/stockfish/

@@ -276,6 +276,52 @@ fn app_dirs_persist_settings_to_disk() {
     assert!(!loaded.sound_enabled);
 }
 
+#[tokio::test(flavor = "multi_thread", worker_threads = 2)]
+async fn replace_spawner_hot_swaps_at_runtime() {
+    use chess_core::api::ApiError;
+    use chess_core::platform::{StockfishSpawner, UciChild};
+
+    struct CountingSpawner {
+        calls: std::sync::atomic::AtomicUsize,
+    }
+
+    #[async_trait::async_trait]
+    impl StockfishSpawner for CountingSpawner {
+        fn is_available(&self) -> bool {
+            true
+        }
+        async fn spawn(&self) -> Result<UciChild, ApiError> {
+            self.calls
+                .fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+            Err(ApiError::Engine("counting only".into()))
+        }
+    }
+
+    let session = SessionManager::new();
+    assert!(!session.spawner().is_available());
+
+    let counter = Arc::new(CountingSpawner {
+        calls: Default::default(),
+    });
+    session.set_spawner(counter.clone() as Arc<dyn StockfishSpawner>);
+    assert!(session.spawner().is_available());
+
+    // Triggering an AI request through choose_move forwards into the
+    // installed spawner, which records the call and errors back; the
+    // module then transparently falls through to the custom engine.
+    let position = chess_core::engine::Position::default();
+    let _ = chess_core::ai::choose_move(
+        session.spawner().as_ref(),
+        "test",
+        position,
+        Vec::new(),
+        7,
+        |_| {},
+    )
+    .await;
+    assert!(counter.calls.load(std::sync::atomic::Ordering::Relaxed) >= 1);
+}
+
 #[test]
 fn clock_event_round_trips_through_set_clock() {
     // Just verifies set_clock returns a snapshot containing the new clock;

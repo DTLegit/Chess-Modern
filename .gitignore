@@ -26,6 +26,8 @@ crates/*/target/
 src-tauri/binaries/stockfish-*
 !src-tauri/binaries/.gitkeep
 flutter/android/app/src/main/assets/stockfish/
+flutter/assets/stockfish/*/
+!flutter/assets/stockfish/.gitkeep
 
 # Flutter build output
 flutter/build/

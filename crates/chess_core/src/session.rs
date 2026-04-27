@@ -30,7 +30,7 @@ struct SessionInner {
     settings: RwLock<Settings>,
     dirs: ArcDirs,
     sink: ArcSink,
-    spawner: ArcSpawner,
+    spawner: RwLock<ArcSpawner>,
     clock_tasks: RwLock<HashSet<GameId>>,
 }
 
@@ -89,7 +89,14 @@ impl SessionManager {
     }
 
     pub fn spawner(&self) -> ArcSpawner {
-        self.inner.spawner.clone()
+        self.inner.spawner.read().clone()
+    }
+
+    /// Hot-swap the Stockfish spawner. The Flutter Android plugin uses
+    /// this after extracting the bundled binary out of assets so the
+    /// next AI request actually finds an executable Stockfish.
+    pub fn set_spawner(&self, spawner: ArcSpawner) {
+        *self.inner.spawner.write() = spawner;
     }
 
     /// Load any previously persisted settings + last-game from disk.
@@ -402,7 +409,7 @@ impl SessionManagerBuilder {
                 settings: RwLock::new(Settings::default()),
                 dirs,
                 sink,
-                spawner,
+                spawner: RwLock::new(spawner),
                 clock_tasks: RwLock::new(HashSet::new()),
             }),
         }

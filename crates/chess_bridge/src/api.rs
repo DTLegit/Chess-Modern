@@ -300,17 +300,18 @@ pub fn subscribe_events(sink: StreamSink<BackendEvent>) -> Result<(), String> {
 /// Override the Stockfish spawner with an explicit binary path. The
 /// Flutter Android plugin code calls this after extracting the binary
 /// out of `assets/stockfish/<abi>/stockfish`, chmod 0755'ing it.
-///
-/// No-op today: hot-swapping the spawner on a live session would
-/// require a `SessionManager::replace_spawner` seam. We log and accept
-/// silently; for now Android needs to stage the binary and call
-/// [`bridge_init`] before the first AI request.
 #[frb(sync)]
 pub fn bridge_provide_external_stockfish(binary_path: String) -> Result<(), String> {
-    log::info!(
-        "bridge_provide_external_stockfish({}): pending hot-swap support",
-        binary_path
-    );
+    let session = crate::try_session().ok_or("bridge_init must be called first")?;
+    let path = std::path::PathBuf::from(&binary_path);
+    if !path.is_file() {
+        return Err(format!(
+            "stockfish binary not found at {}",
+            path.display()
+        ));
+    }
+    session.set_spawner(platform::external_spawner(path));
+    log::info!("stockfish spawner installed: {}", binary_path);
     Ok(())
 }
 
