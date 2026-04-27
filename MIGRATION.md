@@ -92,6 +92,27 @@ spawner at runtime, after copying the per-ABI binary out of `assets/`.
 
 (All resolved through Dart's `path_provider` ➜ Rust's `StaticAppDirs`.)
 
+## Per-platform native-library wiring
+
+Each Flutter target needs to know how to build and link the
+`libchess_bridge` dynamic library produced by `cargo build`. The Linux
+desktop runner already does this via
+`flutter/linux/runner/rust_lib.cmake`, included from
+`flutter/linux/CMakeLists.txt`.
+
+| Platform | Status | Where it lands |
+| --- | --- | --- |
+| **Linux** | wired ✅ | `flutter/linux/runner/rust_lib.cmake` builds via `cargo build`, installs `target/{debug,release}/libchess_bridge.so` into `bundle/lib/`. |
+| **macOS** | manual ⚠️ | Add a "Run Script" build phase that runs `cargo build --manifest-path crates/chess_bridge/Cargo.toml --release --target=$(uname -m)-apple-darwin` and copy `libchess_bridge.dylib` into `Frameworks/` of the .app. |
+| **Windows** | manual ⚠️ | Add a `add_custom_target` in `flutter/windows/CMakeLists.txt` mirroring the Linux file; install `target/release/chess_bridge.dll` next to `chess.exe`. |
+| **iOS** | manual ⚠️ | Build a static `.a` (`cargo build --target aarch64-apple-ios{-sim,}`) and wrap as an XCFramework; reference from `flutter/ios/Runner.xcodeproj`. |
+| **Android** | manual ⚠️ | Add a Gradle `task` invoking `cargo ndk -t arm64-v8a -t armeabi-v7a -t x86_64 build --release` and place the resulting `libchess_bridge.so` per ABI under `flutter/android/app/src/main/jniLibs/<abi>/`. The `cargo-ndk` crate or `flutter_rust_bridge_codegen integrate` automates this. |
+
+The `flutter_rust_bridge_codegen integrate --template app` command writes
+all of the above for you, but it's destructive (it overwrites runner
+files); we ship the Linux wiring by hand for now and document the
+others as one-liners.
+
 ## Reviving the legacy Tauri shell
 
 ```bash
