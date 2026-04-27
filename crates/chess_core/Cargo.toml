@@ -1,0 +1,32 @@
+[package]
+name = "chess_core"
+version = "0.1.0"
+description = "Platform-agnostic chess core: rules, AI, session, clock, PGN."
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[lib]
+name = "chess_core"
+
+[features]
+default = []
+# When enabled, the four backend events also derive `tauri_specta::Event`,
+# letting the legacy Tauri shell register them with a `tauri::Builder`.
+# The Flutter bridge does not need this; it streams the same payloads
+# through `EventSink` directly.
+tauri-events = ["dep:tauri-specta"]
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+uuid = { workspace = true }
+parking_lot = { workspace = true }
+rand = { workspace = true }
+tokio = { workspace = true }
+log = { workspace = true }
+async-trait = { workspace = true }
+specta = { version = "2.0.0-rc.24", features = ["derive"] }
+tauri-specta = { version = "2.0.0-rc.24", features = ["derive", "typescript"], optional = true }

@@ -4,17 +4,19 @@ pub mod custom;
 pub(crate) mod difficulty;
 pub mod stockfish;
 
-use tauri::AppHandle;
-
 use crate::{
     ai::custom::SearchOutput,
     ai::difficulty::profile_for,
     api::{AiProgressEvent, ApiResult},
     engine::Position,
+    platform::StockfishSpawner,
 };
 
+/// Pick a move using whichever engine the difficulty profile says, with a
+/// transparent fallback to the custom Rust engine whenever Stockfish is
+/// unavailable on this platform (iOS, missing sidecar, no spawner, ...).
 pub async fn choose_move(
-    app: Option<AppHandle>,
+    spawner: &dyn StockfishSpawner,
     game_id: &str,
     position: Position,
     history_uci: Vec<String>,
@@ -26,6 +28,7 @@ pub async fn choose_move(
             game_id, &position, difficulty, progress,
         ))
     } else {
-        stockfish::choose_move(app, game_id, &position, &history_uci, difficulty, progress).await
+        stockfish::choose_move(spawner, game_id, &position, &history_uci, difficulty, progress)
+            .await
     }
 }

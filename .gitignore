@@ -13,8 +13,11 @@ dist-ssr
 *.sln
 *.sw?
 
-src-tauri/target
-src-tauri/gen
+# Cargo build output
+/target/
+src-tauri/target/
+src-tauri/gen/
+crates/*/target/
 
 # Built installers/output
 /dist/
@@ -22,3 +25,22 @@ src-tauri/gen
 # Stockfish binaries are downloaded by script; do not commit
 src-tauri/binaries/stockfish-*
 !src-tauri/binaries/.gitkeep
+flutter/android/app/src/main/assets/stockfish/
+
+# Flutter build output
+flutter/build/
+flutter/.dart_tool/
+flutter/.flutter-plugins
+flutter/.flutter-plugins-dependencies
+flutter/.packages
+flutter/pubspec.lock
+flutter/ios/Pods/
+flutter/ios/Flutter/Flutter.podspec
+flutter/macos/Pods/
+flutter/android/.gradle/
+flutter/android/local.properties
+flutter/android/key.properties
+flutter/lib/src/rust/frb_generated*
+
+# Pre-existing pnpm store
+.pnpm-store/

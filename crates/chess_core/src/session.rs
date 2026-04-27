@@ -9,15 +9,15 @@ use std::{
 
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
-use tauri::{AppHandle, Emitter, Manager};
 
 use crate::{
     api::{
-        ApiError, ApiResult, ClockTickEvent, Color, GameId, GameMode, GameOverEvent, GameResult,
-        GameSnapshot, GameStatus, HumanColorChoice, Move, NewGameOpts, Settings,
+        ApiError, ApiResult, BackendEvent, ClockTickEvent, Color, GameId, GameMode, GameOverEvent,
+        GameResult, GameSnapshot, GameStatus, HumanColorChoice, Move, NewGameOpts, Settings,
     },
     clock::{ChessClock, PersistedClock},
     engine::{opposite, Position, STARTING_FEN},
+    platform::{ArcDirs, ArcSink, ArcSpawner, EphemeralAppDirs, NoStockfishSpawner, NullEventSink},
 };
 
 #[derive(Clone)]
@@ -28,7 +28,9 @@ pub struct SessionManager {
 struct SessionInner {
     games: RwLock<HashMap<GameId, GameSession>>,
     settings: RwLock<Settings>,
-    app_handle: RwLock<Option<AppHandle>>,
+    dirs: ArcDirs,
+    sink: ArcSink,
+    spawner: ArcSpawner,
     clock_tasks: RwLock<HashSet<GameId>>,
 }
 
@@ -67,25 +69,34 @@ impl Default for SessionManager {
 }
 
 impl SessionManager {
+    /// Create a session with no persistence, no event sink, and no
+    /// Stockfish spawner. Suitable for unit tests; the legacy integration
+    /// test suite still relies on this.
     pub fn new() -> Self {
-        Self {
-            inner: Arc::new(SessionInner {
-                games: RwLock::new(HashMap::new()),
-                settings: RwLock::new(Settings::default()),
-                app_handle: RwLock::new(None),
-                clock_tasks: RwLock::new(HashSet::new()),
-            }),
-        }
+        Self::builder().build()
     }
 
-    pub fn set_app_handle(&self, app: AppHandle) {
-        *self.inner.app_handle.write() = Some(app);
+    pub fn builder() -> SessionManagerBuilder {
+        SessionManagerBuilder::default()
+    }
+
+    pub fn dirs(&self) -> ArcDirs {
+        self.inner.dirs.clone()
+    }
+
+    pub fn sink(&self) -> ArcSink {
+        self.inner.sink.clone()
+    }
+
+    pub fn spawner(&self) -> ArcSpawner {
+        self.inner.spawner.clone()
+    }
+
+    /// Load any previously persisted settings + last-game from disk.
+    /// Idempotent; safe to call once at app startup.
+    pub fn hydrate(&self) {
         self.load_settings();
         self.load_last_game();
-    }
-
-    pub fn app_handle(&self) -> Option<AppHandle> {
-        self.inner.app_handle.read().clone()
     }
 
     pub fn clone_handle(&self) -> Self {
@@ -184,6 +195,13 @@ impl SessionManager {
         self.persist_settings();
     }
 
+    /// Push an event through the configured sink. The legacy Tauri shell
+    /// turns this back into `app.emit(name, payload)`; the Flutter bridge
+    /// forwards it to a `flutter_rust_bridge::StreamSink`.
+    pub fn emit(&self, event: BackendEvent) {
+        self.inner.sink.emit(event);
+    }
+
     pub fn start_clock_task(&self, game_id: GameId) {
         let has_clock = self
             .inner
@@ -240,13 +258,11 @@ impl SessionManager {
                         (tick, over)
                     };
                     manager.persist_game(&game_id);
-                    if let Some(app) = manager.app_handle() {
-                        let _ = app.emit("clock-tick", tick);
-                        if let Some(over) = over {
-                            let _ = app.emit("game-over", over);
-                            manager.inner.clock_tasks.write().remove(&game_id);
-                            break;
-                        }
+                    manager.emit(BackendEvent::ClockTick(tick));
+                    if let Some(over) = over {
+                        manager.emit(BackendEvent::GameOver(over));
+                        manager.inner.clock_tasks.write().remove(&game_id);
+                        break;
                     }
                 }
             });
@@ -343,8 +359,53 @@ impl SessionManager {
     }
 
     fn data_dir(&self) -> Option<PathBuf> {
-        let app = self.app_handle()?;
-        app.path().app_data_dir().ok().map(|dir| dir.join("chess"))
+        self.inner.dirs.data_dir().map(|root| root.join("chess"))
+    }
+}
+
+#[derive(Default)]
+pub struct SessionManagerBuilder {
+    dirs: Option<ArcDirs>,
+    sink: Option<ArcSink>,
+    spawner: Option<ArcSpawner>,
+}
+
+impl SessionManagerBuilder {
+    pub fn dirs(mut self, dirs: ArcDirs) -> Self {
+        self.dirs = Some(dirs);
+        self
+    }
+
+    pub fn sink(mut self, sink: ArcSink) -> Self {
+        self.sink = Some(sink);
+        self
+    }
+
+    pub fn spawner(mut self, spawner: ArcSpawner) -> Self {
+        self.spawner = Some(spawner);
+        self
+    }
+
+    pub fn build(self) -> SessionManager {
+        let dirs = self
+            .dirs
+            .unwrap_or_else(|| Arc::new(EphemeralAppDirs) as ArcDirs);
+        let sink = self
+            .sink
+            .unwrap_or_else(|| Arc::new(NullEventSink) as ArcSink);
+        let spawner = self
+            .spawner
+            .unwrap_or_else(|| Arc::new(NoStockfishSpawner) as ArcSpawner);
+        SessionManager {
+            inner: Arc::new(SessionInner {
+                games: RwLock::new(HashMap::new()),
+                settings: RwLock::new(Settings::default()),
+                dirs,
+                sink,
+                spawner,
+                clock_tasks: RwLock::new(HashSet::new()),
+            }),
+        }
     }
 }
 

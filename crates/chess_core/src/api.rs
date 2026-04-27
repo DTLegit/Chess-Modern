@@ -240,16 +240,18 @@ impl Default for Settings {
 // Events (backend -> frontend)
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, tauri_specta::Event)]
-#[tauri_specta(event_name = "move-made")]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[cfg_attr(feature = "tauri-events", derive(tauri_specta::Event))]
+#[cfg_attr(feature = "tauri-events", tauri_specta(event_name = "move-made"))]
 pub struct MoveMadeEvent {
     pub game_id: GameId,
     pub mv: Move,
     pub snapshot: GameSnapshot,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, tauri_specta::Event)]
-#[tauri_specta(event_name = "ai-progress")]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[cfg_attr(feature = "tauri-events", derive(tauri_specta::Event))]
+#[cfg_attr(feature = "tauri-events", tauri_specta(event_name = "ai-progress"))]
 pub struct AiProgressEvent {
     pub game_id: GameId,
     pub depth: u32,
@@ -257,21 +259,50 @@ pub struct AiProgressEvent {
     pub pv_san: Vec<String>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, tauri_specta::Event)]
-#[tauri_specta(event_name = "game-over")]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[cfg_attr(feature = "tauri-events", derive(tauri_specta::Event))]
+#[cfg_attr(feature = "tauri-events", tauri_specta(event_name = "game-over"))]
 pub struct GameOverEvent {
     pub game_id: GameId,
     pub result: GameResult,
     pub reason: GameStatus,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Type, tauri_specta::Event)]
-#[tauri_specta(event_name = "clock-tick")]
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[cfg_attr(feature = "tauri-events", derive(tauri_specta::Event))]
+#[cfg_attr(feature = "tauri-events", tauri_specta(event_name = "clock-tick"))]
 pub struct ClockTickEvent {
     pub game_id: GameId,
     pub white_ms: u64,
     pub black_ms: u64,
     pub active: Option<Color>,
+}
+
+/// Aggregate enum for every push-style event the backend emits.
+///
+/// The Tauri shell unwraps this and calls `app.emit("...", payload)` with
+/// the matching event name; the Flutter bridge fans this out to a
+/// `flutter_rust_bridge::StreamSink`.
+#[derive(Debug, Clone, Serialize, Deserialize, Type)]
+#[serde(tag = "kind", rename_all = "kebab-case")]
+pub enum BackendEvent {
+    MoveMade(MoveMadeEvent),
+    AiProgress(AiProgressEvent),
+    GameOver(GameOverEvent),
+    ClockTick(ClockTickEvent),
+}
+
+impl BackendEvent {
+    /// The Tauri event name (kept in lockstep with the original `app.emit`
+    /// strings so the legacy Svelte client keeps working).
+    pub fn name(&self) -> &'static str {
+        match self {
+            BackendEvent::MoveMade(_) => "move-made",
+            BackendEvent::AiProgress(_) => "ai-progress",
+            BackendEvent::GameOver(_) => "game-over",
+            BackendEvent::ClockTick(_) => "clock-tick",
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,9 @@
-//! Tauri command surface — the `invoke()` API exposed to the frontend.
-
-use tauri::Emitter;
+//! Platform-agnostic command surface.
+//!
+//! Both the Tauri shell and the Flutter bridge call these functions; they
+//! wrap `SessionManager` orchestration plus event emission and exactly
+//! match the behaviour of the original `#[tauri::command]` set in
+//! `legacy/tauri/src/commands.rs`.
 
 use crate::{
     ai,
@@ -12,7 +15,7 @@ use crate::{
 };
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Helpers (re-exported for the integration test suite)
 // ---------------------------------------------------------------------------
 
 pub fn api_move_from_engine(game: &GameSession, mv: ChessMove) -> Move {
@@ -83,47 +86,32 @@ pub fn apply_engine_move(
         Ok(MoveResult { mv: api_mv, snapshot })
     })?;
 
-    if let Some(app) = session.app_handle() {
-        let _ = app.emit(
-            "move-made",
-            MoveMadeEvent {
-                game_id: game_id.to_string(),
-                mv: result.mv.clone(),
-                snapshot: result.snapshot.clone(),
-            },
-        );
-        if result.snapshot.status != GameStatus::Active {
-            let _ = app.emit(
-                "game-over",
-                GameOverEvent {
-                    game_id: game_id.to_string(),
-                    result: result.snapshot.result,
-                    reason: result.snapshot.status,
-                },
-            );
-        }
+    session.emit(BackendEvent::MoveMade(MoveMadeEvent {
+        game_id: game_id.to_string(),
+        mv: result.mv.clone(),
+        snapshot: result.snapshot.clone(),
+    }));
+    if result.snapshot.status != GameStatus::Active {
+        session.emit(BackendEvent::GameOver(GameOverEvent {
+            game_id: game_id.to_string(),
+            result: result.snapshot.result,
+            reason: result.snapshot.status,
+        }));
     }
     Ok(result)
 }
 
 // ---------------------------------------------------------------------------
-// Commands
+// Commands (one entry point per legacy `#[tauri::command]`)
 // ---------------------------------------------------------------------------
 
-#[tauri::command]
-#[specta::specta]
-pub async fn new_game(
-    session: tauri::State<'_, SessionManager>,
-    opts: NewGameOpts,
-) -> ApiResult<GameSnapshot> {
+pub async fn new_game(session: &SessionManager, opts: NewGameOpts) -> ApiResult<GameSnapshot> {
     let id = uuid::Uuid::new_v4().to_string();
     session.create_game(id, opts)
 }
 
-#[tauri::command]
-#[specta::specta]
 pub async fn legal_moves_from(
-    session: tauri::State<'_, SessionManager>,
+    session: &SessionManager,
     game_id: GameId,
     square: SquareStr,
 ) -> ApiResult<Vec<SquareStr>> {
@@ -133,25 +121,18 @@ pub async fn legal_moves_from(
     Ok(snap.legal_moves.get(&square).cloned().unwrap_or_default())
 }
 
-#[tauri::command]
-#[specta::specta]
 pub async fn make_move(
-    session: tauri::State<'_, SessionManager>,
+    session: &SessionManager,
     game_id: GameId,
     from: SquareStr,
     to: SquareStr,
     promotion: Option<Promotion>,
 ) -> ApiResult<MoveResult> {
     let mv = session.with_game_mut(&game_id, |game| find_legal_move(game, &from, &to, promotion))?;
-    apply_engine_move(&session, &game_id, mv)
+    apply_engine_move(session, &game_id, mv)
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn request_ai_move(
-    session: tauri::State<'_, SessionManager>,
-    game_id: GameId,
-) -> ApiResult<()> {
+pub async fn request_ai_move(session: &SessionManager, game_id: GameId) -> ApiResult<()> {
     let game = session
         .game(&game_id)
         .ok_or_else(|| ApiError::GameNotFound(game_id.clone()))?;
@@ -162,19 +143,17 @@ pub async fn request_ai_move(
     let position = game.position.clone();
     let history_uci = game.history.iter().map(|mv| mv.uci.clone()).collect::<Vec<_>>();
     let manager = session.clone_handle();
-    let app = manager.app_handle();
+    let spawner = manager.spawner();
     tokio::spawn(async move {
         let progress_manager = manager.clone();
         let result = ai::choose_move(
-            app,
+            spawner.as_ref(),
             &game_id,
             position,
             history_uci,
             difficulty,
             move |event| {
-                if let Some(app) = progress_manager.app_handle() {
-                    let _ = app.emit("ai-progress", event);
-                }
+                progress_manager.emit(BackendEvent::AiProgress(event));
             },
         )
         .await;
@@ -189,12 +168,7 @@ pub async fn request_ai_move(
     Ok(())
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn undo_move(
-    session: tauri::State<'_, SessionManager>,
-    game_id: GameId,
-) -> ApiResult<GameSnapshot> {
+pub async fn undo_move(session: &SessionManager, game_id: GameId) -> ApiResult<GameSnapshot> {
     session.with_game_mut(&game_id, |game| {
         let mut count = if game.mode == GameMode::Hva
             && game.human_color == Some(game.position.side_to_move)
@@ -219,12 +193,7 @@ pub async fn undo_move(
     })
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn resign(
-    session: tauri::State<'_, SessionManager>,
-    game_id: GameId,
-) -> ApiResult<GameSnapshot> {
+pub async fn resign(session: &SessionManager, game_id: GameId) -> ApiResult<GameSnapshot> {
     let snapshot = session.with_game_mut(&game_id, |game| {
         game.status = GameStatus::Resigned;
         game.result = match game.position.side_to_move {
@@ -233,25 +202,15 @@ pub async fn resign(
         };
         Ok(game.snapshot())
     })?;
-    if let Some(app) = session.app_handle() {
-        let _ = app.emit(
-            "game-over",
-            GameOverEvent {
-                game_id,
-                result: snapshot.result,
-                reason: snapshot.status,
-            },
-        );
-    }
+    session.emit(BackendEvent::GameOver(GameOverEvent {
+        game_id,
+        result: snapshot.result,
+        reason: snapshot.status,
+    }));
     Ok(snapshot)
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn offer_draw(
-    session: tauri::State<'_, SessionManager>,
-    game_id: GameId,
-) -> ApiResult<GameSnapshot> {
+pub async fn offer_draw(session: &SessionManager, game_id: GameId) -> ApiResult<GameSnapshot> {
     session.with_game_mut(&game_id, |game| {
         game.status = GameStatus::DrawAgreement;
         game.result = GameResult::Draw;
@@ -259,12 +218,7 @@ pub async fn offer_draw(
     })
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn claim_draw(
-    session: tauri::State<'_, SessionManager>,
-    game_id: GameId,
-) -> ApiResult<GameSnapshot> {
+pub async fn claim_draw(session: &SessionManager, game_id: GameId) -> ApiResult<GameSnapshot> {
     session.with_game_mut(&game_id, |game| {
         let (status, result) = game.position.game_status();
         if matches!(
@@ -280,13 +234,8 @@ pub async fn claim_draw(
     })
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn load_pgn(
-    session: tauri::State<'_, SessionManager>,
-    pgn: String,
-) -> ApiResult<GameSnapshot> {
-    let parsed = pgn::parse(&pgn)?;
+pub async fn load_pgn(session: &SessionManager, pgn_text: String) -> ApiResult<GameSnapshot> {
+    let parsed = pgn::parse(&pgn_text)?;
     let id = uuid::Uuid::new_v4().to_string();
     let mut game = GameSession::from_loaded_game(id.clone(), parsed.position, parsed.history);
     game.result = parsed.result;
@@ -302,22 +251,15 @@ pub async fn load_pgn(
     Ok(snapshot)
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn export_pgn(
-    session: tauri::State<'_, SessionManager>,
-    game_id: GameId,
-) -> ApiResult<String> {
+pub async fn export_pgn(session: &SessionManager, game_id: GameId) -> ApiResult<String> {
     let game = session
         .game(&game_id)
         .ok_or_else(|| ApiError::GameNotFound(game_id.clone()))?;
     Ok(pgn::serialize(&game.history, game.result, None, None))
 }
 
-#[tauri::command]
-#[specta::specta]
 pub async fn set_clock(
-    session: tauri::State<'_, SessionManager>,
+    session: &SessionManager,
     game_id: GameId,
     time_control: TimeControl,
 ) -> ApiResult<GameSnapshot> {
@@ -329,12 +271,7 @@ pub async fn set_clock(
     Ok(snapshot)
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn pause_clock(
-    session: tauri::State<'_, SessionManager>,
-    game_id: GameId,
-) -> ApiResult<GameSnapshot> {
+pub async fn pause_clock(session: &SessionManager, game_id: GameId) -> ApiResult<GameSnapshot> {
     session.with_game_mut(&game_id, |game| {
         let clock = game
             .clock
@@ -345,12 +282,7 @@ pub async fn pause_clock(
     })
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn resume_clock(
-    session: tauri::State<'_, SessionManager>,
-    game_id: GameId,
-) -> ApiResult<GameSnapshot> {
+pub async fn resume_clock(session: &SessionManager, game_id: GameId) -> ApiResult<GameSnapshot> {
     let snapshot = session.with_game_mut(&game_id, |game| {
         let clock = game
             .clock
@@ -363,20 +295,11 @@ pub async fn resume_clock(
     Ok(snapshot)
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn get_settings(
-    session: tauri::State<'_, SessionManager>,
-) -> ApiResult<Settings> {
+pub async fn get_settings(session: &SessionManager) -> ApiResult<Settings> {
     Ok(session.get_settings())
 }
 
-#[tauri::command]
-#[specta::specta]
-pub async fn set_settings(
-    session: tauri::State<'_, SessionManager>,
-    settings: Settings,
-) -> ApiResult<Settings> {
+pub async fn set_settings(session: &SessionManager, settings: Settings) -> ApiResult<Settings> {
     session.set_settings(settings.clone());
     Ok(settings)
 }
