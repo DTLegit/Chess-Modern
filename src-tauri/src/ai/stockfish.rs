@@ -79,7 +79,7 @@ async fn run_stockfish(
     difficulty: u8,
     progress: &mut (impl FnMut(AiProgressEvent) + Send + 'static),
 ) -> ApiResult<Option<SearchOutput>> {
-    let (skill, depth) = profile_for(difficulty)
+    let (skill, _depth, movetime_ms) = profile_for(difficulty)
         .stockfish_settings()
         .ok_or_else(|| ApiError::Engine(format!("level {difficulty} is not a Stockfish level")))?;
     let (mut rx, mut child) = app
@@ -112,13 +112,13 @@ async fn run_stockfish(
         .write(position_cmd.as_bytes())
         .map_err(|e| ApiError::Engine(format!("stockfish stdin: {e}")))?;
     child
-        .write(format!("go depth {depth}\n").as_bytes())
+        .write(format!("go movetime {movetime_ms}\n").as_bytes())
         .map_err(|e| ApiError::Engine(format!("stockfish stdin: {e}")))?;
 
     let mut best = None;
     let mut best_eval = 0;
     let mut best_depth = 0;
-    let deadline = tokio::time::sleep(Duration::from_secs(8));
+    let deadline = tokio::time::sleep(Duration::from_millis(movetime_ms.saturating_add(1_000)));
     tokio::pin!(deadline);
 
     loop {
