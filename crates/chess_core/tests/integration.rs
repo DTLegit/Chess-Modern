@@ -345,8 +345,20 @@ fn clock_event_round_trips_through_set_clock() {
     let snap = session.get(&id).expect("snapshot");
     assert!(snap.clock.is_some());
     let clock = snap.clock.unwrap();
-    assert_eq!(clock.white_ms, 60_000);
-    assert_eq!(clock.black_ms, 60_000);
+    // ChessClock::state() calls `tick()` internally, which subtracts the
+    // wall-clock delta since `last_tick`. On a slow CI runner this is
+    // already a few ms by the time we read it, so we assert a tolerance
+    // instead of equality.
+    assert!(
+        (59_500..=60_000).contains(&clock.white_ms),
+        "white_ms drained too far: {}",
+        clock.white_ms,
+    );
+    assert!(
+        (59_500..=60_000).contains(&clock.black_ms),
+        "black_ms drained too far: {}",
+        clock.black_ms,
+    );
 }
 
 // ---------------------------------------------------------- tiny tempdir helper
