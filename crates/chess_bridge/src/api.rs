@@ -24,7 +24,8 @@ use crate::broadcast::{BroadcastSink, BROADCAST};
 use crate::platform;
 
 // ---------------------------------------------------------------------------
-// Re-exported types (codegen mirrors them on the Dart side)
+// Re-exported types — mirror declarations so codegen generates concrete
+// Dart classes/enums (otherwise frb leaves them as opaque Rust handles).
 // ---------------------------------------------------------------------------
 
 pub use chess_core::api::{
@@ -33,6 +34,226 @@ pub use chess_core::api::{
     HumanColorChoice, Move, MoveMadeEvent, MoveResult, NewGameOpts, Piece, PieceKind, PieceSet,
     Promotion, Settings, TimeControl,
 };
+
+#[frb(mirror(Color))]
+pub enum _MirrorColor {
+    W,
+    B,
+}
+
+#[frb(mirror(PieceKind))]
+pub enum _MirrorPieceKind {
+    P,
+    N,
+    B,
+    R,
+    Q,
+    K,
+}
+
+#[frb(mirror(Piece))]
+pub struct _MirrorPiece {
+    pub color: Color,
+    pub kind: PieceKind,
+}
+
+#[frb(mirror(Promotion))]
+pub enum _MirrorPromotion {
+    N,
+    B,
+    R,
+    Q,
+}
+
+#[frb(mirror(Move))]
+pub struct _MirrorMove {
+    pub from: String,
+    pub to: String,
+    pub promotion: Option<Promotion>,
+    pub san: String,
+    pub uci: String,
+    pub captured: Option<Piece>,
+    pub is_check: bool,
+    pub is_mate: bool,
+    pub is_castle: bool,
+    pub is_en_passant: bool,
+}
+
+#[frb(mirror(GameStatus))]
+pub enum _MirrorGameStatus {
+    Active,
+    Checkmate,
+    Stalemate,
+    DrawFiftyMove,
+    DrawThreefold,
+    DrawInsufficient,
+    DrawAgreement,
+    Resigned,
+    TimeForfeit,
+}
+
+#[frb(mirror(GameResult))]
+pub enum _MirrorGameResult {
+    White,
+    Black,
+    Draw,
+    Ongoing,
+}
+
+#[frb(mirror(ClockState))]
+pub struct _MirrorClockState {
+    pub white_ms: u64,
+    pub black_ms: u64,
+    pub active: Option<Color>,
+    pub paused: bool,
+}
+
+#[frb(mirror(GameSnapshot))]
+pub struct _MirrorGameSnapshot {
+    pub game_id: String,
+    pub fen: String,
+    pub turn: Color,
+    pub in_check: bool,
+    pub status: GameStatus,
+    pub result: GameResult,
+    pub history: Vec<Move>,
+    pub legal_moves: std::collections::HashMap<String, Vec<String>>,
+    pub clock: Option<ClockState>,
+    pub mode: GameMode,
+    pub ai_difficulty: Option<u8>,
+    pub human_color: Option<Color>,
+    pub last_move: Option<Move>,
+}
+
+#[frb(mirror(MoveResult))]
+pub struct _MirrorMoveResult {
+    pub mv: Move,
+    pub snapshot: GameSnapshot,
+}
+
+#[frb(mirror(GameMode))]
+pub enum _MirrorGameMode {
+    Hvh,
+    Hva,
+}
+
+#[frb(mirror(HumanColorChoice))]
+pub enum _MirrorHumanColorChoice {
+    W,
+    B,
+    Random,
+}
+
+#[frb(mirror(TimeControl))]
+pub struct _MirrorTimeControl {
+    pub initial_ms: u64,
+    pub increment_ms: u64,
+}
+
+#[frb(mirror(NewGameOpts))]
+pub struct _MirrorNewGameOpts {
+    pub mode: GameMode,
+    pub ai_difficulty: Option<u8>,
+    pub human_color: Option<HumanColorChoice>,
+    pub time_control: Option<TimeControl>,
+}
+
+#[frb(mirror(BoardTheme))]
+pub enum _MirrorBoardTheme {
+    Wood,
+    Slate,
+    WoodRealistic,
+    SlateRealistic,
+    Marble,
+    Emerald,
+    Obsidian,
+    Sandstone,
+    Midnight,
+}
+
+#[frb(mirror(AppTheme))]
+pub enum _MirrorAppTheme {
+    Light,
+    Dark,
+    Blue,
+}
+
+#[frb(mirror(PieceSet))]
+pub enum _MirrorPieceSet {
+    Classic,
+    Modern,
+    Merida,
+    Minimal,
+}
+
+#[frb(mirror(Accent))]
+pub enum _MirrorAccent {
+    Walnut,
+    Forest,
+    Violet,
+    Teal,
+    Rose,
+}
+
+#[frb(mirror(Settings))]
+pub struct _MirrorSettings {
+    pub app_theme: AppTheme,
+    pub board_theme: BoardTheme,
+    pub piece_set: PieceSet,
+    pub accent: Accent,
+    pub sound_enabled: bool,
+    pub sound_volume: f32,
+    pub show_legal_moves: bool,
+    pub show_coordinates: bool,
+    pub show_last_move: bool,
+}
+
+#[frb(mirror(MoveMadeEvent))]
+pub struct _MirrorMoveMadeEvent {
+    pub game_id: String,
+    pub mv: Move,
+    pub snapshot: GameSnapshot,
+}
+
+#[frb(mirror(AiProgressEvent))]
+pub struct _MirrorAiProgressEvent {
+    pub game_id: String,
+    pub depth: u32,
+    pub eval_cp: i32,
+    pub pv_san: Vec<String>,
+}
+
+#[frb(mirror(GameOverEvent))]
+pub struct _MirrorGameOverEvent {
+    pub game_id: String,
+    pub result: GameResult,
+    pub reason: GameStatus,
+}
+
+#[frb(mirror(ClockTickEvent))]
+pub struct _MirrorClockTickEvent {
+    pub game_id: String,
+    pub white_ms: u64,
+    pub black_ms: u64,
+    pub active: Option<Color>,
+}
+
+#[frb(mirror(BackendEvent))]
+pub enum _MirrorBackendEvent {
+    MoveMade(MoveMadeEvent),
+    AiProgress(AiProgressEvent),
+    GameOver(GameOverEvent),
+    ClockTick(ClockTickEvent),
+}
+
+#[frb(mirror(ApiError))]
+pub enum _MirrorApiError {
+    GameNotFound(String),
+    IllegalMove(String),
+    InvalidInput(String),
+    Engine(String),
+    Internal(String),
+}
 
 // ---------------------------------------------------------------------------
 // Init

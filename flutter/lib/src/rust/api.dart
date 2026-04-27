@@ -5,6 +5,8 @@
 
 import 'frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
+part 'api.freezed.dart';
 
 /// One-time bootstrap. Dart calls this with the writable application
 /// data directory (from `path_provider`) before issuing any command.
@@ -84,26 +86,535 @@ Future<Settings> setSettings({required Settings settings}) =>
 Future<GameSnapshot?> snapshot({required String gameId}) =>
     RustLib.instance.api.crateApiSnapshot(gameId: gameId);
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ApiError>>
-abstract class ApiError implements RustOpaqueInterface {}
+enum Accent {
+  walnut,
+  forest,
+  violet,
+  teal,
+  rose,
+  ;
+}
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<BackendEvent>>
-abstract class BackendEvent implements RustOpaqueInterface {}
+class AiProgressEvent {
+  final String gameId;
+  final int depth;
+  final int evalCp;
+  final List<String> pvSan;
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GameSnapshot>>
-abstract class GameSnapshot implements RustOpaqueInterface {}
+  const AiProgressEvent({
+    required this.gameId,
+    required this.depth,
+    required this.evalCp,
+    required this.pvSan,
+  });
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MoveResult>>
-abstract class MoveResult implements RustOpaqueInterface {}
+  @override
+  int get hashCode =>
+      gameId.hashCode ^ depth.hashCode ^ evalCp.hashCode ^ pvSan.hashCode;
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<NewGameOpts>>
-abstract class NewGameOpts implements RustOpaqueInterface {}
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AiProgressEvent &&
+          runtimeType == other.runtimeType &&
+          gameId == other.gameId &&
+          depth == other.depth &&
+          evalCp == other.evalCp &&
+          pvSan == other.pvSan;
+}
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Promotion>>
-abstract class Promotion implements RustOpaqueInterface {}
+@freezed
+sealed class ApiError with _$ApiError implements FrbException {
+  const ApiError._();
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Settings>>
-abstract class Settings implements RustOpaqueInterface {}
+  const factory ApiError.gameNotFound(
+    String field0,
+  ) = ApiError_GameNotFound;
+  const factory ApiError.illegalMove(
+    String field0,
+  ) = ApiError_IllegalMove;
+  const factory ApiError.invalidInput(
+    String field0,
+  ) = ApiError_InvalidInput;
+  const factory ApiError.engine(
+    String field0,
+  ) = ApiError_Engine;
+  const factory ApiError.internal(
+    String field0,
+  ) = ApiError_Internal;
+}
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TimeControl>>
-abstract class TimeControl implements RustOpaqueInterface {}
+enum AppTheme {
+  light,
+  dark,
+  blue,
+  ;
+}
+
+@freezed
+sealed class BackendEvent with _$BackendEvent {
+  const BackendEvent._();
+
+  const factory BackendEvent.moveMade(
+    MoveMadeEvent field0,
+  ) = BackendEvent_MoveMade;
+  const factory BackendEvent.aiProgress(
+    AiProgressEvent field0,
+  ) = BackendEvent_AiProgress;
+  const factory BackendEvent.gameOver(
+    GameOverEvent field0,
+  ) = BackendEvent_GameOver;
+  const factory BackendEvent.clockTick(
+    ClockTickEvent field0,
+  ) = BackendEvent_ClockTick;
+}
+
+enum BoardTheme {
+  wood,
+  slate,
+  woodRealistic,
+  slateRealistic,
+  marble,
+  emerald,
+  obsidian,
+  sandstone,
+  midnight,
+  ;
+}
+
+class ClockState {
+  final BigInt whiteMs;
+  final BigInt blackMs;
+  final Color? active;
+  final bool paused;
+
+  const ClockState({
+    required this.whiteMs,
+    required this.blackMs,
+    this.active,
+    required this.paused,
+  });
+
+  @override
+  int get hashCode =>
+      whiteMs.hashCode ^ blackMs.hashCode ^ active.hashCode ^ paused.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ClockState &&
+          runtimeType == other.runtimeType &&
+          whiteMs == other.whiteMs &&
+          blackMs == other.blackMs &&
+          active == other.active &&
+          paused == other.paused;
+}
+
+class ClockTickEvent {
+  final String gameId;
+  final BigInt whiteMs;
+  final BigInt blackMs;
+  final Color? active;
+
+  const ClockTickEvent({
+    required this.gameId,
+    required this.whiteMs,
+    required this.blackMs,
+    this.active,
+  });
+
+  @override
+  int get hashCode =>
+      gameId.hashCode ^ whiteMs.hashCode ^ blackMs.hashCode ^ active.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ClockTickEvent &&
+          runtimeType == other.runtimeType &&
+          gameId == other.gameId &&
+          whiteMs == other.whiteMs &&
+          blackMs == other.blackMs &&
+          active == other.active;
+}
+
+enum Color {
+  w,
+  b,
+  ;
+}
+
+enum GameMode {
+  hvh,
+  hva,
+  ;
+}
+
+class GameOverEvent {
+  final String gameId;
+  final GameResult result;
+  final GameStatus reason;
+
+  const GameOverEvent({
+    required this.gameId,
+    required this.result,
+    required this.reason,
+  });
+
+  @override
+  int get hashCode => gameId.hashCode ^ result.hashCode ^ reason.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GameOverEvent &&
+          runtimeType == other.runtimeType &&
+          gameId == other.gameId &&
+          result == other.result &&
+          reason == other.reason;
+}
+
+enum GameResult {
+  white,
+  black,
+  draw,
+  ongoing,
+  ;
+}
+
+class GameSnapshot {
+  final String gameId;
+  final String fen;
+  final Color turn;
+  final bool inCheck;
+  final GameStatus status;
+  final GameResult result;
+  final List<Move> history;
+  final Map<String, List<String>> legalMoves;
+  final ClockState? clock;
+  final GameMode mode;
+  final int? aiDifficulty;
+  final Color? humanColor;
+  final Move? lastMove;
+
+  const GameSnapshot({
+    required this.gameId,
+    required this.fen,
+    required this.turn,
+    required this.inCheck,
+    required this.status,
+    required this.result,
+    required this.history,
+    required this.legalMoves,
+    this.clock,
+    required this.mode,
+    this.aiDifficulty,
+    this.humanColor,
+    this.lastMove,
+  });
+
+  @override
+  int get hashCode =>
+      gameId.hashCode ^
+      fen.hashCode ^
+      turn.hashCode ^
+      inCheck.hashCode ^
+      status.hashCode ^
+      result.hashCode ^
+      history.hashCode ^
+      legalMoves.hashCode ^
+      clock.hashCode ^
+      mode.hashCode ^
+      aiDifficulty.hashCode ^
+      humanColor.hashCode ^
+      lastMove.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GameSnapshot &&
+          runtimeType == other.runtimeType &&
+          gameId == other.gameId &&
+          fen == other.fen &&
+          turn == other.turn &&
+          inCheck == other.inCheck &&
+          status == other.status &&
+          result == other.result &&
+          history == other.history &&
+          legalMoves == other.legalMoves &&
+          clock == other.clock &&
+          mode == other.mode &&
+          aiDifficulty == other.aiDifficulty &&
+          humanColor == other.humanColor &&
+          lastMove == other.lastMove;
+}
+
+enum GameStatus {
+  active,
+  checkmate,
+  stalemate,
+  drawFiftyMove,
+  drawThreefold,
+  drawInsufficient,
+  drawAgreement,
+  resigned,
+  timeForfeit,
+  ;
+}
+
+enum HumanColorChoice {
+  w,
+  b,
+  random,
+  ;
+}
+
+class Move {
+  final String from;
+  final String to;
+  final Promotion? promotion;
+  final String san;
+  final String uci;
+  final Piece? captured;
+  final bool isCheck;
+  final bool isMate;
+  final bool isCastle;
+  final bool isEnPassant;
+
+  const Move({
+    required this.from,
+    required this.to,
+    this.promotion,
+    required this.san,
+    required this.uci,
+    this.captured,
+    required this.isCheck,
+    required this.isMate,
+    required this.isCastle,
+    required this.isEnPassant,
+  });
+
+  @override
+  int get hashCode =>
+      from.hashCode ^
+      to.hashCode ^
+      promotion.hashCode ^
+      san.hashCode ^
+      uci.hashCode ^
+      captured.hashCode ^
+      isCheck.hashCode ^
+      isMate.hashCode ^
+      isCastle.hashCode ^
+      isEnPassant.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Move &&
+          runtimeType == other.runtimeType &&
+          from == other.from &&
+          to == other.to &&
+          promotion == other.promotion &&
+          san == other.san &&
+          uci == other.uci &&
+          captured == other.captured &&
+          isCheck == other.isCheck &&
+          isMate == other.isMate &&
+          isCastle == other.isCastle &&
+          isEnPassant == other.isEnPassant;
+}
+
+class MoveMadeEvent {
+  final String gameId;
+  final Move mv;
+  final GameSnapshot snapshot;
+
+  const MoveMadeEvent({
+    required this.gameId,
+    required this.mv,
+    required this.snapshot,
+  });
+
+  @override
+  int get hashCode => gameId.hashCode ^ mv.hashCode ^ snapshot.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MoveMadeEvent &&
+          runtimeType == other.runtimeType &&
+          gameId == other.gameId &&
+          mv == other.mv &&
+          snapshot == other.snapshot;
+}
+
+class MoveResult {
+  final Move mv;
+  final GameSnapshot snapshot;
+
+  const MoveResult({
+    required this.mv,
+    required this.snapshot,
+  });
+
+  @override
+  int get hashCode => mv.hashCode ^ snapshot.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MoveResult &&
+          runtimeType == other.runtimeType &&
+          mv == other.mv &&
+          snapshot == other.snapshot;
+}
+
+class NewGameOpts {
+  final GameMode mode;
+  final int? aiDifficulty;
+  final HumanColorChoice? humanColor;
+  final TimeControl? timeControl;
+
+  const NewGameOpts({
+    required this.mode,
+    this.aiDifficulty,
+    this.humanColor,
+    this.timeControl,
+  });
+
+  @override
+  int get hashCode =>
+      mode.hashCode ^
+      aiDifficulty.hashCode ^
+      humanColor.hashCode ^
+      timeControl.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is NewGameOpts &&
+          runtimeType == other.runtimeType &&
+          mode == other.mode &&
+          aiDifficulty == other.aiDifficulty &&
+          humanColor == other.humanColor &&
+          timeControl == other.timeControl;
+}
+
+class Piece {
+  final Color color;
+  final PieceKind kind;
+
+  const Piece({
+    required this.color,
+    required this.kind,
+  });
+
+  @override
+  int get hashCode => color.hashCode ^ kind.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Piece &&
+          runtimeType == other.runtimeType &&
+          color == other.color &&
+          kind == other.kind;
+}
+
+enum PieceKind {
+  p,
+  n,
+  b,
+  r,
+  q,
+  k,
+  ;
+}
+
+enum PieceSet {
+  classic,
+  modern,
+  merida,
+  minimal,
+  ;
+}
+
+enum Promotion {
+  n,
+  b,
+  r,
+  q,
+  ;
+}
+
+class Settings {
+  final AppTheme appTheme;
+  final BoardTheme boardTheme;
+  final PieceSet pieceSet;
+  final Accent accent;
+  final bool soundEnabled;
+  final double soundVolume;
+  final bool showLegalMoves;
+  final bool showCoordinates;
+  final bool showLastMove;
+
+  const Settings({
+    required this.appTheme,
+    required this.boardTheme,
+    required this.pieceSet,
+    required this.accent,
+    required this.soundEnabled,
+    required this.soundVolume,
+    required this.showLegalMoves,
+    required this.showCoordinates,
+    required this.showLastMove,
+  });
+
+  @override
+  int get hashCode =>
+      appTheme.hashCode ^
+      boardTheme.hashCode ^
+      pieceSet.hashCode ^
+      accent.hashCode ^
+      soundEnabled.hashCode ^
+      soundVolume.hashCode ^
+      showLegalMoves.hashCode ^
+      showCoordinates.hashCode ^
+      showLastMove.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Settings &&
+          runtimeType == other.runtimeType &&
+          appTheme == other.appTheme &&
+          boardTheme == other.boardTheme &&
+          pieceSet == other.pieceSet &&
+          accent == other.accent &&
+          soundEnabled == other.soundEnabled &&
+          soundVolume == other.soundVolume &&
+          showLegalMoves == other.showLegalMoves &&
+          showCoordinates == other.showCoordinates &&
+          showLastMove == other.showLastMove;
+}
+
+class TimeControl {
+  final BigInt initialMs;
+  final BigInt incrementMs;
+
+  const TimeControl({
+    required this.initialMs,
+    required this.incrementMs,
+  });
+
+  @override
+  int get hashCode => initialMs.hashCode ^ incrementMs.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is TimeControl &&
+          runtimeType == other.runtimeType &&
+          initialMs == other.initialMs &&
+          incrementMs == other.incrementMs;
+}

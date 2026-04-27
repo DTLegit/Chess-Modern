@@ -26,7 +26,6 @@
 
 // Section: imports
 
-use crate::api::*;
 use flutter_rust_bridge::for_generated::byteorder::{NativeEndian, ReadBytesExt, WriteBytesExt};
 use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
 use flutter_rust_bridge::{Handler, IntoIntoDart};
@@ -132,7 +131,7 @@ fn wire__crate__api__claim_draw_impl(
             let api_game_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::claim_draw(api_game_id).await?;
                         Ok(output_ok)
@@ -168,7 +167,7 @@ fn wire__crate__api__export_pgn_impl(
             let api_game_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::export_pgn(api_game_id).await?;
                         Ok(output_ok)
@@ -203,7 +202,7 @@ fn wire__crate__api__get_settings_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::get_settings().await?;
                         Ok(output_ok)
@@ -240,7 +239,7 @@ fn wire__crate__api__legal_moves_from_impl(
             let api_square = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok =
                             crate::api::legal_moves_from(api_game_id, api_square).await?;
@@ -277,7 +276,7 @@ fn wire__crate__api__load_pgn_impl(
             let api_pgn = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::load_pgn(api_pgn).await?;
                         Ok(output_ok)
@@ -313,10 +312,10 @@ fn wire__crate__api__make_move_impl(
             let api_game_id = <String>::sse_decode(&mut deserializer);
             let api_from = <String>::sse_decode(&mut deserializer);
             let api_to = <String>::sse_decode(&mut deserializer);
-            let api_promotion = <Option<Promotion>>::sse_decode(&mut deserializer);
+            let api_promotion = <Option<crate::api::Promotion>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok =
                             crate::api::make_move(api_game_id, api_from, api_to, api_promotion)
@@ -351,10 +350,10 @@ fn wire__crate__api__new_game_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_opts = <NewGameOpts>::sse_decode(&mut deserializer);
+            let api_opts = <crate::api::NewGameOpts>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::new_game(api_opts).await?;
                         Ok(output_ok)
@@ -390,7 +389,7 @@ fn wire__crate__api__offer_draw_impl(
             let api_game_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::offer_draw(api_game_id).await?;
                         Ok(output_ok)
@@ -426,7 +425,7 @@ fn wire__crate__api__pause_clock_impl(
             let api_game_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::pause_clock(api_game_id).await?;
                         Ok(output_ok)
@@ -462,7 +461,7 @@ fn wire__crate__api__request_ai_move_impl(
             let api_game_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::request_ai_move(api_game_id).await?;
                         Ok(output_ok)
@@ -498,7 +497,7 @@ fn wire__crate__api__resign_impl(
             let api_game_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::resign(api_game_id).await?;
                         Ok(output_ok)
@@ -534,7 +533,7 @@ fn wire__crate__api__resume_clock_impl(
             let api_game_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::resume_clock(api_game_id).await?;
                         Ok(output_ok)
@@ -568,10 +567,10 @@ fn wire__crate__api__set_clock_impl(
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_game_id = <String>::sse_decode(&mut deserializer);
-            let api_time_control = <TimeControl>::sse_decode(&mut deserializer);
+            let api_time_control = <crate::api::TimeControl>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok =
                             crate::api::set_clock(api_game_id, api_time_control).await?;
@@ -605,10 +604,10 @@ fn wire__crate__api__set_settings_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_settings = <Settings>::sse_decode(&mut deserializer);
+            let api_settings = <crate::api::Settings>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::set_settings(api_settings).await?;
                         Ok(output_ok)
@@ -658,14 +657,35 @@ fn wire__crate__api__subscribe_events_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec,_,_>(flutter_rust_bridge::for_generated::TaskInfo{ debug_name: "subscribe_events", port: Some(port_), mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal }, move || { 
-            let message = unsafe { flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(ptr_, rust_vec_len_, data_len_) };
-            let mut deserializer = flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_sink = <StreamSink<BackendEvent,flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(&mut deserializer);deserializer.end(); move |context|  {
-                    transform_result_sse::<_, String>((move ||  {
-                         let output_ok = crate::api::subscribe_events(api_sink)?;   Ok(output_ok)
-                    })())
-                } })
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "subscribe_events",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_sink = <StreamSink<
+                crate::api::BackendEvent,
+                flutter_rust_bridge::for_generated::SseCodec,
+            >>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, String>((move || {
+                    let output_ok = crate::api::subscribe_events(api_sink)?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
 }
 fn wire__crate__api__undo_move_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
@@ -692,7 +712,7 @@ fn wire__crate__api__undo_move_impl(
             let api_game_id = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
-                transform_result_sse::<_, ApiError>(
+                transform_result_sse::<_, crate::api::ApiError>(
                     (move || async move {
                         let output_ok = crate::api::undo_move(api_game_id).await?;
                         Ok(output_ok)
@@ -704,32 +724,138 @@ fn wire__crate__api__undo_move_impl(
     )
 }
 
-// Section: related_funcs
+// Section: static_checks
 
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ApiError>
-);
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<BackendEvent>
-);
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GameSnapshot>
-);
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MoveResult>
-);
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<NewGameOpts>
-);
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Promotion>
-);
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Settings>
-);
-flutter_rust_bridge::frb_generated_moi_arc_impl_value!(
-    flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TimeControl>
-);
+#[allow(clippy::unnecessary_literal_unwrap)]
+const _: fn() = || {
+    {
+        let AiProgressEvent = None::<crate::api::AiProgressEvent>.unwrap();
+        let _: String = AiProgressEvent.game_id;
+        let _: u32 = AiProgressEvent.depth;
+        let _: i32 = AiProgressEvent.eval_cp;
+        let _: Vec<String> = AiProgressEvent.pv_san;
+    }
+    match None::<crate::api::ApiError>.unwrap() {
+        crate::api::ApiError::GameNotFound(field0) => {
+            let _: String = field0;
+        }
+        crate::api::ApiError::IllegalMove(field0) => {
+            let _: String = field0;
+        }
+        crate::api::ApiError::InvalidInput(field0) => {
+            let _: String = field0;
+        }
+        crate::api::ApiError::Engine(field0) => {
+            let _: String = field0;
+        }
+        crate::api::ApiError::Internal(field0) => {
+            let _: String = field0;
+        }
+    }
+    match None::<crate::api::BackendEvent>.unwrap() {
+        crate::api::BackendEvent::MoveMade(field0) => {
+            let _: crate::api::MoveMadeEvent = field0;
+        }
+        crate::api::BackendEvent::AiProgress(field0) => {
+            let _: crate::api::AiProgressEvent = field0;
+        }
+        crate::api::BackendEvent::GameOver(field0) => {
+            let _: crate::api::GameOverEvent = field0;
+        }
+        crate::api::BackendEvent::ClockTick(field0) => {
+            let _: crate::api::ClockTickEvent = field0;
+        }
+    }
+    {
+        let ClockState = None::<crate::api::ClockState>.unwrap();
+        let _: u64 = ClockState.white_ms;
+        let _: u64 = ClockState.black_ms;
+        let _: Option<crate::api::Color> = ClockState.active;
+        let _: bool = ClockState.paused;
+    }
+    {
+        let ClockTickEvent = None::<crate::api::ClockTickEvent>.unwrap();
+        let _: String = ClockTickEvent.game_id;
+        let _: u64 = ClockTickEvent.white_ms;
+        let _: u64 = ClockTickEvent.black_ms;
+        let _: Option<crate::api::Color> = ClockTickEvent.active;
+    }
+    {
+        let GameOverEvent = None::<crate::api::GameOverEvent>.unwrap();
+        let _: String = GameOverEvent.game_id;
+        let _: crate::api::GameResult = GameOverEvent.result;
+        let _: crate::api::GameStatus = GameOverEvent.reason;
+    }
+    {
+        let GameSnapshot = None::<crate::api::GameSnapshot>.unwrap();
+        let _: String = GameSnapshot.game_id;
+        let _: String = GameSnapshot.fen;
+        let _: crate::api::Color = GameSnapshot.turn;
+        let _: bool = GameSnapshot.in_check;
+        let _: crate::api::GameStatus = GameSnapshot.status;
+        let _: crate::api::GameResult = GameSnapshot.result;
+        let _: Vec<crate::api::Move> = GameSnapshot.history;
+        let _: std::collections::HashMap<String, Vec<String>> = GameSnapshot.legal_moves;
+        let _: Option<crate::api::ClockState> = GameSnapshot.clock;
+        let _: crate::api::GameMode = GameSnapshot.mode;
+        let _: Option<u8> = GameSnapshot.ai_difficulty;
+        let _: Option<crate::api::Color> = GameSnapshot.human_color;
+        let _: Option<crate::api::Move> = GameSnapshot.last_move;
+    }
+    {
+        let Move = None::<crate::api::Move>.unwrap();
+        let _: String = Move.from;
+        let _: String = Move.to;
+        let _: Option<crate::api::Promotion> = Move.promotion;
+        let _: String = Move.san;
+        let _: String = Move.uci;
+        let _: Option<crate::api::Piece> = Move.captured;
+        let _: bool = Move.is_check;
+        let _: bool = Move.is_mate;
+        let _: bool = Move.is_castle;
+        let _: bool = Move.is_en_passant;
+    }
+    {
+        let MoveMadeEvent = None::<crate::api::MoveMadeEvent>.unwrap();
+        let _: String = MoveMadeEvent.game_id;
+        let _: crate::api::Move = MoveMadeEvent.mv;
+        let _: crate::api::GameSnapshot = MoveMadeEvent.snapshot;
+    }
+    {
+        let MoveResult = None::<crate::api::MoveResult>.unwrap();
+        let _: crate::api::Move = MoveResult.mv;
+        let _: crate::api::GameSnapshot = MoveResult.snapshot;
+    }
+    {
+        let NewGameOpts = None::<crate::api::NewGameOpts>.unwrap();
+        let _: crate::api::GameMode = NewGameOpts.mode;
+        let _: Option<u8> = NewGameOpts.ai_difficulty;
+        let _: Option<crate::api::HumanColorChoice> = NewGameOpts.human_color;
+        let _: Option<crate::api::TimeControl> = NewGameOpts.time_control;
+    }
+    {
+        let Piece = None::<crate::api::Piece>.unwrap();
+        let _: crate::api::Color = Piece.color;
+        let _: crate::api::PieceKind = Piece.kind;
+    }
+    {
+        let Settings = None::<crate::api::Settings>.unwrap();
+        let _: crate::api::AppTheme = Settings.app_theme;
+        let _: crate::api::BoardTheme = Settings.board_theme;
+        let _: crate::api::PieceSet = Settings.piece_set;
+        let _: crate::api::Accent = Settings.accent;
+        let _: bool = Settings.sound_enabled;
+        let _: f32 = Settings.sound_volume;
+        let _: bool = Settings.show_legal_moves;
+        let _: bool = Settings.show_coordinates;
+        let _: bool = Settings.show_last_move;
+    }
+    {
+        let TimeControl = None::<crate::api::TimeControl>.unwrap();
+        let _: u64 = TimeControl.initial_ms;
+        let _: u64 = TimeControl.increment_ms;
+    }
+};
 
 // Section: dart2rust
 
@@ -741,167 +867,17 @@ impl SseDecode for flutter_rust_bridge::for_generated::anyhow::Error {
     }
 }
 
-impl SseDecode for ApiError {
+impl SseDecode for std::collections::HashMap<String, Vec<String>> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ApiError>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
-
-impl SseDecode for BackendEvent {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<BackendEvent>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
-
-impl SseDecode for GameSnapshot {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GameSnapshot>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
-
-impl SseDecode for MoveResult {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MoveResult>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
-
-impl SseDecode for NewGameOpts {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<NewGameOpts>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
-
-impl SseDecode for Promotion {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Promotion>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
-
-impl SseDecode for Settings {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Settings>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
-    }
-}
-
-impl SseDecode for TimeControl {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <RustOpaqueMoi<
-            flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TimeControl>,
-        >>::sse_decode(deserializer);
-        return flutter_rust_bridge::for_generated::rust_auto_opaque_decode_owned(inner);
+        let mut inner = <Vec<(String, Vec<String>)>>::sse_decode(deserializer);
+        return inner.into_iter().collect();
     }
 }
 
 impl SseDecode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ApiError>>
+    for StreamSink<crate::api::BackendEvent, flutter_rust_bridge::for_generated::SseCodec>
 {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<BackendEvent>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GameSnapshot>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MoveResult>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<NewGameOpts>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Promotion>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Settings>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TimeControl>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut inner = <usize>::sse_decode(deserializer);
-        return decode_rust_opaque_moi(inner);
-    }
-}
-
-impl SseDecode for StreamSink<BackendEvent, flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <String>::sse_decode(deserializer);
@@ -917,6 +893,301 @@ impl SseDecode for String {
     }
 }
 
+impl SseDecode for crate::api::Accent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::Accent::Walnut,
+            1 => crate::api::Accent::Forest,
+            2 => crate::api::Accent::Violet,
+            3 => crate::api::Accent::Teal,
+            4 => crate::api::Accent::Rose,
+            _ => unreachable!("Invalid variant for Accent: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::AiProgressEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_gameId = <String>::sse_decode(deserializer);
+        let mut var_depth = <u32>::sse_decode(deserializer);
+        let mut var_evalCp = <i32>::sse_decode(deserializer);
+        let mut var_pvSan = <Vec<String>>::sse_decode(deserializer);
+        return crate::api::AiProgressEvent {
+            game_id: var_gameId,
+            depth: var_depth,
+            eval_cp: var_evalCp,
+            pv_san: var_pvSan,
+        };
+    }
+}
+
+impl SseDecode for crate::api::ApiError {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                let mut var_field0 = <String>::sse_decode(deserializer);
+                return crate::api::ApiError::GameNotFound(var_field0);
+            }
+            1 => {
+                let mut var_field0 = <String>::sse_decode(deserializer);
+                return crate::api::ApiError::IllegalMove(var_field0);
+            }
+            2 => {
+                let mut var_field0 = <String>::sse_decode(deserializer);
+                return crate::api::ApiError::InvalidInput(var_field0);
+            }
+            3 => {
+                let mut var_field0 = <String>::sse_decode(deserializer);
+                return crate::api::ApiError::Engine(var_field0);
+            }
+            4 => {
+                let mut var_field0 = <String>::sse_decode(deserializer);
+                return crate::api::ApiError::Internal(var_field0);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseDecode for crate::api::AppTheme {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::AppTheme::Light,
+            1 => crate::api::AppTheme::Dark,
+            2 => crate::api::AppTheme::Blue,
+            _ => unreachable!("Invalid variant for AppTheme: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::BackendEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                let mut var_field0 = <crate::api::MoveMadeEvent>::sse_decode(deserializer);
+                return crate::api::BackendEvent::MoveMade(var_field0);
+            }
+            1 => {
+                let mut var_field0 = <crate::api::AiProgressEvent>::sse_decode(deserializer);
+                return crate::api::BackendEvent::AiProgress(var_field0);
+            }
+            2 => {
+                let mut var_field0 = <crate::api::GameOverEvent>::sse_decode(deserializer);
+                return crate::api::BackendEvent::GameOver(var_field0);
+            }
+            3 => {
+                let mut var_field0 = <crate::api::ClockTickEvent>::sse_decode(deserializer);
+                return crate::api::BackendEvent::ClockTick(var_field0);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseDecode for crate::api::BoardTheme {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::BoardTheme::Wood,
+            1 => crate::api::BoardTheme::Slate,
+            2 => crate::api::BoardTheme::WoodRealistic,
+            3 => crate::api::BoardTheme::SlateRealistic,
+            4 => crate::api::BoardTheme::Marble,
+            5 => crate::api::BoardTheme::Emerald,
+            6 => crate::api::BoardTheme::Obsidian,
+            7 => crate::api::BoardTheme::Sandstone,
+            8 => crate::api::BoardTheme::Midnight,
+            _ => unreachable!("Invalid variant for BoardTheme: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for bool {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u8().unwrap() != 0
+    }
+}
+
+impl SseDecode for crate::api::ClockState {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_whiteMs = <u64>::sse_decode(deserializer);
+        let mut var_blackMs = <u64>::sse_decode(deserializer);
+        let mut var_active = <Option<crate::api::Color>>::sse_decode(deserializer);
+        let mut var_paused = <bool>::sse_decode(deserializer);
+        return crate::api::ClockState {
+            white_ms: var_whiteMs,
+            black_ms: var_blackMs,
+            active: var_active,
+            paused: var_paused,
+        };
+    }
+}
+
+impl SseDecode for crate::api::ClockTickEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_gameId = <String>::sse_decode(deserializer);
+        let mut var_whiteMs = <u64>::sse_decode(deserializer);
+        let mut var_blackMs = <u64>::sse_decode(deserializer);
+        let mut var_active = <Option<crate::api::Color>>::sse_decode(deserializer);
+        return crate::api::ClockTickEvent {
+            game_id: var_gameId,
+            white_ms: var_whiteMs,
+            black_ms: var_blackMs,
+            active: var_active,
+        };
+    }
+}
+
+impl SseDecode for crate::api::Color {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::Color::W,
+            1 => crate::api::Color::B,
+            _ => unreachable!("Invalid variant for Color: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for f32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_f32::<NativeEndian>().unwrap()
+    }
+}
+
+impl SseDecode for crate::api::GameMode {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::GameMode::Hvh,
+            1 => crate::api::GameMode::Hva,
+            _ => unreachable!("Invalid variant for GameMode: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::GameOverEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_gameId = <String>::sse_decode(deserializer);
+        let mut var_result = <crate::api::GameResult>::sse_decode(deserializer);
+        let mut var_reason = <crate::api::GameStatus>::sse_decode(deserializer);
+        return crate::api::GameOverEvent {
+            game_id: var_gameId,
+            result: var_result,
+            reason: var_reason,
+        };
+    }
+}
+
+impl SseDecode for crate::api::GameResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::GameResult::White,
+            1 => crate::api::GameResult::Black,
+            2 => crate::api::GameResult::Draw,
+            3 => crate::api::GameResult::Ongoing,
+            _ => unreachable!("Invalid variant for GameResult: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::GameSnapshot {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_gameId = <String>::sse_decode(deserializer);
+        let mut var_fen = <String>::sse_decode(deserializer);
+        let mut var_turn = <crate::api::Color>::sse_decode(deserializer);
+        let mut var_inCheck = <bool>::sse_decode(deserializer);
+        let mut var_status = <crate::api::GameStatus>::sse_decode(deserializer);
+        let mut var_result = <crate::api::GameResult>::sse_decode(deserializer);
+        let mut var_history = <Vec<crate::api::Move>>::sse_decode(deserializer);
+        let mut var_legalMoves =
+            <std::collections::HashMap<String, Vec<String>>>::sse_decode(deserializer);
+        let mut var_clock = <Option<crate::api::ClockState>>::sse_decode(deserializer);
+        let mut var_mode = <crate::api::GameMode>::sse_decode(deserializer);
+        let mut var_aiDifficulty = <Option<u8>>::sse_decode(deserializer);
+        let mut var_humanColor = <Option<crate::api::Color>>::sse_decode(deserializer);
+        let mut var_lastMove = <Option<crate::api::Move>>::sse_decode(deserializer);
+        return crate::api::GameSnapshot {
+            game_id: var_gameId,
+            fen: var_fen,
+            turn: var_turn,
+            in_check: var_inCheck,
+            status: var_status,
+            result: var_result,
+            history: var_history,
+            legal_moves: var_legalMoves,
+            clock: var_clock,
+            mode: var_mode,
+            ai_difficulty: var_aiDifficulty,
+            human_color: var_humanColor,
+            last_move: var_lastMove,
+        };
+    }
+}
+
+impl SseDecode for crate::api::GameStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::GameStatus::Active,
+            1 => crate::api::GameStatus::Checkmate,
+            2 => crate::api::GameStatus::Stalemate,
+            3 => crate::api::GameStatus::DrawFiftyMove,
+            4 => crate::api::GameStatus::DrawThreefold,
+            5 => crate::api::GameStatus::DrawInsufficient,
+            6 => crate::api::GameStatus::DrawAgreement,
+            7 => crate::api::GameStatus::Resigned,
+            8 => crate::api::GameStatus::TimeForfeit,
+            _ => unreachable!("Invalid variant for GameStatus: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::HumanColorChoice {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::HumanColorChoice::W,
+            1 => crate::api::HumanColorChoice::B,
+            2 => crate::api::HumanColorChoice::Random,
+            _ => unreachable!("Invalid variant for HumanColorChoice: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for i32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_i32::<NativeEndian>().unwrap()
+    }
+}
+
 impl SseDecode for Vec<String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -924,6 +1195,18 @@ impl SseDecode for Vec<String> {
         let mut ans_ = Vec::with_capacity(len_ as usize);
         for idx_ in 0..len_ {
             ans_.push(<String>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::Move> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::Move>::sse_decode(deserializer));
         }
         return ans_;
     }
@@ -941,25 +1224,301 @@ impl SseDecode for Vec<u8> {
     }
 }
 
-impl SseDecode for Option<GameSnapshot> {
+impl SseDecode for Vec<(String, Vec<String>)> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<(String, Vec<String>)>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for crate::api::Move {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_from = <String>::sse_decode(deserializer);
+        let mut var_to = <String>::sse_decode(deserializer);
+        let mut var_promotion = <Option<crate::api::Promotion>>::sse_decode(deserializer);
+        let mut var_san = <String>::sse_decode(deserializer);
+        let mut var_uci = <String>::sse_decode(deserializer);
+        let mut var_captured = <Option<crate::api::Piece>>::sse_decode(deserializer);
+        let mut var_isCheck = <bool>::sse_decode(deserializer);
+        let mut var_isMate = <bool>::sse_decode(deserializer);
+        let mut var_isCastle = <bool>::sse_decode(deserializer);
+        let mut var_isEnPassant = <bool>::sse_decode(deserializer);
+        return crate::api::Move {
+            from: var_from,
+            to: var_to,
+            promotion: var_promotion,
+            san: var_san,
+            uci: var_uci,
+            captured: var_captured,
+            is_check: var_isCheck,
+            is_mate: var_isMate,
+            is_castle: var_isCastle,
+            is_en_passant: var_isEnPassant,
+        };
+    }
+}
+
+impl SseDecode for crate::api::MoveMadeEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_gameId = <String>::sse_decode(deserializer);
+        let mut var_mv = <crate::api::Move>::sse_decode(deserializer);
+        let mut var_snapshot = <crate::api::GameSnapshot>::sse_decode(deserializer);
+        return crate::api::MoveMadeEvent {
+            game_id: var_gameId,
+            mv: var_mv,
+            snapshot: var_snapshot,
+        };
+    }
+}
+
+impl SseDecode for crate::api::MoveResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_mv = <crate::api::Move>::sse_decode(deserializer);
+        let mut var_snapshot = <crate::api::GameSnapshot>::sse_decode(deserializer);
+        return crate::api::MoveResult {
+            mv: var_mv,
+            snapshot: var_snapshot,
+        };
+    }
+}
+
+impl SseDecode for crate::api::NewGameOpts {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_mode = <crate::api::GameMode>::sse_decode(deserializer);
+        let mut var_aiDifficulty = <Option<u8>>::sse_decode(deserializer);
+        let mut var_humanColor = <Option<crate::api::HumanColorChoice>>::sse_decode(deserializer);
+        let mut var_timeControl = <Option<crate::api::TimeControl>>::sse_decode(deserializer);
+        return crate::api::NewGameOpts {
+            mode: var_mode,
+            ai_difficulty: var_aiDifficulty,
+            human_color: var_humanColor,
+            time_control: var_timeControl,
+        };
+    }
+}
+
+impl SseDecode for Option<crate::api::ClockState> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
-            return Some(<GameSnapshot>::sse_decode(deserializer));
+            return Some(<crate::api::ClockState>::sse_decode(deserializer));
         } else {
             return None;
         }
     }
 }
 
-impl SseDecode for Option<Promotion> {
+impl SseDecode for Option<crate::api::Color> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
-            return Some(<Promotion>::sse_decode(deserializer));
+            return Some(<crate::api::Color>::sse_decode(deserializer));
         } else {
             return None;
         }
+    }
+}
+
+impl SseDecode for Option<crate::api::GameSnapshot> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::GameSnapshot>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::HumanColorChoice> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::HumanColorChoice>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::Move> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::Move>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::Piece> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::Piece>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::Promotion> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::Promotion>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<crate::api::TimeControl> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::TimeControl>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<u8> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<u8>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for crate::api::Piece {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_color = <crate::api::Color>::sse_decode(deserializer);
+        let mut var_kind = <crate::api::PieceKind>::sse_decode(deserializer);
+        return crate::api::Piece {
+            color: var_color,
+            kind: var_kind,
+        };
+    }
+}
+
+impl SseDecode for crate::api::PieceKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::PieceKind::P,
+            1 => crate::api::PieceKind::N,
+            2 => crate::api::PieceKind::B,
+            3 => crate::api::PieceKind::R,
+            4 => crate::api::PieceKind::Q,
+            5 => crate::api::PieceKind::K,
+            _ => unreachable!("Invalid variant for PieceKind: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::PieceSet {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::PieceSet::Classic,
+            1 => crate::api::PieceSet::Modern,
+            2 => crate::api::PieceSet::Merida,
+            3 => crate::api::PieceSet::Minimal,
+            _ => unreachable!("Invalid variant for PieceSet: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::Promotion {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::Promotion::N,
+            1 => crate::api::Promotion::B,
+            2 => crate::api::Promotion::R,
+            3 => crate::api::Promotion::Q,
+            _ => unreachable!("Invalid variant for Promotion: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for (String, Vec<String>) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_field0 = <String>::sse_decode(deserializer);
+        let mut var_field1 = <Vec<String>>::sse_decode(deserializer);
+        return (var_field0, var_field1);
+    }
+}
+
+impl SseDecode for crate::api::Settings {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_appTheme = <crate::api::AppTheme>::sse_decode(deserializer);
+        let mut var_boardTheme = <crate::api::BoardTheme>::sse_decode(deserializer);
+        let mut var_pieceSet = <crate::api::PieceSet>::sse_decode(deserializer);
+        let mut var_accent = <crate::api::Accent>::sse_decode(deserializer);
+        let mut var_soundEnabled = <bool>::sse_decode(deserializer);
+        let mut var_soundVolume = <f32>::sse_decode(deserializer);
+        let mut var_showLegalMoves = <bool>::sse_decode(deserializer);
+        let mut var_showCoordinates = <bool>::sse_decode(deserializer);
+        let mut var_showLastMove = <bool>::sse_decode(deserializer);
+        return crate::api::Settings {
+            app_theme: var_appTheme,
+            board_theme: var_boardTheme,
+            piece_set: var_pieceSet,
+            accent: var_accent,
+            sound_enabled: var_soundEnabled,
+            sound_volume: var_soundVolume,
+            show_legal_moves: var_showLegalMoves,
+            show_coordinates: var_showCoordinates,
+            show_last_move: var_showLastMove,
+        };
+    }
+}
+
+impl SseDecode for crate::api::TimeControl {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_initialMs = <u64>::sse_decode(deserializer);
+        let mut var_incrementMs = <u64>::sse_decode(deserializer);
+        return crate::api::TimeControl {
+            initial_ms: var_initialMs,
+            increment_ms: var_incrementMs,
+        };
+    }
+}
+
+impl SseDecode for u32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u32::<NativeEndian>().unwrap()
+    }
+}
+
+impl SseDecode for u64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u64::<NativeEndian>().unwrap()
     }
 }
 
@@ -973,27 +1532,6 @@ impl SseDecode for u8 {
 impl SseDecode for () {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {}
-}
-
-impl SseDecode for usize {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        deserializer.cursor.read_u64::<NativeEndian>().unwrap() as _
-    }
-}
-
-impl SseDecode for i32 {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        deserializer.cursor.read_i32::<NativeEndian>().unwrap()
-    }
-}
-
-impl SseDecode for bool {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        deserializer.cursor.read_u8().unwrap() != 0
-    }
 }
 
 fn pde_ffi_dispatcher_primary_impl(
@@ -1043,121 +1581,592 @@ fn pde_ffi_dispatcher_sync_impl(
 // Section: rust2dart
 
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<ApiError> {
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::Accent> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
+        match self.0 {
+            crate::api::Accent::Walnut => 0.into_dart(),
+            crate::api::Accent::Forest => 1.into_dart(),
+            crate::api::Accent::Violet => 2.into_dart(),
+            crate::api::Accent::Teal => 3.into_dart(),
+            crate::api::Accent::Rose => 4.into_dart(),
+            _ => unreachable!(),
+        }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<ApiError> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<ApiError>> for ApiError {
-    fn into_into_dart(self) -> FrbWrapper<ApiError> {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::Accent>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::Accent>> for crate::api::Accent {
+    fn into_into_dart(self) -> FrbWrapper<crate::api::Accent> {
         self.into()
     }
 }
-
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<BackendEvent> {
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::AiProgressEvent> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
+        [
+            self.0.game_id.into_into_dart().into_dart(),
+            self.0.depth.into_into_dart().into_dart(),
+            self.0.eval_cp.into_into_dart().into_dart(),
+            self.0.pv_san.into_into_dart().into_dart(),
+        ]
+        .into_dart()
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<BackendEvent> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<BackendEvent>> for BackendEvent {
-    fn into_into_dart(self) -> FrbWrapper<BackendEvent> {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::AiProgressEvent>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::AiProgressEvent>>
+    for crate::api::AiProgressEvent
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::AiProgressEvent> {
         self.into()
     }
 }
-
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<GameSnapshot> {
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::ApiError> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
+        match self.0 {
+            crate::api::ApiError::GameNotFound(field0) => {
+                [0.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::ApiError::IllegalMove(field0) => {
+                [1.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::ApiError::InvalidInput(field0) => {
+                [2.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::ApiError::Engine(field0) => {
+                [3.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::ApiError::Internal(field0) => {
+                [4.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<GameSnapshot> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<GameSnapshot>> for GameSnapshot {
-    fn into_into_dart(self) -> FrbWrapper<GameSnapshot> {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::ApiError>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::ApiError>> for crate::api::ApiError {
+    fn into_into_dart(self) -> FrbWrapper<crate::api::ApiError> {
         self.into()
     }
 }
-
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<MoveResult> {
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::AppTheme> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
+        match self.0 {
+            crate::api::AppTheme::Light => 0.into_dart(),
+            crate::api::AppTheme::Dark => 1.into_dart(),
+            crate::api::AppTheme::Blue => 2.into_dart(),
+            _ => unreachable!(),
+        }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<MoveResult> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<MoveResult>> for MoveResult {
-    fn into_into_dart(self) -> FrbWrapper<MoveResult> {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::AppTheme>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::AppTheme>> for crate::api::AppTheme {
+    fn into_into_dart(self) -> FrbWrapper<crate::api::AppTheme> {
         self.into()
     }
 }
-
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<NewGameOpts> {
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::BackendEvent> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
+        match self.0 {
+            crate::api::BackendEvent::MoveMade(field0) => {
+                [0.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::BackendEvent::AiProgress(field0) => {
+                [1.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::BackendEvent::GameOver(field0) => {
+                [2.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::BackendEvent::ClockTick(field0) => {
+                [3.into_dart(), field0.into_into_dart().into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<NewGameOpts> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<NewGameOpts>> for NewGameOpts {
-    fn into_into_dart(self) -> FrbWrapper<NewGameOpts> {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::BackendEvent>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::BackendEvent>>
+    for crate::api::BackendEvent
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::BackendEvent> {
         self.into()
     }
 }
-
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<Promotion> {
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::BoardTheme> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
+        match self.0 {
+            crate::api::BoardTheme::Wood => 0.into_dart(),
+            crate::api::BoardTheme::Slate => 1.into_dart(),
+            crate::api::BoardTheme::WoodRealistic => 2.into_dart(),
+            crate::api::BoardTheme::SlateRealistic => 3.into_dart(),
+            crate::api::BoardTheme::Marble => 4.into_dart(),
+            crate::api::BoardTheme::Emerald => 5.into_dart(),
+            crate::api::BoardTheme::Obsidian => 6.into_dart(),
+            crate::api::BoardTheme::Sandstone => 7.into_dart(),
+            crate::api::BoardTheme::Midnight => 8.into_dart(),
+            _ => unreachable!(),
+        }
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<Promotion> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<Promotion>> for Promotion {
-    fn into_into_dart(self) -> FrbWrapper<Promotion> {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::BoardTheme>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::BoardTheme>>
+    for crate::api::BoardTheme
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::BoardTheme> {
         self.into()
     }
 }
-
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<Settings> {
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::ClockState> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
+        [
+            self.0.white_ms.into_into_dart().into_dart(),
+            self.0.black_ms.into_into_dart().into_dart(),
+            self.0.active.into_into_dart().into_dart(),
+            self.0.paused.into_into_dart().into_dart(),
+        ]
+        .into_dart()
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<Settings> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<Settings>> for Settings {
-    fn into_into_dart(self) -> FrbWrapper<Settings> {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::ClockState>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::ClockState>>
+    for crate::api::ClockState
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::ClockState> {
         self.into()
     }
 }
-
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for FrbWrapper<TimeControl> {
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::ClockTickEvent> {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self.0)
-            .into_dart()
+        [
+            self.0.game_id.into_into_dart().into_dart(),
+            self.0.white_ms.into_into_dart().into_dart(),
+            self.0.black_ms.into_into_dart().into_dart(),
+            self.0.active.into_into_dart().into_dart(),
+        ]
+        .into_dart()
     }
 }
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<TimeControl> {}
-
-impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<TimeControl>> for TimeControl {
-    fn into_into_dart(self) -> FrbWrapper<TimeControl> {
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::ClockTickEvent>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::ClockTickEvent>>
+    for crate::api::ClockTickEvent
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::ClockTickEvent> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::Color> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::Color::W => 0.into_dart(),
+            crate::api::Color::B => 1.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::api::Color> {}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::Color>> for crate::api::Color {
+    fn into_into_dart(self) -> FrbWrapper<crate::api::Color> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::GameMode> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::GameMode::Hvh => 0.into_dart(),
+            crate::api::GameMode::Hva => 1.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::GameMode>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::GameMode>> for crate::api::GameMode {
+    fn into_into_dart(self) -> FrbWrapper<crate::api::GameMode> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::GameOverEvent> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.0.game_id.into_into_dart().into_dart(),
+            self.0.result.into_into_dart().into_dart(),
+            self.0.reason.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::GameOverEvent>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::GameOverEvent>>
+    for crate::api::GameOverEvent
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::GameOverEvent> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::GameResult> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::GameResult::White => 0.into_dart(),
+            crate::api::GameResult::Black => 1.into_dart(),
+            crate::api::GameResult::Draw => 2.into_dart(),
+            crate::api::GameResult::Ongoing => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::GameResult>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::GameResult>>
+    for crate::api::GameResult
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::GameResult> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::GameSnapshot> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.0.game_id.into_into_dart().into_dart(),
+            self.0.fen.into_into_dart().into_dart(),
+            self.0.turn.into_into_dart().into_dart(),
+            self.0.in_check.into_into_dart().into_dart(),
+            self.0.status.into_into_dart().into_dart(),
+            self.0.result.into_into_dart().into_dart(),
+            self.0.history.into_into_dart().into_dart(),
+            self.0.legal_moves.into_into_dart().into_dart(),
+            self.0.clock.into_into_dart().into_dart(),
+            self.0.mode.into_into_dart().into_dart(),
+            self.0.ai_difficulty.into_into_dart().into_dart(),
+            self.0.human_color.into_into_dart().into_dart(),
+            self.0.last_move.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::GameSnapshot>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::GameSnapshot>>
+    for crate::api::GameSnapshot
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::GameSnapshot> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::GameStatus> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::GameStatus::Active => 0.into_dart(),
+            crate::api::GameStatus::Checkmate => 1.into_dart(),
+            crate::api::GameStatus::Stalemate => 2.into_dart(),
+            crate::api::GameStatus::DrawFiftyMove => 3.into_dart(),
+            crate::api::GameStatus::DrawThreefold => 4.into_dart(),
+            crate::api::GameStatus::DrawInsufficient => 5.into_dart(),
+            crate::api::GameStatus::DrawAgreement => 6.into_dart(),
+            crate::api::GameStatus::Resigned => 7.into_dart(),
+            crate::api::GameStatus::TimeForfeit => 8.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::GameStatus>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::GameStatus>>
+    for crate::api::GameStatus
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::GameStatus> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::HumanColorChoice> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::HumanColorChoice::W => 0.into_dart(),
+            crate::api::HumanColorChoice::B => 1.into_dart(),
+            crate::api::HumanColorChoice::Random => 2.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::HumanColorChoice>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::HumanColorChoice>>
+    for crate::api::HumanColorChoice
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::HumanColorChoice> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::Move> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.0.from.into_into_dart().into_dart(),
+            self.0.to.into_into_dart().into_dart(),
+            self.0.promotion.into_into_dart().into_dart(),
+            self.0.san.into_into_dart().into_dart(),
+            self.0.uci.into_into_dart().into_dart(),
+            self.0.captured.into_into_dart().into_dart(),
+            self.0.is_check.into_into_dart().into_dart(),
+            self.0.is_mate.into_into_dart().into_dart(),
+            self.0.is_castle.into_into_dart().into_dart(),
+            self.0.is_en_passant.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::api::Move> {}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::Move>> for crate::api::Move {
+    fn into_into_dart(self) -> FrbWrapper<crate::api::Move> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::MoveMadeEvent> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.0.game_id.into_into_dart().into_dart(),
+            self.0.mv.into_into_dart().into_dart(),
+            self.0.snapshot.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::MoveMadeEvent>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::MoveMadeEvent>>
+    for crate::api::MoveMadeEvent
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::MoveMadeEvent> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::MoveResult> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.0.mv.into_into_dart().into_dart(),
+            self.0.snapshot.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::MoveResult>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::MoveResult>>
+    for crate::api::MoveResult
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::MoveResult> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::NewGameOpts> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.0.mode.into_into_dart().into_dart(),
+            self.0.ai_difficulty.into_into_dart().into_dart(),
+            self.0.human_color.into_into_dart().into_dart(),
+            self.0.time_control.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::NewGameOpts>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::NewGameOpts>>
+    for crate::api::NewGameOpts
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::NewGameOpts> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::Piece> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.0.color.into_into_dart().into_dart(),
+            self.0.kind.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for FrbWrapper<crate::api::Piece> {}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::Piece>> for crate::api::Piece {
+    fn into_into_dart(self) -> FrbWrapper<crate::api::Piece> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::PieceKind> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::PieceKind::P => 0.into_dart(),
+            crate::api::PieceKind::N => 1.into_dart(),
+            crate::api::PieceKind::B => 2.into_dart(),
+            crate::api::PieceKind::R => 3.into_dart(),
+            crate::api::PieceKind::Q => 4.into_dart(),
+            crate::api::PieceKind::K => 5.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::PieceKind>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::PieceKind>>
+    for crate::api::PieceKind
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::PieceKind> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::PieceSet> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::PieceSet::Classic => 0.into_dart(),
+            crate::api::PieceSet::Modern => 1.into_dart(),
+            crate::api::PieceSet::Merida => 2.into_dart(),
+            crate::api::PieceSet::Minimal => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::PieceSet>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::PieceSet>> for crate::api::PieceSet {
+    fn into_into_dart(self) -> FrbWrapper<crate::api::PieceSet> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::Promotion> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self.0 {
+            crate::api::Promotion::N => 0.into_dart(),
+            crate::api::Promotion::B => 1.into_dart(),
+            crate::api::Promotion::R => 2.into_dart(),
+            crate::api::Promotion::Q => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::Promotion>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::Promotion>>
+    for crate::api::Promotion
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::Promotion> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::Settings> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.0.app_theme.into_into_dart().into_dart(),
+            self.0.board_theme.into_into_dart().into_dart(),
+            self.0.piece_set.into_into_dart().into_dart(),
+            self.0.accent.into_into_dart().into_dart(),
+            self.0.sound_enabled.into_into_dart().into_dart(),
+            self.0.sound_volume.into_into_dart().into_dart(),
+            self.0.show_legal_moves.into_into_dart().into_dart(),
+            self.0.show_coordinates.into_into_dart().into_dart(),
+            self.0.show_last_move.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::Settings>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::Settings>> for crate::api::Settings {
+    fn into_into_dart(self) -> FrbWrapper<crate::api::Settings> {
+        self.into()
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::TimeControl> {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.0.initial_ms.into_into_dart().into_dart(),
+            self.0.increment_ms.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for FrbWrapper<crate::api::TimeControl>
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<FrbWrapper<crate::api::TimeControl>>
+    for crate::api::TimeControl
+{
+    fn into_into_dart(self) -> FrbWrapper<crate::api::TimeControl> {
         self.into()
     }
 }
@@ -1169,151 +2178,16 @@ impl SseEncode for flutter_rust_bridge::for_generated::anyhow::Error {
     }
 }
 
-impl SseEncode for ApiError {
+impl SseEncode for std::collections::HashMap<String, Vec<String>> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ApiError>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
-impl SseEncode for BackendEvent {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<BackendEvent>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
-impl SseEncode for GameSnapshot {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GameSnapshot>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
-impl SseEncode for MoveResult {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MoveResult>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
-impl SseEncode for NewGameOpts {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<NewGameOpts>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
-impl SseEncode for Promotion {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Promotion>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
-impl SseEncode for Settings {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Settings>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
-    }
-}
-
-impl SseEncode for TimeControl {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TimeControl>>>::sse_encode(flutter_rust_bridge::for_generated::rust_auto_opaque_encode::<_, MoiArc<_>>(self), serializer);
+        <Vec<(String, Vec<String>)>>::sse_encode(self.into_iter().collect(), serializer);
     }
 }
 
 impl SseEncode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ApiError>>
+    for StreamSink<crate::api::BackendEvent, flutter_rust_bridge::for_generated::SseCodec>
 {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<BackendEvent>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GameSnapshot>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MoveResult>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<NewGameOpts>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Promotion>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Settings>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode
-    for RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TimeControl>>
-{
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        let (ptr, size) = self.sse_encode_raw();
-        <usize>::sse_encode(ptr, serializer);
-        <i32>::sse_encode(size, serializer);
-    }
-}
-
-impl SseEncode for StreamSink<BackendEvent, flutter_rust_bridge::for_generated::SseCodec> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         unimplemented!("")
@@ -1327,12 +2201,308 @@ impl SseEncode for String {
     }
 }
 
+impl SseEncode for crate::api::Accent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::Accent::Walnut => 0,
+                crate::api::Accent::Forest => 1,
+                crate::api::Accent::Violet => 2,
+                crate::api::Accent::Teal => 3,
+                crate::api::Accent::Rose => 4,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::AiProgressEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.game_id, serializer);
+        <u32>::sse_encode(self.depth, serializer);
+        <i32>::sse_encode(self.eval_cp, serializer);
+        <Vec<String>>::sse_encode(self.pv_san, serializer);
+    }
+}
+
+impl SseEncode for crate::api::ApiError {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::api::ApiError::GameNotFound(field0) => {
+                <i32>::sse_encode(0, serializer);
+                <String>::sse_encode(field0, serializer);
+            }
+            crate::api::ApiError::IllegalMove(field0) => {
+                <i32>::sse_encode(1, serializer);
+                <String>::sse_encode(field0, serializer);
+            }
+            crate::api::ApiError::InvalidInput(field0) => {
+                <i32>::sse_encode(2, serializer);
+                <String>::sse_encode(field0, serializer);
+            }
+            crate::api::ApiError::Engine(field0) => {
+                <i32>::sse_encode(3, serializer);
+                <String>::sse_encode(field0, serializer);
+            }
+            crate::api::ApiError::Internal(field0) => {
+                <i32>::sse_encode(4, serializer);
+                <String>::sse_encode(field0, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseEncode for crate::api::AppTheme {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::AppTheme::Light => 0,
+                crate::api::AppTheme::Dark => 1,
+                crate::api::AppTheme::Blue => 2,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::BackendEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::api::BackendEvent::MoveMade(field0) => {
+                <i32>::sse_encode(0, serializer);
+                <crate::api::MoveMadeEvent>::sse_encode(field0, serializer);
+            }
+            crate::api::BackendEvent::AiProgress(field0) => {
+                <i32>::sse_encode(1, serializer);
+                <crate::api::AiProgressEvent>::sse_encode(field0, serializer);
+            }
+            crate::api::BackendEvent::GameOver(field0) => {
+                <i32>::sse_encode(2, serializer);
+                <crate::api::GameOverEvent>::sse_encode(field0, serializer);
+            }
+            crate::api::BackendEvent::ClockTick(field0) => {
+                <i32>::sse_encode(3, serializer);
+                <crate::api::ClockTickEvent>::sse_encode(field0, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseEncode for crate::api::BoardTheme {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::BoardTheme::Wood => 0,
+                crate::api::BoardTheme::Slate => 1,
+                crate::api::BoardTheme::WoodRealistic => 2,
+                crate::api::BoardTheme::SlateRealistic => 3,
+                crate::api::BoardTheme::Marble => 4,
+                crate::api::BoardTheme::Emerald => 5,
+                crate::api::BoardTheme::Obsidian => 6,
+                crate::api::BoardTheme::Sandstone => 7,
+                crate::api::BoardTheme::Midnight => 8,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for bool {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u8(self as _).unwrap();
+    }
+}
+
+impl SseEncode for crate::api::ClockState {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <u64>::sse_encode(self.white_ms, serializer);
+        <u64>::sse_encode(self.black_ms, serializer);
+        <Option<crate::api::Color>>::sse_encode(self.active, serializer);
+        <bool>::sse_encode(self.paused, serializer);
+    }
+}
+
+impl SseEncode for crate::api::ClockTickEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.game_id, serializer);
+        <u64>::sse_encode(self.white_ms, serializer);
+        <u64>::sse_encode(self.black_ms, serializer);
+        <Option<crate::api::Color>>::sse_encode(self.active, serializer);
+    }
+}
+
+impl SseEncode for crate::api::Color {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::Color::W => 0,
+                crate::api::Color::B => 1,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for f32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_f32::<NativeEndian>(self).unwrap();
+    }
+}
+
+impl SseEncode for crate::api::GameMode {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::GameMode::Hvh => 0,
+                crate::api::GameMode::Hva => 1,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::GameOverEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.game_id, serializer);
+        <crate::api::GameResult>::sse_encode(self.result, serializer);
+        <crate::api::GameStatus>::sse_encode(self.reason, serializer);
+    }
+}
+
+impl SseEncode for crate::api::GameResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::GameResult::White => 0,
+                crate::api::GameResult::Black => 1,
+                crate::api::GameResult::Draw => 2,
+                crate::api::GameResult::Ongoing => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::GameSnapshot {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.game_id, serializer);
+        <String>::sse_encode(self.fen, serializer);
+        <crate::api::Color>::sse_encode(self.turn, serializer);
+        <bool>::sse_encode(self.in_check, serializer);
+        <crate::api::GameStatus>::sse_encode(self.status, serializer);
+        <crate::api::GameResult>::sse_encode(self.result, serializer);
+        <Vec<crate::api::Move>>::sse_encode(self.history, serializer);
+        <std::collections::HashMap<String, Vec<String>>>::sse_encode(self.legal_moves, serializer);
+        <Option<crate::api::ClockState>>::sse_encode(self.clock, serializer);
+        <crate::api::GameMode>::sse_encode(self.mode, serializer);
+        <Option<u8>>::sse_encode(self.ai_difficulty, serializer);
+        <Option<crate::api::Color>>::sse_encode(self.human_color, serializer);
+        <Option<crate::api::Move>>::sse_encode(self.last_move, serializer);
+    }
+}
+
+impl SseEncode for crate::api::GameStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::GameStatus::Active => 0,
+                crate::api::GameStatus::Checkmate => 1,
+                crate::api::GameStatus::Stalemate => 2,
+                crate::api::GameStatus::DrawFiftyMove => 3,
+                crate::api::GameStatus::DrawThreefold => 4,
+                crate::api::GameStatus::DrawInsufficient => 5,
+                crate::api::GameStatus::DrawAgreement => 6,
+                crate::api::GameStatus::Resigned => 7,
+                crate::api::GameStatus::TimeForfeit => 8,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::HumanColorChoice {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::HumanColorChoice::W => 0,
+                crate::api::HumanColorChoice::B => 1,
+                crate::api::HumanColorChoice::Random => 2,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for i32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_i32::<NativeEndian>(self).unwrap();
+    }
+}
+
 impl SseEncode for Vec<String> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
             <String>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::Move> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::Move>::sse_encode(item, serializer);
         }
     }
 }
@@ -1347,23 +2517,255 @@ impl SseEncode for Vec<u8> {
     }
 }
 
-impl SseEncode for Option<GameSnapshot> {
+impl SseEncode for Vec<(String, Vec<String>)> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <bool>::sse_encode(self.is_some(), serializer);
-        if let Some(value) = self {
-            <GameSnapshot>::sse_encode(value, serializer);
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <(String, Vec<String>)>::sse_encode(item, serializer);
         }
     }
 }
 
-impl SseEncode for Option<Promotion> {
+impl SseEncode for crate::api::Move {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.from, serializer);
+        <String>::sse_encode(self.to, serializer);
+        <Option<crate::api::Promotion>>::sse_encode(self.promotion, serializer);
+        <String>::sse_encode(self.san, serializer);
+        <String>::sse_encode(self.uci, serializer);
+        <Option<crate::api::Piece>>::sse_encode(self.captured, serializer);
+        <bool>::sse_encode(self.is_check, serializer);
+        <bool>::sse_encode(self.is_mate, serializer);
+        <bool>::sse_encode(self.is_castle, serializer);
+        <bool>::sse_encode(self.is_en_passant, serializer);
+    }
+}
+
+impl SseEncode for crate::api::MoveMadeEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.game_id, serializer);
+        <crate::api::Move>::sse_encode(self.mv, serializer);
+        <crate::api::GameSnapshot>::sse_encode(self.snapshot, serializer);
+    }
+}
+
+impl SseEncode for crate::api::MoveResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::Move>::sse_encode(self.mv, serializer);
+        <crate::api::GameSnapshot>::sse_encode(self.snapshot, serializer);
+    }
+}
+
+impl SseEncode for crate::api::NewGameOpts {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::GameMode>::sse_encode(self.mode, serializer);
+        <Option<u8>>::sse_encode(self.ai_difficulty, serializer);
+        <Option<crate::api::HumanColorChoice>>::sse_encode(self.human_color, serializer);
+        <Option<crate::api::TimeControl>>::sse_encode(self.time_control, serializer);
+    }
+}
+
+impl SseEncode for Option<crate::api::ClockState> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
-            <Promotion>::sse_encode(value, serializer);
+            <crate::api::ClockState>::sse_encode(value, serializer);
         }
+    }
+}
+
+impl SseEncode for Option<crate::api::Color> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::Color>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::GameSnapshot> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::GameSnapshot>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::HumanColorChoice> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::HumanColorChoice>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::Move> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::Move>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::Piece> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::Piece>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::Promotion> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::Promotion>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<crate::api::TimeControl> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::TimeControl>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<u8> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <u8>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for crate::api::Piece {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::Color>::sse_encode(self.color, serializer);
+        <crate::api::PieceKind>::sse_encode(self.kind, serializer);
+    }
+}
+
+impl SseEncode for crate::api::PieceKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::PieceKind::P => 0,
+                crate::api::PieceKind::N => 1,
+                crate::api::PieceKind::B => 2,
+                crate::api::PieceKind::R => 3,
+                crate::api::PieceKind::Q => 4,
+                crate::api::PieceKind::K => 5,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::PieceSet {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::PieceSet::Classic => 0,
+                crate::api::PieceSet::Modern => 1,
+                crate::api::PieceSet::Merida => 2,
+                crate::api::PieceSet::Minimal => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::Promotion {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::Promotion::N => 0,
+                crate::api::Promotion::B => 1,
+                crate::api::Promotion::R => 2,
+                crate::api::Promotion::Q => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for (String, Vec<String>) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.0, serializer);
+        <Vec<String>>::sse_encode(self.1, serializer);
+    }
+}
+
+impl SseEncode for crate::api::Settings {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::AppTheme>::sse_encode(self.app_theme, serializer);
+        <crate::api::BoardTheme>::sse_encode(self.board_theme, serializer);
+        <crate::api::PieceSet>::sse_encode(self.piece_set, serializer);
+        <crate::api::Accent>::sse_encode(self.accent, serializer);
+        <bool>::sse_encode(self.sound_enabled, serializer);
+        <f32>::sse_encode(self.sound_volume, serializer);
+        <bool>::sse_encode(self.show_legal_moves, serializer);
+        <bool>::sse_encode(self.show_coordinates, serializer);
+        <bool>::sse_encode(self.show_last_move, serializer);
+    }
+}
+
+impl SseEncode for crate::api::TimeControl {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <u64>::sse_encode(self.initial_ms, serializer);
+        <u64>::sse_encode(self.increment_ms, serializer);
+    }
+}
+
+impl SseEncode for u32 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u32::<NativeEndian>(self).unwrap();
+    }
+}
+
+impl SseEncode for u64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u64::<NativeEndian>(self).unwrap();
     }
 }
 
@@ -1379,30 +2781,6 @@ impl SseEncode for () {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {}
 }
 
-impl SseEncode for usize {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        serializer
-            .cursor
-            .write_u64::<NativeEndian>(self as _)
-            .unwrap();
-    }
-}
-
-impl SseEncode for i32 {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        serializer.cursor.write_i32::<NativeEndian>(self).unwrap();
-    }
-}
-
-impl SseEncode for bool {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        serializer.cursor.write_u8(self as _).unwrap();
-    }
-}
-
 #[cfg(not(target_family = "wasm"))]
 mod io {
     // This file is automatically generated, so please do not edit it.
@@ -1411,7 +2789,6 @@ mod io {
     // Section: imports
 
     use super::*;
-    use crate::api::*;
     use flutter_rust_bridge::for_generated::byteorder::{
         NativeEndian, ReadBytesExt, WriteBytesExt,
     };
@@ -1421,118 +2798,6 @@ mod io {
     // Section: boilerplate
 
     flutter_rust_bridge::frb_generated_boilerplate_io!();
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerApiError(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ApiError>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerApiError(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ApiError>>::decrement_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBackendEvent(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<BackendEvent>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBackendEvent(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<BackendEvent>>::decrement_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGameSnapshot(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GameSnapshot>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGameSnapshot(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GameSnapshot>>::decrement_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMoveResult(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MoveResult>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMoveResult(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MoveResult>>::decrement_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerNewGameOpts(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<NewGameOpts>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerNewGameOpts(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<NewGameOpts>>::decrement_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPromotion(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Promotion>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPromotion(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Promotion>>::decrement_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSettings(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Settings>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSettings(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Settings>>::decrement_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTimeControl(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TimeControl>>::increment_strong_count(ptr as _);
-    }
-
-    #[unsafe(no_mangle)]
-    pub extern "C" fn frbgen_chess_rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTimeControl(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TimeControl>>::decrement_strong_count(ptr as _);
-    }
 }
 #[cfg(not(target_family = "wasm"))]
 pub use io::*;
@@ -1546,7 +2811,6 @@ mod web {
     // Section: imports
 
     use super::*;
-    use crate::api::*;
     use flutter_rust_bridge::for_generated::byteorder::{
         NativeEndian, ReadBytesExt, WriteBytesExt,
     };
@@ -1558,118 +2822,6 @@ mod web {
     // Section: boilerplate
 
     flutter_rust_bridge::frb_generated_boilerplate_web!();
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerApiError(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ApiError>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerApiError(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ApiError>>::decrement_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBackendEvent(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<BackendEvent>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerBackendEvent(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<BackendEvent>>::decrement_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGameSnapshot(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GameSnapshot>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGameSnapshot(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GameSnapshot>>::decrement_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMoveResult(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MoveResult>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerMoveResult(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<MoveResult>>::decrement_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerNewGameOpts(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<NewGameOpts>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerNewGameOpts(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<NewGameOpts>>::decrement_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPromotion(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Promotion>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPromotion(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Promotion>>::decrement_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSettings(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Settings>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerSettings(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Settings>>::decrement_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTimeControl(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TimeControl>>::increment_strong_count(ptr as _);
-    }
-
-    #[wasm_bindgen]
-    pub fn rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTimeControl(
-        ptr: *const std::ffi::c_void,
-    ) {
-        MoiArc::<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<TimeControl>>::decrement_strong_count(ptr as _);
-    }
 }
 #[cfg(target_family = "wasm")]
 pub use web::*;
