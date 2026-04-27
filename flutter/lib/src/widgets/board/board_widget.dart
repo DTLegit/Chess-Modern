@@ -251,12 +251,16 @@ class _Hint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final xy = squareXY(sq, orientation);
-    return IgnorePointer(
-      child: Positioned(
-        left: xy.col * cell,
-        top: xy.row * cell,
-        width: cell,
-        height: cell,
+    // `Positioned` must be a direct child of a `Stack`. We previously
+    // wrapped it in `IgnorePointer`, which broke the parent-data
+    // contract (`type 'ParentData' is not a subtype of type
+    // 'StackParentData'`). Move IgnorePointer inside.
+    return Positioned(
+      left: xy.col * cell,
+      top: xy.row * cell,
+      width: cell,
+      height: cell,
+      child: IgnorePointer(
         child: Center(
           child: isCapture
               ? Container(
