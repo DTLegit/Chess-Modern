@@ -147,12 +147,9 @@ class _HomeScreenState extends State<HomeScreen> {
             const _ScrubIntent(-1),
         const SingleActivator(LogicalKeyboardKey.arrowRight):
             const _ScrubIntent(1),
-        const SingleActivator(LogicalKeyboardKey.home):
-            const _ScrubToIntent(0),
-        const SingleActivator(LogicalKeyboardKey.end):
-            const _ScrubLiveIntent(),
-        const SingleActivator(LogicalKeyboardKey.escape):
-            const _EscapeIntent(),
+        const SingleActivator(LogicalKeyboardKey.home): const _ScrubToIntent(0),
+        const SingleActivator(LogicalKeyboardKey.end): const _ScrubLiveIntent(),
+        const SingleActivator(LogicalKeyboardKey.escape): const _EscapeIntent(),
       },
       child: Actions(
         actions: <Type, Action<Intent>>{
@@ -160,8 +157,8 @@ class _HomeScreenState extends State<HomeScreen> {
               onInvoke: (_) => _openNewGameDialog()),
           _UndoIntent:
               CallbackAction<_UndoIntent>(onInvoke: (_) => widget.game.undo()),
-          _FlipIntent: CallbackAction<_FlipIntent>(
-              onInvoke: (_) => widget.game.flip()),
+          _FlipIntent:
+              CallbackAction<_FlipIntent>(onInvoke: (_) => widget.game.flip()),
           _ScrubIntent: CallbackAction<_ScrubIntent>(
               onInvoke: (intent) => widget.game.scrubStep(intent.delta)),
           _ScrubToIntent: CallbackAction<_ScrubToIntent>(
@@ -229,7 +226,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       : 'Black to move'));
           return Row(
             children: [
-              const Text('Chess', style: TextStyle(fontWeight: FontWeight.w700)),
+              const Text('Chess',
+                  style: TextStyle(fontWeight: FontWeight.w700)),
               const SizedBox(width: 12),
               Text(
                 label,
@@ -326,8 +324,8 @@ class _MobileLayout extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.all(12),
-          child: _PlayerStrip(
-              game: game, side: rust.Color.b, label: 'Opponent'),
+          child:
+              _PlayerStrip(game: game, side: rust.Color.b, label: 'Opponent'),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -335,8 +333,7 @@ class _MobileLayout extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(12),
-          child: _PlayerStrip(
-              game: game, side: rust.Color.w, label: 'You'),
+          child: _PlayerStrip(game: game, side: rust.Color.w, label: 'You'),
         ),
         const Divider(height: 1),
         Expanded(
@@ -411,8 +408,7 @@ class _PlayerStrip extends StatelessWidget {
         final live = game.live;
         final mode = live?.mode ?? rust.GameMode.hvh;
         final hc = live?.humanColor;
-        final ai =
-            mode == rust.GameMode.hva && hc != null && hc != side;
+        final ai = mode == rust.GameMode.hva && hc != null && hc != side;
         final aiBadge = ai && live?.aiDifficulty != null
             ? ' · AI ${live!.aiDifficulty}'
             : '';
@@ -438,20 +434,29 @@ class _PlayerStrip extends StatelessWidget {
                   border: Border.all(color: const Color(0x33000000)),
                 ),
               ),
-              Text(
-                ai ? 'Computer$aiBadge' : label,
-                style: Theme.of(context).textTheme.bodyMedium,
+              Flexible(
+                child: Text(
+                  ai ? 'Computer$aiBadge' : label,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
               ),
               if (thinking)
                 Padding(
                   padding: const EdgeInsets.only(left: 8),
                   child: Text(
                     'thinking…',
+                    overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ),
-              const Spacer(),
-              CapturesRow(game: game, side: side),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: CapturesRow(game: game, side: side),
+                ),
+              ),
               const SizedBox(width: 8),
               ClockPanel(game: game, side: side),
             ],
