@@ -20,8 +20,9 @@ parking_lot = { workspace = true }
 tokio = { workspace = true }
 async-trait = { workspace = true }
 log = { workspace = true }
-flutter_rust_bridge = "=2.7.1"
+flutter_rust_bridge = "=2.12.0"
 anyhow = "1"
+once_cell = "1"
 
 [target.'cfg(any(target_os = "linux", target_os = "macos", target_os = "windows", target_os = "android"))'.dependencies]
 # Process spawning lives behind tokio's process feature on host platforms.

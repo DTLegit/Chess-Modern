@@ -1,0 +1,5 @@
+rust_input: crate::api
+rust_root: crates/chess_bridge
+dart_output: flutter/lib/src/rust
+rust_output: crates/chess_bridge/src/frb_generated.rs
+local: true
