@@ -1,0 +1,7 @@
+{
+  "$schema": "https://www.cursor.com/schemas/environment.schema.json",
+  "name": "chess-test",
+  "install": "bash .cursor/install.sh",
+  "start": "source $HOME/.bashrc 2>/dev/null || true; export FLUTTER_HOME=$HOME/flutter; export ANDROID_SDK_ROOT=$HOME/android-sdk; export ANDROID_HOME=$ANDROID_SDK_ROOT; export ANDROID_NDK_ROOT=$ANDROID_SDK_ROOT/ndk/26.1.10909125; export PATH=$HOME/.cargo/bin:$FLUTTER_HOME/bin:$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH",
+  "agentCanUpdateSnapshot": true
+}
