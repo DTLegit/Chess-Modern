@@ -1,22 +1,32 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 import '../audio/synth.dart';
 import '../rust/api.dart' as rust;
 import '../state/game_controller.dart';
 import '../state/settings_controller.dart';
+import '../theme/app_theme.dart';
+import '../theme/tokens.dart';
+import '../theme/typography.dart';
 import '../widgets/board/board_widget.dart';
 import '../widgets/modals/about_dialog.dart';
 import '../widgets/modals/game_over_dialog.dart';
 import '../widgets/modals/new_game_dialog.dart';
-import '../widgets/modals/promotion_dialog.dart';
 import '../widgets/modals/settings_dialog.dart';
 import '../widgets/modals/welcome_dialog.dart';
 import '../widgets/panels/captures.dart';
 import '../widgets/panels/clock_panel.dart';
 import '../widgets/panels/move_history.dart';
+import '../widgets/primitives/app_button.dart';
+import '../widgets/primitives/app_dialog.dart';
+import '../widgets/primitives/app_divider.dart';
+import '../widgets/primitives/app_icon_button.dart';
+import '../widgets/primitives/app_icons.dart';
+import '../widgets/primitives/app_panel.dart';
+import '../widgets/primitives/app_scaffold.dart';
+import '../widgets/primitives/app_segmented.dart';
 
 const double _mobileBreakpoint = 720;
 
@@ -38,7 +48,6 @@ class _HomeScreenState extends State<HomeScreen> {
   late final SoundSynth _synth;
   StreamSubscription? _soundSub;
   String? _gameOverDismissedFor;
-  String? _promotionShownFor;
   bool _welcomeShown = false;
 
   @override
@@ -50,8 +59,8 @@ class _HomeScreenState extends State<HomeScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!_welcomeShown && widget.game.live == null) {
         _welcomeShown = true;
-        await showDialog(
-          context: context,
+        await showAppDialog(
+          context,
           builder: (_) => WelcomeDialog(
             onNewGame: () => _openNewGameDialog(),
             onSettings: () => _openSettings(),
@@ -72,39 +81,20 @@ class _HomeScreenState extends State<HomeScreen> {
     final live = widget.game.live;
     if (live == null) return;
 
-    // Game-over modal auto-pop.
     if (live.status != rust.GameStatus.active &&
         live.result != rust.GameResult.ongoing &&
         live.gameId != _gameOverDismissedFor) {
       _gameOverDismissedFor = live.gameId;
       _showGameOver(live);
     }
-
-    // Promotion modal.
-    final pending = widget.game.pendingPromotion;
-    if (pending != null && _promotionShownFor != _pendingKey(pending)) {
-      _promotionShownFor = _pendingKey(pending);
-      _showPromotionPicker(pending);
-    }
-  }
-
-  String _pendingKey(PendingPromotion p) => '${p.from}->${p.to}@${p.color}';
-
-  Future<void> _showPromotionPicker(PendingPromotion p) async {
-    final choice = await showPromotionPicker(context, color: p.color);
-    if (choice == null) {
-      widget.game.cancelPromotion();
-    } else {
-      await widget.game.commitPromotion(choice);
-    }
-    _promotionShownFor = null;
   }
 
   Future<void> _showGameOver(rust.GameSnapshot snap) async {
-    await showDialog(
-      context: context,
+    await showAppDialog(
+      context,
       builder: (_) => GameOverDialog(
         snapshot: snap,
+        game: widget.game,
         onNewGame: () => _openNewGameDialog(),
         onRematch: (opts) => widget.game.newGame(opts),
       ),
@@ -112,8 +102,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openNewGameDialog() async {
-    final opts = await showDialog<rust.NewGameOpts?>(
-      context: context,
+    final opts = await showAppDialog<rust.NewGameOpts?>(
+      context,
       builder: (_) => const NewGameDialog(),
     );
     if (opts != null) {
@@ -123,15 +113,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openSettings() async {
-    await showDialog(
-      context: context,
+    await showAppDialog(
+      context,
       builder: (_) => SettingsDialog(controller: widget.settings),
     );
   }
 
   Future<void> _openAbout() async {
-    await showDialog(
-      context: context,
+    await showAppDialog(
+      context,
       builder: (_) => const ChessAboutDialog(),
     );
   }
@@ -147,8 +137,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const _ScrubIntent(-1),
         const SingleActivator(LogicalKeyboardKey.arrowRight):
             const _ScrubIntent(1),
-        const SingleActivator(LogicalKeyboardKey.home):
-            const _ScrubToIntent(0),
+        const SingleActivator(LogicalKeyboardKey.home): const _ScrubToIntent(0),
         const SingleActivator(LogicalKeyboardKey.end):
             const _ScrubLiveIntent(),
         const SingleActivator(LogicalKeyboardKey.escape):
@@ -176,103 +165,177 @@ class _HomeScreenState extends State<HomeScreen> {
         },
         child: Focus(
           autofocus: true,
-          child: Scaffold(
-            appBar: _buildAppBar(context),
-            body: SafeArea(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final isMobile = constraints.maxWidth < _mobileBreakpoint;
-                  return isMobile
-                      ? _MobileLayout(
-                          game: widget.game,
-                          settings: widget.settings,
-                          onOpenSettings: _openSettings,
-                          onOpenNewGame: _openNewGameDialog,
-                        )
-                      : _DesktopLayout(
-                          game: widget.game,
-                          settings: widget.settings,
-                        );
-                },
-              ),
-            ),
-            floatingActionButton: LayoutBuilder(
-              builder: (context, constraints) {
-                final isMobile = constraints.maxWidth < _mobileBreakpoint;
-                return isMobile
-                    ? FloatingActionButton.extended(
-                        onPressed: _openNewGameDialog,
-                        icon: const Icon(Icons.add),
-                        label: const Text('New game'),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final isMobile = constraints.maxWidth < _mobileBreakpoint;
+              return AppScaffold(
+                topBar: _TopBar(
+                  game: widget.game,
+                  onNewGame: _openNewGameDialog,
+                  onSettings: _openSettings,
+                  onAbout: _openAbout,
+                  isMobile: isMobile,
+                ),
+                statusBar: _StatusBar(game: widget.game),
+                body: isMobile
+                    ? _MobileLayout(
+                        game: widget.game,
+                        settings: widget.settings,
+                        onOpenSettings: _openSettings,
+                        onOpenNewGame: _openNewGameDialog,
                       )
-                    : const SizedBox.shrink();
-              },
-            ),
+                    : _DesktopLayout(
+                        game: widget.game,
+                        settings: widget.settings,
+                      ),
+                floatingActionButton: isMobile
+                    ? AppButton(
+                        label: 'New game',
+                        onPressed: _openNewGameDialog,
+                        leading: const IconPlus(),
+                      )
+                    : null,
+              );
+            },
           ),
         ),
       ),
     );
   }
+}
 
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
-    return AppBar(
-      title: ListenableBuilder(
-        listenable: widget.game,
-        builder: (_, __) {
-          final l = widget.game.live;
-          final label = l == null
-              ? 'Choose how to play'
-              : (l.status != rust.GameStatus.active
-                  ? 'Game over'
-                  : (l.turn == rust.Color.w
-                      ? 'White to move'
-                      : 'Black to move'));
-          return Row(
-            children: [
-              const Text('Chess', style: TextStyle(fontWeight: FontWeight.w700)),
-              const SizedBox(width: 12),
-              Text(
-                label,
-                style: Theme.of(context).textTheme.bodyMedium,
+class _TopBar extends StatelessWidget {
+  const _TopBar({
+    required this.game,
+    required this.onNewGame,
+    required this.onSettings,
+    required this.onAbout,
+    required this.isMobile,
+  });
+
+  final GameController game;
+  final VoidCallback onNewGame;
+  final VoidCallback onSettings;
+  final VoidCallback onAbout;
+  final bool isMobile;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = AppTheme.of(context);
+    final accent = theme.accent;
+    return ListenableBuilder(
+      listenable: game,
+      builder: (_, __) {
+        final l = game.live;
+        final label = l == null
+            ? 'Choose how to play'
+            : (l.status != rust.GameStatus.active
+                ? 'Game over'
+                : (l.turn == rust.Color.w ? 'White to move' : 'Black to move'));
+        final canUndo = (l?.history.length ?? 0) > 0;
+        return Row(
+          children: [
+            // Brand mark (♛) + wordmark.
+            Text(
+              '♛',
+              style: AppTextStyles.serifTitle.copyWith(
+                color: accent.mid,
+                fontSize: 22,
+                height: 1.0,
               ),
-            ],
-          );
-        },
-      ),
-      actions: [
-        TextButton.icon(
-          onPressed: _openNewGameDialog,
-          icon: const Icon(Icons.add),
-          label: const Text('New game'),
-        ),
-        ListenableBuilder(
-          listenable: widget.game,
-          builder: (_, __) {
-            final canUndo = (widget.game.live?.history.length ?? 0) > 0;
-            return IconButton(
-              tooltip: 'Undo (U)',
-              onPressed: canUndo ? widget.game.undo : null,
-              icon: const Icon(Icons.undo),
-            );
-          },
-        ),
-        IconButton(
-          tooltip: 'Flip board (F)',
-          onPressed: widget.game.flip,
-          icon: const Icon(Icons.swap_vert),
-        ),
-        IconButton(
-          tooltip: 'Settings',
-          onPressed: _openSettings,
-          icon: const Icon(Icons.settings),
-        ),
-        IconButton(
-          tooltip: 'About',
-          onPressed: _openAbout,
-          icon: const Icon(Icons.info_outline),
-        ),
-        const SizedBox(width: 4),
-      ],
+            ),
+            const SizedBox(width: AppSpacing.sm),
+            Text(
+              'Chess',
+              style: AppTextStyles.serifTitle.copyWith(
+                fontSize: 18,
+                color: theme.palette.ink,
+              ),
+            ),
+            const SizedBox(width: AppSpacing.lg),
+            Container(
+              width: 1,
+              height: 18,
+              color: theme.palette.hairline,
+            ),
+            const SizedBox(width: AppSpacing.lg),
+            Text(label, style: AppTextStyles.bodyMuted.copyWith(
+                  color: theme.palette.inkSoft,
+                )),
+            const Spacer(),
+            if (!isMobile) ...[
+              AppButton(
+                label: 'New game',
+                size: AppButtonSize.small,
+                leading: const IconPlus(),
+                onPressed: onNewGame,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              AppIconButton(
+                tooltip: 'Undo (U)',
+                icon: const IconUndo(),
+                onPressed: canUndo ? game.undo : null,
+              ),
+              const SizedBox(width: 4),
+              AppIconButton(
+                tooltip: 'Flip board (F)',
+                icon: const IconFlip(),
+                onPressed: game.flip,
+              ),
+              const SizedBox(width: 4),
+              AppIconButton(
+                tooltip: 'Settings',
+                icon: const IconSettings(),
+                onPressed: onSettings,
+              ),
+              const SizedBox(width: 4),
+              AppIconButton(
+                tooltip: 'About',
+                icon: const IconInfo(),
+                onPressed: onAbout,
+              ),
+            ] else
+              AppIconButton(
+                tooltip: 'Settings',
+                icon: const IconSettings(),
+                onPressed: onSettings,
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _StatusBar extends StatelessWidget {
+  const _StatusBar({required this.game});
+  final GameController game;
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppTheme.of(context).palette;
+    return ListenableBuilder(
+      listenable: game,
+      builder: (_, __) {
+        final live = game.live;
+        final mode = live == null
+            ? 'Welcome'
+            : (live.mode == rust.GameMode.hva
+                ? 'Human vs AI · level ${live.aiDifficulty ?? "?"}'
+                : 'Human vs Human');
+        return Row(
+          children: [
+            Text(
+              mode,
+              style: AppTextStyles.caption.copyWith(color: palette.inkMute),
+            ),
+            const Spacer(),
+            Text(
+              'N new · U undo · F flip · ← → scrub · Esc cancel',
+              style: AppTextStyles.caption.copyWith(color: palette.inkFaint),
+            ),
+          ],
+        );
+      },
     );
   }
 }
@@ -286,7 +349,7 @@ class _DesktopLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(AppSpacing.bigGap),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -295,7 +358,7 @@ class _DesktopLayout extends StatelessWidget {
             constraints: const BoxConstraints(maxWidth: 720),
             child: _BoardColumn(game: game, settings: settings),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: AppSpacing.bigGap),
           SizedBox(
             width: 320,
             child: MoveHistoryPanel(game: game),
@@ -307,7 +370,7 @@ class _DesktopLayout extends StatelessWidget {
   }
 }
 
-class _MobileLayout extends StatelessWidget {
+class _MobileLayout extends StatefulWidget {
   const _MobileLayout({
     required this.game,
     required this.settings,
@@ -321,49 +384,54 @@ class _MobileLayout extends StatelessWidget {
   final VoidCallback onOpenNewGame;
 
   @override
+  State<_MobileLayout> createState() => _MobileLayoutState();
+}
+
+class _MobileLayoutState extends State<_MobileLayout> {
+  int _tabIndex = 0;
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: _PlayerStrip(
-              game: game, side: rust.Color.b, label: 'Opponent'),
+              game: widget.game, side: rust.Color.b, label: 'Opponent'),
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: BoardWidget(game: game, settings: settings),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          child: BoardWidget(game: widget.game, settings: widget.settings),
         ),
         Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: _PlayerStrip(
-              game: game, side: rust.Color.w, label: 'You'),
+              game: widget.game, side: rust.Color.w, label: 'You'),
         ),
-        const Divider(height: 1),
+        const AppDivider(),
+        Padding(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: AppSegmented<int>(
+            equalWidth: true,
+            value: _tabIndex,
+            onChanged: (v) => setState(() => _tabIndex = v),
+            options: const [
+              AppSegmentOption(value: 0, label: 'Moves'),
+              AppSegmentOption(value: 1, label: 'Actions'),
+            ],
+          ),
+        ),
         Expanded(
-          child: DefaultTabController(
-            length: 2,
-            child: Column(
-              children: [
-                const TabBar(
-                  tabs: [
-                    Tab(text: 'Moves'),
-                    Tab(text: 'Actions'),
-                  ],
-                ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      MoveHistoryPanel(game: game),
-                      _ActionsPanel(
-                        game: game,
-                        onSettings: onOpenSettings,
-                        onNewGame: onOpenNewGame,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          child: IndexedStack(
+            index: _tabIndex,
+            children: [
+              MoveHistoryPanel(game: widget.game),
+              _ActionsPanel(
+                game: widget.game,
+                onSettings: widget.onOpenSettings,
+                onNewGame: widget.onOpenNewGame,
+              ),
+            ],
           ),
         ),
       ],
@@ -383,9 +451,9 @@ class _BoardColumn extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         _PlayerStrip(game: game, side: rust.Color.b, label: 'Opponent'),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         BoardWidget(game: game, settings: settings),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         _PlayerStrip(game: game, side: rust.Color.w, label: 'You'),
       ],
     );
@@ -405,25 +473,22 @@ class _PlayerStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = AppTheme.of(context);
+    final palette = theme.palette;
     return ListenableBuilder(
       listenable: game,
       builder: (_, __) {
         final live = game.live;
         final mode = live?.mode ?? rust.GameMode.hvh;
         final hc = live?.humanColor;
-        final ai =
-            mode == rust.GameMode.hva && hc != null && hc != side;
+        final ai = mode == rust.GameMode.hva && hc != null && hc != side;
         final aiBadge = ai && live?.aiDifficulty != null
             ? ' · AI ${live!.aiDifficulty}'
             : '';
         final thinking = game.thinking && live?.turn == side;
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            border: Border.all(color: Theme.of(context).dividerColor),
-            borderRadius: BorderRadius.circular(8),
-          ),
+        return AppPanel(
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
           child: Row(
             children: [
               Container(
@@ -435,24 +500,25 @@ class _PlayerStrip extends StatelessWidget {
                       ? const Color(0xFFF7EEDB)
                       : const Color(0xFF1F1813),
                   shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0x33000000)),
+                  border: Border.all(color: const Color(0x33000000), width: 1),
                 ),
               ),
               Text(
                 ai ? 'Computer$aiBadge' : label,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: AppTextStyles.body.copyWith(color: palette.ink),
               ),
               if (thinking)
                 Padding(
-                  padding: const EdgeInsets.only(left: 8),
+                  padding: const EdgeInsets.only(left: AppSpacing.sm),
                   child: Text(
                     'thinking…',
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: AppTextStyles.caption.copyWith(
+                        color: palette.inkMute, fontStyle: FontStyle.italic),
                   ),
                 ),
               const Spacer(),
               CapturesRow(game: game, side: side),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.lg),
               ClockPanel(game: game, side: side),
             ],
           ),
@@ -476,83 +542,74 @@ class _ActionsPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: ListenableBuilder(
         listenable: game,
         builder: (_, __) {
           final live = game.live;
           final canUndo = (live?.history.length ?? 0) > 0;
           return Wrap(
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
-              FilledButton.icon(
+              AppButton(
+                label: 'New game',
                 onPressed: onNewGame,
-                icon: const Icon(Icons.add),
-                label: const Text('New game'),
+                leading: const IconPlus(),
               ),
-              OutlinedButton.icon(
+              AppButton(
+                label: 'Undo',
+                variant: AppButtonVariant.ghost,
                 onPressed: canUndo ? game.undo : null,
-                icon: const Icon(Icons.undo),
-                label: const Text('Undo'),
+                leading: const IconUndo(),
               ),
-              OutlinedButton.icon(
-                onPressed: () => game.flip(),
-                icon: const Icon(Icons.swap_vert),
-                label: const Text('Flip board'),
+              AppButton(
+                label: 'Flip',
+                variant: AppButtonVariant.ghost,
+                onPressed: game.flip,
+                leading: const IconFlip(),
               ),
-              OutlinedButton.icon(
+              AppButton(
+                label: 'Resign',
+                variant: AppButtonVariant.ghost,
                 onPressed: live == null ? null : () => game.resign(),
-                icon: const Icon(Icons.flag_outlined),
-                label: const Text('Resign'),
+                leading: const IconFlag(),
               ),
-              OutlinedButton.icon(
+              AppButton(
+                label: 'Prev',
+                variant: AppButtonVariant.ghost,
                 onPressed: () => game.scrubStep(-1),
-                icon: const Icon(Icons.chevron_left),
-                label: const Text('Prev'),
+                leading: const IconChevronLeft(),
               ),
-              OutlinedButton.icon(
+              AppButton(
+                label: 'Next',
+                variant: AppButtonVariant.ghost,
                 onPressed: () => game.scrubStep(1),
-                icon: const Icon(Icons.chevron_right),
-                label: const Text('Next'),
+                leading: const IconChevronRight(),
               ),
-              OutlinedButton.icon(
+              AppButton(
+                label: 'Live',
+                variant: AppButtonVariant.ghost,
                 onPressed: () => game.scrubLive(),
-                icon: const Icon(Icons.fast_forward),
-                label: const Text('Live'),
+                leading: const IconLive(),
               ),
-              OutlinedButton.icon(
+              AppButton(
+                label: 'Settings',
+                variant: AppButtonVariant.ghost,
                 onPressed: onSettings,
-                icon: const Icon(Icons.settings),
-                label: const Text('Settings'),
+                leading: const IconSettings(),
               ),
-              OutlinedButton.icon(
+              AppButton(
+                label: 'Export PGN',
+                variant: AppButtonVariant.ghost,
                 onPressed: live == null
                     ? null
                     : () async {
                         final pgn = await game.exportPgn();
                         if (!context.mounted) return;
-                        await showDialog(
-                          context: context,
-                          builder: (_) => AlertDialog(
-                            title: const Text('Export PGN'),
-                            content: SingleChildScrollView(
-                              child: SelectableText(
-                                pgn,
-                                style: const TextStyle(fontFamily: 'monospace'),
-                              ),
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () => Navigator.of(context).pop(),
-                                child: const Text('Close'),
-                              ),
-                            ],
-                          ),
-                        );
+                        await _showPgnDialog(context, pgn);
                       },
-                icon: const Icon(Icons.file_upload),
-                label: const Text('Export PGN'),
+                leading: const IconUpload(),
               ),
             ],
           );
@@ -560,6 +617,49 @@ class _ActionsPanel extends StatelessWidget {
       ),
     );
   }
+}
+
+Future<void> _showPgnDialog(BuildContext context, String pgn) async {
+  // Inline PGN preview dialog. The full file-save flow lives in
+  // GameOverDialog (Phase 5b); this is a quick text preview/export.
+  final palette = AppTheme.of(context).palette;
+  await showAppDialog(
+    context,
+    builder: (ctx) => AppDialog(
+      title: 'Export PGN',
+      width: 520,
+      body: Container(
+        height: 300,
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: palette.bgCard,
+          border: Border.all(color: palette.hairline, width: 1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: SingleChildScrollView(
+          child: Text(
+            pgn,
+            style: AppTextStyles.mono.copyWith(color: palette.ink),
+          ),
+        ),
+      ),
+      actions: [
+        AppButton(
+          label: 'Copy',
+          variant: AppButtonVariant.ghost,
+          leading: const IconCopy(),
+          onPressed: () async {
+            await Clipboard.setData(ClipboardData(text: pgn));
+          },
+        ),
+        AppButton(
+          label: 'Close',
+          variant: AppButtonVariant.ghost,
+          onPressed: () => Navigator.of(ctx).maybePop(),
+        ),
+      ],
+    ),
+  );
 }
 
 class _NewGameIntent extends Intent {
