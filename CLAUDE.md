@@ -87,7 +87,7 @@ Dart's `path_provider` resolves the data dir per-OS, hands it to Rust through `b
 - Stockfish desktop binaries and Android ABI binaries are gitignored; missing-binary path is a transparent custom-engine fallback, not an error.
 - `session::start_clock_task` no-ops outside a Tokio runtime (only matters for synchronous unit tests).
 - The `BackendEvent` broadcast sink does not GC dropped listeners — fine because Flutter subscribes once at startup.
-- Drag-to-move is intentionally not implemented; the Flutter port is tap-to-select / tap-to-target only.
+- The Flutter UI dropped Material 3 and rebuilt on `WidgetsApp` with custom primitives (`flutter/lib/src/widgets/primitives/`) and design tokens (`flutter/lib/src/theme/tokens.dart`). Read `AppTheme.of(context)` instead of `Theme.of(context)`. Adding new screens should reuse the `App*` primitives, not Material widgets.
 
 ## Legacy
 

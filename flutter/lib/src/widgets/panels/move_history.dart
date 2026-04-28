@@ -1,7 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../rust/api.dart' as rust;
 import '../../state/game_controller.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/tokens.dart';
+import '../../theme/typography.dart';
+import '../primitives/app_divider.dart';
 
 class MoveHistoryPanel extends StatelessWidget {
   const MoveHistoryPanel({super.key, required this.game});
@@ -17,7 +21,7 @@ class MoveHistoryPanel extends StatelessWidget {
         if (live == null || live.history.isEmpty) {
           return const _PanelShell(
             title: 'Moves',
-            child: Center(child: Text('No moves yet')),
+            child: _Empty(),
           );
         }
         final pairs = <_PlyPair>[];
@@ -34,49 +38,90 @@ class MoveHistoryPanel extends StatelessWidget {
         return _PanelShell(
           title: 'Moves',
           child: ListView.builder(
+            padding: EdgeInsets.zero,
             itemCount: pairs.length,
             itemBuilder: (context, index) {
               final p = pairs[index];
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 4),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 32,
-                      child: Text(
-                        '${p.number}.',
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontFeatures: const [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: _PlyButton(
-                        san: p.white.san,
-                        active: activeIndex == p.whiteIndex,
-                        onTap: () => game.scrubTo(p.whiteIndex),
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Expanded(
-                      child: p.black == null
-                          ? const SizedBox.shrink()
-                          : _PlyButton(
-                              san: p.black!.san,
-                              active: activeIndex == p.blackIndex,
-                              onTap: () => game.scrubTo(p.blackIndex),
-                            ),
-                    ),
-                  ],
-                ),
+              final stripe = index.isOdd;
+              return _MoveRow(
+                stripe: stripe,
+                number: p.number,
+                whiteSan: p.white.san,
+                blackSan: p.black?.san,
+                whiteActive: activeIndex == p.whiteIndex,
+                blackActive: activeIndex == p.blackIndex,
+                onWhiteTap: () => game.scrubTo(p.whiteIndex),
+                onBlackTap: p.black == null ? null : () => game.scrubTo(p.blackIndex),
               );
             },
           ),
         );
       },
+    );
+  }
+}
+
+class _MoveRow extends StatelessWidget {
+  const _MoveRow({
+    required this.stripe,
+    required this.number,
+    required this.whiteSan,
+    required this.blackSan,
+    required this.whiteActive,
+    required this.blackActive,
+    required this.onWhiteTap,
+    required this.onBlackTap,
+  });
+  final bool stripe;
+  final int number;
+  final String whiteSan;
+  final String? blackSan;
+  final bool whiteActive;
+  final bool blackActive;
+  final VoidCallback onWhiteTap;
+  final VoidCallback? onBlackTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = AppTheme.of(context);
+    final palette = theme.palette;
+    final accent = theme.accent;
+
+    return Container(
+      color: stripe
+          ? Color.alphaBlend(accent.soft.withValues(alpha: 0.05), palette.bgCard)
+          : null,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg, vertical: 4),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 28,
+            child: Text(
+              '$number.',
+              textAlign: TextAlign.right,
+              style: AppTextStyles.mono.copyWith(color: palette.inkMute),
+            ),
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: _PlyChip(
+              san: whiteSan,
+              active: whiteActive,
+              onTap: onWhiteTap,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.xxs),
+          Expanded(
+            child: blackSan == null
+                ? const SizedBox.shrink()
+                : _PlyChip(
+                    san: blackSan!,
+                    active: blackActive,
+                    onTap: onBlackTap!,
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -96,8 +141,8 @@ class _PlyPair {
   final int blackIndex;
 }
 
-class _PlyButton extends StatelessWidget {
-  const _PlyButton({
+class _PlyChip extends StatefulWidget {
+  const _PlyChip({
     required this.san,
     required this.active,
     required this.onTap,
@@ -107,22 +152,50 @@ class _PlyButton extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
+  State<_PlyChip> createState() => _PlyChipState();
+}
+
+class _PlyChipState extends State<_PlyChip> {
+  bool _hovered = false;
+  @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(4),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-        decoration: BoxDecoration(
-          color: active
-              ? Theme.of(context).colorScheme.primaryContainer
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          san,
-          style: const TextStyle(
-            fontFeatures: [FontFeature.tabularFigures()],
+    final theme = AppTheme.of(context);
+    final palette = theme.palette;
+    final accent = theme.accent;
+
+    final fg = widget.active
+        ? accent.ink
+        : (_hovered ? palette.ink : palette.inkSoft);
+
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedContainer(
+          duration: AppDurations.fast,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            gradient: widget.active
+                ? LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [accent.mid, accent.base],
+                  )
+                : null,
+            color: widget.active
+                ? null
+                : (_hovered
+                    ? Color.alphaBlend(
+                        accent.soft.withValues(alpha: 0.18), palette.bgCard)
+                    : null),
+            borderRadius: BorderRadius.circular(AppRadii.tiny),
+          ),
+          child: Text(
+            widget.san,
+            style: AppTextStyles.mono.copyWith(color: fg, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -134,28 +207,47 @@ class _PanelShell extends StatelessWidget {
   const _PanelShell({required this.title, required this.child});
   final String title;
   final Widget child;
-
   @override
   Widget build(BuildContext context) {
+    final palette = AppTheme.of(context).palette;
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: BorderRadius.circular(10),
+        color: palette.bgCard,
+        border: Border.all(color: palette.hairline, width: 1),
+        borderRadius: BorderRadius.circular(AppRadii.md),
+        boxShadow: palette.shadowSm,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 10, 12, 6),
+            padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md,
+                AppSpacing.lg, AppSpacing.sm),
             child: Text(
               title,
-              style: Theme.of(context).textTheme.titleSmall,
+              style: AppTextStyles.heading2.copyWith(color: palette.ink),
             ),
           ),
-          const Divider(height: 1),
+          const AppDivider(),
           Expanded(child: child),
         ],
+      ),
+    );
+  }
+}
+
+class _Empty extends StatelessWidget {
+  const _Empty();
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppTheme.of(context).palette;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Text(
+          'No moves yet',
+          style: AppTextStyles.bodyMuted.copyWith(color: palette.inkMute),
+        ),
       ),
     );
   }

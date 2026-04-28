@@ -1,7 +1,9 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../rust/api.dart' as rust;
 import '../../state/game_controller.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/typography.dart';
 import '../board/piece_widget.dart';
 
 const _values = {
@@ -46,27 +48,36 @@ class CapturesRow extends StatelessWidget {
         final myPoints = side == rust.Color.b ? whitePoints : blackPoints;
         final theirPoints = side == rust.Color.b ? blackPoints : whitePoints;
         final diff = theirPoints - myPoints;
+        final theme = AppTheme.of(context);
+
+        // Capture icons overlap by -8px per Svelte Captures.svelte.
+        final children = <Widget>[];
+        var first = true;
+        for (final entry in entries) {
+          for (var i = 0; i < entry.value; i++) {
+            children.add(Transform.translate(
+              offset: first ? Offset.zero : const Offset(-6, 0),
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: PieceWidget(
+                  piece: rust.Piece(color: side, kind: entry.key),
+                ),
+              ),
+            ));
+            first = false;
+          }
+        }
 
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            for (final entry in entries)
-              for (var i = 0; i < entry.value; i++)
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 1),
-                  child: SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: PieceWidget(
-                      piece: rust.Piece(color: side, kind: entry.key),
-                    ),
-                  ),
-                ),
+            ...children,
             if (diff > 0) ...[
-              const SizedBox(width: 4),
+              const SizedBox(width: 6),
               Text(
                 '+$diff',
-                style: Theme.of(context).textTheme.bodySmall,
+                style: AppTextStyles.caption.copyWith(color: theme.accent.mid),
               ),
             ],
           ],

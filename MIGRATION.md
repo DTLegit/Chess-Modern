@@ -13,8 +13,8 @@ Old:
 
 New:
 
-- `flutter/` (Flutter 3.27 app, Material 3, responsive layout for desktop +
-  mobile).
+- `flutter/` (Flutter 3.27 app, custom design system rooted in `WidgetsApp`,
+  responsive layout for desktop + mobile).
 - `crates/chess_core/` (platform-agnostic Rust core).
 - `crates/chess_bridge/` (flutter_rust_bridge bridge crate).
 - AI driven by a `StockfishSpawner` trait, with desktop / Android / iOS
@@ -112,6 +112,57 @@ The `flutter_rust_bridge_codegen integrate --template app` command writes
 all of the above for you, but it's destructive (it overwrites runner
 files); we ship the Linux wiring by hand for now and document the
 others as one-liners.
+
+## Visual parity pass
+
+The first Flutter migration shipped on Material 3 with default chrome
+(ripples, M3 surface tints, blue ColorScheme). A follow-up pass dropped
+Material entirely and rebuilt the UI as a faithful clone of the legacy
+Svelte design that lives in `legacy/svelte/`.
+
+### What changed
+
+- **App shell:** `MaterialApp` → `WidgetsApp` (`flutter/lib/src/app.dart`).
+  Localization delegates kept (`DefaultMaterialLocalizations`,
+  `DefaultWidgetsLocalizations`, `DefaultCupertinoLocalizations`) but no
+  Material widgets remain in `flutter/lib/`.
+- **Design tokens:** all colors, spacing, radii, shadows, durations, and
+  easing curves extracted from `legacy/svelte/styles/app.css` into
+  `flutter/lib/src/theme/tokens.dart` (palettes for light/dark/blue, five
+  accent presets, nine board palettes, motion tokens). Typography in
+  `flutter/lib/src/theme/typography.dart`. The data is exposed via an
+  `AppTheme` `InheritedWidget` (`flutter/lib/src/theme/app_theme.dart`);
+  read it with `AppTheme.of(context)` in place of `Theme.of(context)`.
+- **Bundled fonts:** Inter (sans), EB Garamond (serif, regular + italic),
+  JetBrains Mono (mono) — all variable .ttf files in
+  `flutter/assets/fonts/`. Declared in `pubspec.yaml`.
+- **Primitive widget library:** `flutter/lib/src/widgets/primitives/`
+  contains `AppButton`, `AppIconButton`, `AppDialog` (+ `showAppDialog`),
+  `AppPanel`, `AppListRow`, `AppLabel`, `AppDivider`, `AppSwitch`,
+  `AppCheckbox`, `AppRadio`, `AppSlider`, `AppSegmented`, `AppTextField`,
+  `AppScaffold`, plus a CustomPainter icon set in `app_icons.dart`. None of
+  these import `flutter/material.dart`.
+- **Restored product divergences** from the original Svelte UI:
+  - In-board promotion picker overlay
+    (`flutter/lib/src/widgets/board/promotion_overlay.dart`), positioned
+    on the destination square with directional stacking, replacing the
+    centered Material dialog.
+  - Real file-save PGN export via the `file_selector` package (desktop);
+    mobile keeps the "Copy PGN" fallback.
+  - Drag-to-move added to the board widget alongside tap-to-select
+    (`flutter/lib/src/widgets/board/board_widget.dart`), with a 0.6%
+    threshold, 1.08 piece scale + drop-shadow during drag, and snap-to-square
+    on release.
+- **Backend untouched:** the 15-command + 4-event bridge contract
+  (`crates/chess_bridge/src/api.rs`) and all Rust crates are unchanged.
+  Only the `pubspec.yaml` deps grew by one entry (`file_selector ^1.0.3`).
+
+### Verification
+
+- `flutter analyze` should be clean.
+- `flutter test` covers the new primitives via
+  `flutter/test/widgets/primitives/primitives_test.dart`.
+- `cargo test --workspace --all-targets` is unchanged from before this pass.
 
 ## Reviving the legacy Tauri shell
 

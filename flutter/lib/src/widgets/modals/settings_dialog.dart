@@ -1,8 +1,19 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import '../../rust/api.dart' as rust;
 import '../../state/settings_controller.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/tokens.dart';
+import '../../theme/typography.dart';
+import '../primitives/app_button.dart';
+import '../primitives/app_dialog.dart';
+import '../primitives/app_label.dart';
+import '../primitives/app_list_row.dart';
+import '../primitives/app_segmented.dart';
+import '../primitives/app_slider.dart';
+import '../primitives/app_switch.dart';
 
+/// Settings modal — mirrors `legacy/svelte/lib/modals/Settings.svelte`.
 class SettingsDialog extends StatelessWidget {
   const SettingsDialog({super.key, required this.controller});
 
@@ -14,139 +25,320 @@ class SettingsDialog extends StatelessWidget {
       listenable: controller,
       builder: (context, _) {
         final s = controller.value;
-        return AlertDialog(
-          title: const Text('Settings'),
-          content: SizedBox(
-            width: 460,
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _section(context, 'Appearance'),
-                  _appThemeRow(context, s),
-                  const SizedBox(height: 12),
-                  _accentRow(context, s),
-                  const SizedBox(height: 12),
-                  _boardThemeRow(context, s),
-                  const SizedBox(height: 16),
-                  _section(context, 'Board'),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Show legal moves'),
-                    value: s.showLegalMoves,
-                    onChanged: (v) => controller
-                        .update((cur) => _copy(cur, showLegalMoves: v)),
-                  ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Show coordinates'),
-                    value: s.showCoordinates,
-                    onChanged: (v) => controller
-                        .update((cur) => _copy(cur, showCoordinates: v)),
-                  ),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Highlight last move'),
-                    value: s.showLastMove,
-                    onChanged: (v) => controller
-                        .update((cur) => _copy(cur, showLastMove: v)),
-                  ),
-                  const SizedBox(height: 16),
-                  _section(context, 'Audio'),
-                  SwitchListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Sound effects'),
-                    value: s.soundEnabled,
-                    onChanged: (v) => controller
-                        .update((cur) => _copy(cur, soundEnabled: v)),
-                  ),
-                  if (s.soundEnabled) ...[
-                    Text('Volume: ${(s.soundVolume * 100).round()}%'),
-                    Slider(
-                      value: s.soundVolume,
-                      onChanged: (v) => controller
-                          .update((cur) => _copy(cur, soundVolume: v)),
-                    ),
-                  ],
-                ],
+        return AppDialog(
+          title: 'Settings',
+          width: 560,
+          body: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const AppLabel('Appearance'),
+              const SizedBox(height: AppSpacing.sm),
+              _AppThemeRow(controller: controller, value: s.appTheme),
+              const SizedBox(height: AppSpacing.lg),
+              const AppLabel('Accent color'),
+              const SizedBox(height: AppSpacing.sm),
+              _AccentRow(controller: controller, value: s.accent),
+              const SizedBox(height: AppSpacing.lg),
+              const AppLabel('Board theme'),
+              const SizedBox(height: AppSpacing.sm),
+              _BoardThemeGrid(controller: controller, value: s.boardTheme),
+              const SizedBox(height: AppSpacing.huge),
+              const AppLabel('Board hints'),
+              const SizedBox(height: AppSpacing.xxs),
+              AppListRow(
+                title: 'Show legal moves',
+                trailing: AppSwitch(
+                  value: s.showLegalMoves,
+                  onChanged: (v) =>
+                      controller.update((c) => _copy(c, showLegalMoves: v)),
+                ),
               ),
-            ),
+              AppListRow(
+                title: 'Show coordinates',
+                trailing: AppSwitch(
+                  value: s.showCoordinates,
+                  onChanged: (v) =>
+                      controller.update((c) => _copy(c, showCoordinates: v)),
+                ),
+              ),
+              AppListRow(
+                title: 'Highlight last move',
+                trailing: AppSwitch(
+                  value: s.showLastMove,
+                  onChanged: (v) =>
+                      controller.update((c) => _copy(c, showLastMove: v)),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              const AppLabel('Sound'),
+              const SizedBox(height: AppSpacing.xxs),
+              AppListRow(
+                title: 'Sound effects',
+                trailing: AppSwitch(
+                  value: s.soundEnabled,
+                  onChanged: (v) =>
+                      controller.update((c) => _copy(c, soundEnabled: v)),
+                ),
+              ),
+              if (s.soundEnabled) ...[
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.lg, vertical: 4),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 80,
+                        child: Text(
+                          'Volume',
+                          style: AppTextStyles.body
+                              .copyWith(color: AppTheme.of(context).palette.ink),
+                        ),
+                      ),
+                      Expanded(
+                        child: AppSlider(
+                          value: s.soundVolume,
+                          divisions: 20,
+                          onChanged: (v) =>
+                              controller.update((c) => _copy(c, soundVolume: v)),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      SizedBox(
+                        width: 40,
+                        child: Text(
+                          '${(s.soundVolume * 100).round()}%',
+                          textAlign: TextAlign.right,
+                          style: AppTextStyles.mono.copyWith(
+                              color: AppTheme.of(context).palette.inkMute),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           ),
           actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Close'),
+            AppButton(
+              label: 'Close',
+              variant: AppButtonVariant.ghost,
+              onPressed: () => Navigator.of(context).maybePop(),
             ),
           ],
         );
       },
     );
   }
+}
 
-  Widget _section(BuildContext context, String title) => Padding(
-        padding: const EdgeInsets.only(bottom: 8),
-        child: Text(
-          title,
-          style: Theme.of(context).textTheme.titleSmall,
-        ),
-      );
-
-  Widget _appThemeRow(BuildContext context, rust.Settings s) {
-    return Wrap(
-      spacing: 8,
-      children: [
-        for (final t in rust.AppTheme.values)
-          ChoiceChip(
-            selected: s.appTheme == t,
-            label: Text(_appThemeLabel(t)),
-            onSelected: (_) =>
-                controller.update((cur) => _copy(cur, appTheme: t)),
-          ),
+class _AppThemeRow extends StatelessWidget {
+  const _AppThemeRow({required this.controller, required this.value});
+  final SettingsController controller;
+  final rust.AppTheme value;
+  @override
+  Widget build(BuildContext context) {
+    return AppSegmented<rust.AppTheme>(
+      value: value,
+      onChanged: (v) => controller.update((c) => _copy(c, appTheme: v)),
+      options: const [
+        AppSegmentOption(value: rust.AppTheme.light, label: 'Light'),
+        AppSegmentOption(value: rust.AppTheme.dark, label: 'Dark'),
+        AppSegmentOption(value: rust.AppTheme.blue, label: 'Blue'),
       ],
     );
   }
+}
 
-  Widget _accentRow(BuildContext context, rust.Settings s) {
+class _AccentRow extends StatelessWidget {
+  const _AccentRow({required this.controller, required this.value});
+  final SettingsController controller;
+  final rust.Accent value;
+
+  @override
+  Widget build(BuildContext context) {
     return Wrap(
-      spacing: 8,
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
       children: [
         for (final a in rust.Accent.values)
-          ChoiceChip(
-            selected: s.accent == a,
-            label: Text(_accentLabel(a)),
-            onSelected: (_) =>
-                controller.update((cur) => _copy(cur, accent: a)),
-          ),
-      ],
-    );
-  }
-
-  Widget _boardThemeRow(BuildContext context, rust.Settings s) {
-    return Wrap(
-      spacing: 8,
-      runSpacing: 6,
-      children: [
-        for (final t in rust.BoardTheme.values)
-          ChoiceChip(
-            selected: s.boardTheme == t,
-            label: Text(_boardThemeLabel(t)),
-            onSelected: (_) =>
-                controller.update((cur) => _copy(cur, boardTheme: t)),
+          _AccentSwatch(
+            accent: a,
+            selected: a == value,
+            onTap: () => controller.update((c) => _copy(c, accent: a)),
           ),
       ],
     );
   }
 }
 
-String _appThemeLabel(rust.AppTheme t) {
-  switch (t) {
-    case rust.AppTheme.light:
-      return 'Light';
-    case rust.AppTheme.dark:
-      return 'Dark';
-    case rust.AppTheme.blue:
-      return 'Blue';
+class _AccentSwatch extends StatefulWidget {
+  const _AccentSwatch({
+    required this.accent,
+    required this.selected,
+    required this.onTap,
+  });
+  final rust.Accent accent;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  State<_AccentSwatch> createState() => _AccentSwatchState();
+}
+
+class _AccentSwatchState extends State<_AccentSwatch> {
+  bool _hover = false;
+  @override
+  Widget build(BuildContext context) {
+    final theme = AppTheme.of(context);
+    final palette = theme.palette;
+    final accentColors = accentFor(widget.accent);
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: AppDurations.fast,
+          padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.lg, vertical: AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: widget.selected
+                ? Color.alphaBlend(
+                    accentColors.soft.withValues(alpha: 0.18), palette.bgCard)
+                : palette.bgCard,
+            border: Border.all(
+              color: widget.selected
+                  ? accentColors.mid
+                  : (_hover ? palette.hairlineStrong : palette.hairline),
+              width: widget.selected ? 1.5 : 1,
+            ),
+            borderRadius: BorderRadius.circular(AppRadii.sm),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 16,
+                height: 16,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [accentColors.soft, accentColors.mid],
+                  ),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: palette.hairline, width: 1),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                _accentLabel(widget.accent),
+                style: AppTextStyles.button.copyWith(color: palette.ink),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BoardThemeGrid extends StatelessWidget {
+  const _BoardThemeGrid({required this.controller, required this.value});
+  final SettingsController controller;
+  final rust.BoardTheme value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        for (final t in rust.BoardTheme.values)
+          _BoardThemeCard(
+            theme: t,
+            selected: t == value,
+            onTap: () => controller.update((c) => _copy(c, boardTheme: t)),
+          ),
+      ],
+    );
+  }
+}
+
+class _BoardThemeCard extends StatefulWidget {
+  const _BoardThemeCard({
+    required this.theme,
+    required this.selected,
+    required this.onTap,
+  });
+  final rust.BoardTheme theme;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  State<_BoardThemeCard> createState() => _BoardThemeCardState();
+}
+
+class _BoardThemeCardState extends State<_BoardThemeCard> {
+  bool _hover = false;
+  @override
+  Widget build(BuildContext context) {
+    final theme = AppTheme.of(context);
+    final palette = theme.palette;
+    final accent = theme.accent;
+    final board = boardPaletteFor(widget.theme);
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: AppDurations.fast,
+          width: 130,
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          decoration: BoxDecoration(
+            color: palette.bgCard,
+            border: Border.all(
+              color: widget.selected
+                  ? accent.mid
+                  : (_hover ? palette.hairlineStrong : palette.hairline),
+              width: widget.selected ? 1.5 : 1,
+            ),
+            borderRadius: BorderRadius.circular(AppRadii.sm),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 4-square mini-board preview
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadii.tiny),
+                child: AspectRatio(
+                  aspectRatio: 2,
+                  child: Row(
+                    children: [
+                      Expanded(child: ColoredBox(color: board.light)),
+                      Expanded(child: ColoredBox(color: board.dark)),
+                      Expanded(child: ColoredBox(color: board.dark)),
+                      Expanded(child: ColoredBox(color: board.light)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                _boardThemeLabel(widget.theme),
+                style: AppTextStyles.caption.copyWith(
+                  color: widget.selected ? accent.mid : palette.ink,
+                  fontWeight: widget.selected ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
 

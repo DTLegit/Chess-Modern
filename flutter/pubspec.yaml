@@ -18,6 +18,7 @@ dependencies:
   flutter_svg: ^2.0.16
   audioplayers: ^6.1.0
   collection: ^1.19.0
+  file_selector: ^1.0.3
 
 dev_dependencies:
   flutter_test:
@@ -38,3 +39,15 @@ flutter:
     # referenced from Dart via rootBundle.load('assets/stockfish/<abi>/stockfish')
     # and ignored when missing (custom-engine fallback kicks in).
     - assets/stockfish/
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Variable.ttf
+    - family: EBGaramond
+      fonts:
+        - asset: assets/fonts/EBGaramond-Variable.ttf
+        - asset: assets/fonts/EBGaramond-Italic-Variable.ttf
+          style: italic
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Variable.ttf

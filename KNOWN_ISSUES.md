@@ -48,16 +48,10 @@ packaging that are intentionally left as-is.
 
 ## Frontend behaviour
 
-- **Drag-to-move is not yet implemented.** The Flutter port uses
-  tap-to-select / tap-to-target only, matching the touch-first mobile flow.
-  The original Svelte board supported pointer drag; that is on the backlog.
 - **Audio is procedurally synthesised**, just like the Svelte version, but
   rendered to PCM WAV bytes and played via `audioplayers`. This avoids
   shipping any audio assets but means the synth runs on the main isolate
   the first time each `SoundKind` is hit (~5 ms blocking; cached afterward).
-- **PGN export uses a SelectableText dialog, not a native file picker.**
-  Adding a real save dialog is one short follow-up using
-  [`file_selector`](https://pub.dev/packages/file_selector).
-- **Promotion is a modal picker, not in-board.** The original Svelte UI
-  drew the picker on top of the board; the Flutter version uses a centered
-  Material dialog. Functionally equivalent.
+- **PGN export on mobile (iOS / Android) falls back to "Copy PGN".** The
+  desktop builds use the `file_selector` save dialog; mobile platforms
+  copy the PGN to the system clipboard since `file_selector` is desktop-only.
