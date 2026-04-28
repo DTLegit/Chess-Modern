@@ -24,10 +24,15 @@ or hold game state outside the Rust core, stop and ask.
 
 | Phase | Owner agent | Branch | What it can touch |
 | --- | --- | --- | --- |
-| 1 — Visual parity | Frontend (`claude-opus-4-7-thinking-xhigh`) | `phase-1-visual-parity` | Flutter UI only. Zero changes to `crates/`, `flutter/lib/src/rust/`, or `crates/chess_bridge/src/api.rs`. |
-| 2 — Backend refactor | Backend (`gpt-5.5-extra-high`) | `phase-2-backend-refactor` | Rust internals (`crates/chess_core/`). Bridge API (`crates/chess_bridge/src/api.rs` exported types + 15 commands + `BackendEvent` variants) MUST stay byte-stable. |
+| 1 — Visual parity | Frontend (`claude-4.6-sonnet-medium-thinking`) | `phase-1-visual-parity` | Flutter UI only. Zero changes to `crates/`, `flutter/lib/src/rust/`, or `crates/chess_bridge/src/api.rs`. |
+| 2 — Backend refactor | Backend (`gpt-5.3-codex-high-fast`) | `phase-2-backend-refactor` | Rust internals (`crates/chess_core/`). Bridge API (`crates/chess_bridge/src/api.rs` exported types + 15 commands + `BackendEvent` variants) MUST stay byte-stable. |
 | 3 — Integration | Backend then Frontend | `phase-3-integration` | Bridge API evolution allowed. Codegen MUST be re-run (`flutter_rust_bridge_codegen generate`). Flutter consumes new bindings in the same phase before merge. |
 | 4 — Polish | Frontend (Backend on demand) | `phase-4-polish` | UX, perf, bug fixes from Phase 3 smoke. |
+
+Models chosen for cost-efficiency on a tight token budget. The parent
+MAY upgrade individual subagent runs to `claude-opus-4-7-thinking-xhigh`
+or `gpt-5.5-extra-high` on a per-run basis if reasoning quality
+demands it, with explicit justification.
 
 A subagent that catches itself drifting outside its phase's scope must
 stop and post a comment on the working branch instead of expanding

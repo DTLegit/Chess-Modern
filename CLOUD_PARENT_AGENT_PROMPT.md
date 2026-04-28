@@ -16,15 +16,39 @@ write code yourself.
 You spawn subagents via Cursor's nested-subagent capability (Cursor 2.5+).
 Two specific subagent slots:
 
-- **Frontend Subagent** — model `claude-opus-4-7-thinking-xhigh`. Owns
-  Phase 1, Phase 3 (Flutter side), Phase 4 (Flutter side).
-- **Backend Subagent** — model `gpt-5.5-extra-high`. Owns Phase 2,
+- **Frontend Subagent** — model `claude-4.6-sonnet-medium-thinking`.
+  Owns Phase 1, Phase 3 (Flutter side), Phase 4 (Flutter side).
+- **Backend Subagent** — model `gpt-5.3-codex-high-fast`. Owns Phase 2,
   Phase 3 (Rust side), Phase 4 (Rust on demand).
 
-If either model is unavailable in the cloud-agent Max-Mode roster, fall
-back: Frontend → `claude-4.6-sonnet-medium-thinking`; Backend →
-`gpt-5.3-codex-high-fast`. Note the substitution in the parent run
-summary.
+These models are chosen for cost-efficiency. If a phase clearly needs
+stronger reasoning (e.g. the parent observes the subagent spinning on a
+hard architectural decision in Phase 2's AI providers, or a tricky
+Phase 3 API redesign), the parent MAY upgrade that single subagent run
+to `claude-opus-4-7-thinking-xhigh` (frontend / orchestration-heavy) or
+`gpt-5.5-extra-high` (backend) — but only with an explicit cost
+justification noted in the run summary.
+
+## Cost discipline (mandatory)
+
+This run is on a tight token budget. Apply these practices:
+
+- **Be cache-friendly.** When dispatching a subagent, do NOT re-paste
+  large file contents into the subagent prompt. Tell the subagent to
+  read files itself from the repo at known paths. Cursor's prompt
+  cache will hit on those file reads across subagents, dramatically
+  lowering effective token rate.
+- **Avoid long-context Max Mode where possible.** Sonnet 4.6 doubles
+  input pricing above 200k input tokens; GPT-5.5 doubles above 272k.
+  Keep individual turns under those thresholds. Split large reads
+  into multiple smaller turns rather than one mega-context turn.
+- **Don't re-read for re-reads' sake.** If you've already established
+  the relevant file structure in your context, don't dump it again in
+  later turns; reference paths.
+- **Halt early on the spend-limit-warning signal.** If Cursor surfaces
+  a budget warning at any point, stop the auto-continue chain
+  immediately, post a status comment with current branch state and
+  what's left to do, and end your run for human triage.
 
 ## Read order (do this first, in full)
 
@@ -119,7 +143,7 @@ Spawn the Frontend Subagent with this prompt (verbatim, but tailor the
 "Reminders" if you have phase-specific context):
 
 ```
-Model: claude-opus-4-7-thinking-xhigh
+Model: claude-4.6-sonnet-medium-thinking
 Branch: phase-1-visual-parity (branched from master)
 
 Primary spec: VISUAL_PARITY_AGENT_PROMPT.md (read in full).
@@ -150,7 +174,7 @@ gate yourself and only fast-forward if green.
 ## Phase 2 dispatch
 
 ```
-Model: gpt-5.5-extra-high
+Model: gpt-5.3-codex-high-fast
 Branch: phase-2-backend-refactor (branched from post-Phase-1 master)
 
 Scope (from FULL_MASTER_AGENT_INSTRUCTIONS.md "Backend Subagent Spec"):
@@ -187,7 +211,7 @@ When done, run the Phase 2 acceptance checks and post a status comment.
 Backend first:
 
 ```
-Model: gpt-5.5-extra-high
+Model: gpt-5.3-codex-high-fast
 Branch: phase-3-integration (branched from post-Phase-2 master)
 
 Scope: surface any new GameSession capabilities (draw offer/accept,
@@ -213,7 +237,7 @@ and the rationale.
 Then frontend:
 
 ```
-Model: claude-opus-4-7-thinking-xhigh
+Model: claude-4.6-sonnet-medium-thinking
 Branch: phase-3-integration (continue on the branch the Backend Subagent pushed)
 
 Scope: consume the new bindings produced by the Backend Subagent's
@@ -231,8 +255,8 @@ smoke. Post a status comment with the results.
 ## Phase 4 dispatch
 
 ```
-Model: claude-opus-4-7-thinking-xhigh (Backend on demand if a fix
-needs Rust changes)
+Model: claude-4.6-sonnet-medium-thinking (Backend on demand if a fix
+needs Rust changes — use gpt-5.3-codex-high-fast)
 Branch: phase-4-polish (branched from post-Phase-3 master)
 
 Scope: UX polish (animations, micro-interactions, toast surfaces),
