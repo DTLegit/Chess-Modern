@@ -9,6 +9,60 @@ import 'theme/tokens.dart';
 import 'theme/typography.dart';
 import 'ui/home_screen.dart';
 
+/// Ambient background with a subtle radial-gradient paper/noise texture.
+/// Mirrors Svelte's `--c-bg` ambient grain layers from `app.css`.
+class _AppBackground extends StatelessWidget {
+  const _AppBackground({required this.palette, required this.child});
+  final AppPalette palette;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLight = palette.brightness == Brightness.light;
+    return Container(
+      color: palette.bg,
+      child: Stack(
+        children: [
+          // Subtle radial ambient: brightens center slightly.
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  center: const Alignment(0.0, -0.3),
+                  radius: 1.2,
+                  colors: [
+                    isLight
+                        ? const Color(0x0FFFFFFF)
+                        : const Color(0x08FFFFFF),
+                    const Color(0x00000000),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Vignette: darkens edges slightly.
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: RadialGradient(
+                  radius: 1.5,
+                  colors: [
+                    const Color(0x00000000),
+                    isLight
+                        ? const Color(0x08000000)
+                        : const Color(0x14000000),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          child,
+        ],
+      ),
+    );
+  }
+}
+
 class ChessApp extends StatelessWidget {
   const ChessApp({
     super.key,
@@ -53,8 +107,8 @@ class ChessApp extends StatelessWidget {
               data: themeData,
               child: DefaultTextStyle(
                 style: AppTextStyles.body.copyWith(color: themeData.palette.ink),
-                child: ColoredBox(
-                  color: themeData.palette.bg,
+                child: _AppBackground(
+                  palette: themeData.palette,
                   child: child ?? const SizedBox.shrink(),
                 ),
               ),

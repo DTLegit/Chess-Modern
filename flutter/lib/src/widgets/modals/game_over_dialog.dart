@@ -122,13 +122,20 @@ class _GameOverDialogState extends State<GameOverDialog> {
             variant: AppButtonVariant.ghost,
             onPressed: () {
               Navigator.of(context).maybePop();
+              // Swap colors on rematch (mirrors Svelte GameOver.svelte rematch()).
+              final swapped = s.humanColor == rust.Color.w
+                  ? rust.HumanColorChoice.b
+                  : rust.HumanColorChoice.w;
               widget.onRematch(rust.NewGameOpts(
                 mode: s.mode,
                 aiDifficulty: s.aiDifficulty,
-                humanColor: s.humanColor == rust.Color.w
-                    ? rust.HumanColorChoice.w
-                    : rust.HumanColorChoice.b,
-                timeControl: null,
+                humanColor: swapped,
+                timeControl: s.clock != null
+                    ? rust.TimeControl(
+                        initialMs: s.clock!.whiteMs,
+                        incrementMs: BigInt.zero,
+                      )
+                    : null,
               ));
             },
           ),
@@ -160,22 +167,22 @@ String _resultTitle(rust.GameResult r) {
 String _resultDetail(rust.GameStatus s) {
   switch (s) {
     case rust.GameStatus.checkmate:
-      return 'Checkmate.';
+      return 'by checkmate';
     case rust.GameStatus.stalemate:
-      return 'Stalemate.';
+      return 'by stalemate';
     case rust.GameStatus.drawFiftyMove:
-      return 'Draw by the 50-move rule.';
+      return 'by the fifty-move rule';
     case rust.GameStatus.drawThreefold:
-      return 'Draw by threefold repetition.';
+      return 'by threefold repetition';
     case rust.GameStatus.drawInsufficient:
-      return 'Draw — insufficient material.';
+      return 'by insufficient material';
     case rust.GameStatus.drawAgreement:
-      return 'Draw by agreement.';
+      return 'by agreement';
     case rust.GameStatus.resigned:
-      return 'A player resigned.';
+      return 'by resignation';
     case rust.GameStatus.timeForfeit:
-      return 'Time forfeit.';
+      return 'on time';
     case rust.GameStatus.active:
-      return 'Game in progress.';
+      return '';
   }
 }

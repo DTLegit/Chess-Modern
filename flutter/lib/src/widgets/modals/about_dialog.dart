@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../../theme/app_theme.dart';
@@ -15,76 +14,84 @@ class ChessAboutDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = AppTheme.of(context);
     final palette = theme.palette;
-    final accent = theme.accent;
     return AppDialog(
-      width: 460,
+      // Svelte: width="380px"
+      width: 380,
       title: 'About',
       body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Center(
-            child: Text(
-              '♛',
-              style: AppTextStyles.serifHero.copyWith(
-                color: accent.mid,
-                fontSize: 64,
-                height: 1.0,
+          // Logo tile.
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF6E4A2A), Color(0xFF3A2515)],
               ),
+              borderRadius: BorderRadius.circular(64 * 0.3),
+              boxShadow: palette.shadowMd,
+            ),
+            child: Stack(
+              children: [
+                Center(
+                  child: Text(
+                    '♛',
+                    style: TextStyle(
+                      fontFamily: AppFontFamilies.serif,
+                      fontSize: 40,
+                      color: const Color(0xFFF5E0B5),
+                      height: 1.0,
+                    ),
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(64 * 0.3),
+                    border: Border.all(color: const Color(0x33000000)),
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          Center(
-            child: Text(
-              'Chess',
-              style: AppTextStyles.serifHero.copyWith(
-                color: palette.ink,
-                fontSize: 26,
-              ),
+          Text(
+            'Chess',
+            style: AppTextStyles.serifHero.copyWith(
+              color: palette.ink,
+              fontSize: 26,
             ),
           ),
           const SizedBox(height: 4),
-          Center(
-            child: Text(
-              'version 0.1.0 — early preview',
-              style: AppTextStyles.caption.copyWith(color: palette.inkMute),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
           Text(
-            'A polished, native cross-platform chess game.',
-            style: AppTextStyles.body.copyWith(
-              color: palette.ink,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'Built with Flutter for the UI and Rust for the engine + AI, '
-            'connected through flutter_rust_bridge.',
-            style: AppTextStyles.body.copyWith(color: palette.inkSoft),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            'AI uses a custom Rust minimax engine for difficulty 1–3, and '
-            'Stockfish 17 for 4–10 on platforms where it is available '
-            '(macOS, Windows, Linux desktop, and Android). On iOS the '
-            'sandbox forbids spawning external binaries, so levels 4–10 '
-            'transparently use the strongest custom-engine setting.',
-            style: AppTextStyles.body.copyWith(color: palette.inkSoft),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            defaultTargetPlatform == TargetPlatform.iOS
-                ? 'You are on iOS, which uses the custom Rust engine.'
-                : 'Stockfish is bundled with the desktop and Android builds.',
+            'version 0.1.0',
             style: AppTextStyles.caption.copyWith(color: palette.inkMute),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          // Svelte copy: concise one-liner description.
+          Text(
+            'A small, hand-crafted chess application built with care. '
+            'Two boards, two piece sets, no telemetry, no clutter.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.body.copyWith(color: palette.inkSoft),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            'Built with Flutter + Rust via flutter_rust_bridge. '
+            'AI uses a custom minimax engine (levels 1–3) and Stockfish 17 (levels 4–10) '
+            'where available.',
+            textAlign: TextAlign.center,
+            style: AppTextStyles.caption.copyWith(color: palette.inkMute, height: 1.55),
           ),
         ],
       ),
       actions: [
+        // Svelte About.svelte uses variant="primary" for the close button.
         AppButton(
           label: 'Close',
-          variant: AppButtonVariant.ghost,
+          variant: AppButtonVariant.primary,
           onPressed: () => Navigator.of(context).maybePop(),
         ),
       ],

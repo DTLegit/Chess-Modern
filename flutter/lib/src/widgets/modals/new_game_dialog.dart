@@ -17,7 +17,11 @@ enum _TcPreset { casual, blitz3p2, b5, b10, b15p10, b30, custom }
 
 /// New game setup. Mirrors `legacy/svelte/lib/modals/NewGame.svelte`.
 class NewGameDialog extends StatefulWidget {
-  const NewGameDialog({super.key});
+  const NewGameDialog({super.key, this.initialBoardTheme, this.canDismiss = true});
+  final rust.BoardTheme? initialBoardTheme;
+  /// When false, the Cancel button and close icon are hidden so the user
+  /// must start a game (used on first launch when no game exists yet).
+  final bool canDismiss;
 
   @override
   State<NewGameDialog> createState() => _NewGameDialogState();
@@ -28,8 +32,18 @@ class _NewGameDialogState extends State<NewGameDialog> {
   int _aiDifficulty = 3;
   rust.HumanColorChoice _humanColor = rust.HumanColorChoice.w;
   _TcPreset _tcPreset = _TcPreset.casual;
+  late rust.BoardTheme _boardTheme;
+  rust.BoardTheme? _hoverTheme;
   late final TextEditingController _customMin = TextEditingController(text: '5');
   late final TextEditingController _customInc = TextEditingController(text: '0');
+
+  rust.BoardTheme get _previewTheme => _hoverTheme ?? _boardTheme;
+
+  @override
+  void initState() {
+    super.initState();
+    _boardTheme = widget.initialBoardTheme ?? rust.BoardTheme.wood;
+  }
 
   @override
   void dispose() {
@@ -46,6 +60,7 @@ class _NewGameDialogState extends State<NewGameDialog> {
     return AppDialog(
       title: 'New game',
       width: 540,
+      showCloseButton: widget.canDismiss,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -116,6 +131,18 @@ class _NewGameDialogState extends State<NewGameDialog> {
             ),
           ],
           const SizedBox(height: AppSpacing.huge),
+          const AppLabel('Board theme'),
+          const SizedBox(height: AppSpacing.sm),
+          // Mini-board preview — updates on hover.
+          _NewGameBoardPreview(boardTheme: _previewTheme),
+          const SizedBox(height: AppSpacing.md),
+          // 3-col swatch grid.
+          _BoardThemePicker(
+            value: _boardTheme,
+            onChanged: (t) => setState(() => _boardTheme = t),
+            onHover: (t) => setState(() => _hoverTheme = t),
+          ),
+          const SizedBox(height: AppSpacing.huge),
           const AppLabel('Time control'),
           const SizedBox(height: AppSpacing.sm),
           Wrap(
@@ -177,13 +204,14 @@ class _NewGameDialogState extends State<NewGameDialog> {
         ],
       ),
       actions: [
+        if (widget.canDismiss)
+          AppButton(
+            label: 'Cancel',
+            variant: AppButtonVariant.ghost,
+            onPressed: () => Navigator.of(context).maybePop(null),
+          ),
         AppButton(
-          label: 'Cancel',
-          variant: AppButtonVariant.ghost,
-          onPressed: () => Navigator.of(context).maybePop(null),
-        ),
-        AppButton(
-          label: 'Start',
+          label: 'Start game',
           onPressed: () => Navigator.of(context).maybePop(_buildOpts()),
         ),
       ],
@@ -228,6 +256,197 @@ class _NewGameDialogState extends State<NewGameDialog> {
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Mini-board preview (new game)
+// ---------------------------------------------------------------------------
+
+class _NewGameBoardPreview extends StatelessWidget {
+  const _NewGameBoardPreview({required this.boardTheme});
+  final rust.BoardTheme boardTheme;
+
+  @override
+  Widget build(BuildContext context) {
+    final board = boardPaletteFor(boardTheme);
+    final bezel = boardBezelFor(boardTheme);
+    final palette = AppTheme.of(context).palette;
+    return AnimatedContainer(
+      duration: AppDurations.fast,
+      height: 120,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [bezel.topColor, bezel.bottomColor],
+        ),
+        borderRadius: BorderRadius.circular(AppRadii.md),
+        boxShadow: palette.shadowSm,
+      ),
+      padding: const EdgeInsets.all(6),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppRadii.tiny),
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: LayoutBuilder(
+            builder: (_, constraints) {
+              final cell = constraints.maxWidth / 8;
+              return Stack(
+                children: [
+                  for (var row = 0; row < 8; row++)
+                    for (var col = 0; col < 8; col++)
+                      Positioned(
+                        left: col * cell,
+                        top: row * cell,
+                        width: cell,
+                        height: cell,
+                        child: ColoredBox(
+                          color: (row + col).isEven ? board.light : board.dark,
+                        ),
+                      ),
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Board theme picker (3-col grid)
+// ---------------------------------------------------------------------------
+
+class _BoardThemePicker extends StatelessWidget {
+  const _BoardThemePicker({
+    required this.value,
+    required this.onChanged,
+    required this.onHover,
+  });
+  final rust.BoardTheme value;
+  final ValueChanged<rust.BoardTheme> onChanged;
+  final ValueChanged<rust.BoardTheme?> onHover;
+
+  @override
+  Widget build(BuildContext context) {
+    final themes = rust.BoardTheme.values;
+    return Wrap(
+      spacing: AppSpacing.sm,
+      runSpacing: AppSpacing.sm,
+      children: [
+        for (final t in themes)
+          _BoardThemeSwatch(
+            theme: t,
+            selected: t == value,
+            onTap: () => onChanged(t),
+            onHover: onHover,
+          ),
+      ],
+    );
+  }
+}
+
+class _BoardThemeSwatch extends StatefulWidget {
+  const _BoardThemeSwatch({
+    required this.theme,
+    required this.selected,
+    required this.onTap,
+    required this.onHover,
+  });
+  final rust.BoardTheme theme;
+  final bool selected;
+  final VoidCallback onTap;
+  final ValueChanged<rust.BoardTheme?> onHover;
+
+  @override
+  State<_BoardThemeSwatch> createState() => _BoardThemeSwatchState();
+}
+
+class _BoardThemeSwatchState extends State<_BoardThemeSwatch> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = AppTheme.of(context);
+    final palette = theme.palette;
+    final accent = theme.accent;
+    final board = boardPaletteFor(widget.theme);
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      onEnter: (_) {
+        setState(() => _hover = true);
+        widget.onHover(widget.theme);
+      },
+      onExit: (_) {
+        setState(() => _hover = false);
+        widget.onHover(null);
+      },
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: AnimatedContainer(
+          duration: AppDurations.fast,
+          width: 110,
+          padding: const EdgeInsets.all(AppSpacing.xs),
+          decoration: BoxDecoration(
+            color: palette.bgCard,
+            border: Border.all(
+              color: widget.selected
+                  ? accent.mid
+                  : (_hover ? palette.hairlineStrong : palette.hairline),
+              width: widget.selected ? 1.5 : 1,
+            ),
+            borderRadius: BorderRadius.circular(AppRadii.sm),
+            boxShadow: widget.selected
+                ? [
+                    BoxShadow(
+                      color: accent.mid.withValues(alpha: 0.30),
+                      blurRadius: 8,
+                    ),
+                  ]
+                : null,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 4-square checker pattern — CrossAxisAlignment.stretch needed
+              // so ColoredBox fills the full height of each Expanded cell.
+              ClipRRect(
+                borderRadius: BorderRadius.circular(AppRadii.tiny),
+                child: AspectRatio(
+                  aspectRatio: 2,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(child: ColoredBox(color: board.light)),
+                      Expanded(child: ColoredBox(color: board.dark)),
+                      Expanded(child: ColoredBox(color: board.dark)),
+                      Expanded(child: ColoredBox(color: board.light)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                _boardThemeName(widget.theme),
+                style: AppTextStyles.caption.copyWith(
+                  fontSize: 11,
+                  color: widget.selected ? accent.mid : palette.ink,
+                  fontWeight:
+                      widget.selected ? FontWeight.w600 : FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Time-control chip
+// ---------------------------------------------------------------------------
 
 class _TcChip extends StatefulWidget {
   const _TcChip({
@@ -295,6 +514,10 @@ class _TcChipState extends State<_TcChip> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
 String _tcLabel(_TcPreset p) {
   switch (p) {
     case _TcPreset.casual:
@@ -317,22 +540,49 @@ String _tcLabel(_TcPreset p) {
 String _aiLabel(int n) {
   switch (n) {
     case 1:
-      return 'Casual';
+      return 'Beginner';
     case 2:
+      return 'Novice';
     case 3:
       return 'Easy';
     case 4:
+      return 'Casual';
     case 5:
-      return 'Medium';
+      return 'Intermediate';
     case 6:
+      return 'Club';
     case 7:
       return 'Hard';
     case 8:
-    case 9:
       return 'Expert';
+    case 9:
+      return 'Master';
     case 10:
       return 'Grandmaster';
     default:
       return '';
+  }
+}
+
+String _boardThemeName(rust.BoardTheme t) {
+  switch (t) {
+    case rust.BoardTheme.wood:
+      return 'Wood';
+    case rust.BoardTheme.slate:
+      return 'Slate';
+    case rust.BoardTheme.woodRealistic:
+      return 'Wood (realistic)';
+    case rust.BoardTheme.slateRealistic:
+      return 'Slate (realistic)';
+    case rust.BoardTheme.marble:
+      return 'Marble';
+    case rust.BoardTheme.emerald:
+      return 'Emerald';
+    case rust.BoardTheme.obsidian:
+      return 'Obsidian';
+    case rust.BoardTheme.sandstone:
+      return 'Sandstone';
+    case rust.BoardTheme.midnight:
+      return 'Midnight';
   }
 }

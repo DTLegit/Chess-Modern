@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Download Stockfish 17 binaries for all four targets and place them in
-# src-tauri/binaries/ with the Tauri sidecar naming convention:
+# Download Stockfish 17 binaries for desktop targets and place them in
+# crates/chess_bridge/binaries/ where the macOS Flutter build script picks
+# them up to embed as app sidecars:
 #
 #   stockfish-aarch64-apple-darwin
 #   stockfish-x86_64-apple-darwin
@@ -11,7 +12,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-DEST="$ROOT/src-tauri/binaries"
+DEST="$ROOT/crates/chess_bridge/binaries"
 mkdir -p "$DEST"
 
 WORK="$(mktemp -d)"
@@ -40,5 +41,5 @@ fetch "stockfish-windows-x86-64-avx2.zip"     "stockfish-x86_64-pc-windows-msvc.
 # Linux x64
 fetch "stockfish-ubuntu-x86-64-avx2.tar"      "stockfish-x86_64-unknown-linux-gnu"  "stockfish/stockfish-ubuntu-x86-64-avx2"
 
-echo "==> Done. Binaries:"
+echo "==> Done. Binaries in $DEST:"
 ls -la "$DEST"

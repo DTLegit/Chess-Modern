@@ -20,9 +20,9 @@ import '../widgets/panels/captures.dart';
 import '../widgets/panels/clock_panel.dart';
 import '../widgets/panels/move_history.dart';
 import '../widgets/primitives/app_button.dart';
+import '../widgets/primitives/game_logo.dart';
 import '../widgets/primitives/app_dialog.dart';
 import '../widgets/primitives/app_divider.dart';
-import '../widgets/primitives/app_icon_button.dart';
 import '../widgets/primitives/app_icons.dart';
 import '../widgets/primitives/app_panel.dart';
 import '../widgets/primitives/app_scaffold.dart';
@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late final SoundSynth _synth;
   StreamSubscription? _soundSub;
   String? _gameOverDismissedFor;
-  bool _welcomeShown = false;
+  bool _welcomeOpen = false;
 
   @override
   void initState() {
@@ -56,18 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _synth = SoundSynth(widget.settings);
     _soundSub = widget.game.sounds.listen(_synth.play);
     widget.game.addListener(_onGameChanged);
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      if (!_welcomeShown && widget.game.live == null) {
-        _welcomeShown = true;
-        await showAppDialog(
-          context,
-          builder: (_) => WelcomeDialog(
-            onNewGame: () => _openNewGameDialog(),
-            onSettings: () => _openSettings(),
-          ),
-        );
-      }
-    });
+    // Show welcome screen if no game is active.
+    _welcomeOpen = widget.game.live == null;
   }
 
   @override
@@ -102,9 +92,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _openNewGameDialog() async {
+    // On first launch (no active game) the user must start a game — hide the
+    // cancel button and prevent scrim-tap dismissal.
+    final isFirstGame = widget.game.live == null;
     final opts = await showAppDialog<rust.NewGameOpts?>(
       context,
-      builder: (_) => const NewGameDialog(),
+      barrierDismissible: !isFirstGame,
+      builder: (_) => NewGameDialog(canDismiss: !isFirstGame),
     );
     if (opts != null) {
       _gameOverDismissedFor = null;
@@ -112,10 +106,13 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> _openSettings() async {
+  Future<void> _openSettings({bool showBoardTheme = true}) async {
     await showAppDialog(
       context,
-      builder: (_) => SettingsDialog(controller: widget.settings),
+      builder: (_) => SettingsDialog(
+        controller: widget.settings,
+        showBoardTheme: showBoardTheme,
+      ),
     );
   }
 
@@ -124,6 +121,10 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       builder: (_) => const ChessAboutDialog(),
     );
+  }
+
+  void _openWelcome() {
+    setState(() => _welcomeOpen = true);
   }
 
   @override
@@ -168,10 +169,11 @@ class _HomeScreenState extends State<HomeScreen> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final isMobile = constraints.maxWidth < _mobileBreakpoint;
-              return AppScaffold(
+              final scaffold = AppScaffold(
                 topBar: _TopBar(
                   game: widget.game,
                   onNewGame: _openNewGameDialog,
+                  onWelcome: _openWelcome,
                   onSettings: _openSettings,
                   onAbout: _openAbout,
                   isMobile: isMobile,
@@ -196,6 +198,25 @@ class _HomeScreenState extends State<HomeScreen> {
                       )
                     : null,
               );
+
+              if (!_welcomeOpen) return scaffold;
+
+              // Welcome screen as a full-screen Stack overlay.
+              return Stack(
+                children: [
+                  // Underlying scaffold is non-interactive while welcome is open.
+                  IgnorePointer(child: scaffold),
+                  Positioned.fill(
+                    child: WelcomeScreen(
+                      onNewGame: () {
+                        setState(() => _welcomeOpen = false);
+                        _openNewGameDialog();
+                      },
+                      onSettings: () => _openSettings(showBoardTheme: false),
+                    ),
+                  ),
+                ],
+              );
             },
           ),
         ),
@@ -204,10 +225,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Top bar
+// ---------------------------------------------------------------------------
+
 class _TopBar extends StatelessWidget {
   const _TopBar({
     required this.game,
     required this.onNewGame,
+    required this.onWelcome,
     required this.onSettings,
     required this.onAbout,
     required this.isMobile,
@@ -215,6 +241,7 @@ class _TopBar extends StatelessWidget {
 
   final GameController game;
   final VoidCallback onNewGame;
+  final VoidCallback onWelcome;
   final VoidCallback onSettings;
   final VoidCallback onAbout;
   final bool isMobile;
@@ -222,7 +249,6 @@ class _TopBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.of(context);
-    final accent = theme.accent;
     return ListenableBuilder(
       listenable: game,
       builder: (_, __) {
@@ -235,15 +261,8 @@ class _TopBar extends StatelessWidget {
         final canUndo = (l?.history.length ?? 0) > 0;
         return Row(
           children: [
-            // Brand mark (♛) + wordmark.
-            Text(
-              '♛',
-              style: AppTextStyles.serifTitle.copyWith(
-                color: accent.mid,
-                fontSize: 22,
-                height: 1.0,
-              ),
-            ),
+            // Brand mark — knight + king silhouette tile.
+            const GameLogo(size: 28),
             const SizedBox(width: AppSpacing.sm),
             Text(
               'Chess',
@@ -259,10 +278,16 @@ class _TopBar extends StatelessWidget {
               color: theme.palette.hairline,
             ),
             const SizedBox(width: AppSpacing.lg),
-            Text(label, style: AppTextStyles.bodyMuted.copyWith(
+            Expanded(
+              child: Text(
+                label,
+                style: AppTextStyles.bodyMuted.copyWith(
                   color: theme.palette.inkSoft,
-                )),
-            const Spacer(),
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
             if (!isMobile) ...[
               AppButton(
                 label: 'New game',
@@ -270,34 +295,46 @@ class _TopBar extends StatelessWidget {
                 leading: const IconPlus(),
                 onPressed: onNewGame,
               ),
-              const SizedBox(width: AppSpacing.sm),
-              AppIconButton(
-                tooltip: 'Undo (U)',
-                icon: const IconUndo(),
+              const SizedBox(width: 4),
+              AppButton(
+                label: 'Start screen',
+                variant: AppButtonVariant.subtle,
+                size: AppButtonSize.small,
+                onPressed: onWelcome,
+              ),
+              const SizedBox(width: 4),
+              AppButton(
+                label: 'Undo',
+                variant: AppButtonVariant.subtle,
+                size: AppButtonSize.small,
                 onPressed: canUndo ? game.undo : null,
               ),
               const SizedBox(width: 4),
-              AppIconButton(
-                tooltip: 'Flip board (F)',
-                icon: const IconFlip(),
+              AppButton(
+                label: 'Flip',
+                variant: AppButtonVariant.subtle,
+                size: AppButtonSize.small,
                 onPressed: game.flip,
               ),
               const SizedBox(width: 4),
-              AppIconButton(
-                tooltip: 'Settings',
-                icon: const IconSettings(),
+              AppButton(
+                label: 'Settings',
+                variant: AppButtonVariant.subtle,
+                size: AppButtonSize.small,
                 onPressed: onSettings,
               ),
               const SizedBox(width: 4),
-              AppIconButton(
-                tooltip: 'About',
-                icon: const IconInfo(),
+              AppButton(
+                label: 'About',
+                variant: AppButtonVariant.subtle,
+                size: AppButtonSize.small,
                 onPressed: onAbout,
               ),
             ] else
-              AppIconButton(
-                tooltip: 'Settings',
-                icon: const IconSettings(),
+              AppButton(
+                label: 'Settings',
+                variant: AppButtonVariant.subtle,
+                size: AppButtonSize.small,
                 onPressed: onSettings,
               ),
           ],
@@ -307,9 +344,14 @@ class _TopBar extends StatelessWidget {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Status bar
+// ---------------------------------------------------------------------------
+
 class _StatusBar extends StatelessWidget {
   const _StatusBar({required this.game});
   final GameController game;
+
   @override
   Widget build(BuildContext context) {
     final palette = AppTheme.of(context).palette;
@@ -329,9 +371,26 @@ class _StatusBar extends StatelessWidget {
               style: AppTextStyles.caption.copyWith(color: palette.inkMute),
             ),
             const Spacer(),
-            Text(
-              'N new · U undo · F flip · ← → scrub · Esc cancel',
-              style: AppTextStyles.caption.copyWith(color: palette.inkFaint),
+            Flexible(
+              child: Wrap(
+                spacing: 2,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                alignment: WrapAlignment.end,
+                children: [
+                  _KbdChip('N', palette),
+                  _StatusText(' new · ', palette),
+                  _KbdChip('U', palette),
+                  _StatusText(' undo · ', palette),
+                  _KbdChip('F', palette),
+                  _StatusText(' flip · ', palette),
+                  _KbdChip('←', palette),
+                  _StatusText('/', palette),
+                  _KbdChip('→', palette),
+                  _StatusText(' scrub · ', palette),
+                  _KbdChip('Esc', palette),
+                  _StatusText(' cancel', palette),
+                ],
+              ),
             ),
           ],
         );
@@ -339,6 +398,59 @@ class _StatusBar extends StatelessWidget {
     );
   }
 }
+
+class _KbdChip extends StatelessWidget {
+  const _KbdChip(this.key_, this.palette);
+  final String key_;
+  final AppPalette palette;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(5, 1, 5, 1),
+      decoration: BoxDecoration(
+        color: palette.bgCard,
+        borderRadius: BorderRadius.circular(4),
+        // Uniform border required for borderRadius; simulate thicker bottom
+        // with a boxShadow offset downward (matches the Svelte kbd border-bottom: 2px).
+        border: Border.all(color: palette.hairline, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: palette.hairlineStrong,
+            offset: const Offset(0, 1),
+            blurRadius: 0,
+          ),
+        ],
+      ),
+      child: Text(
+        key_,
+        style: AppTextStyles.mono.copyWith(
+          fontSize: 10,
+          color: palette.inkSoft,
+          height: 1.3,
+        ),
+      ),
+    );
+  }
+}
+
+class _StatusText extends StatelessWidget {
+  const _StatusText(this.text, this.palette);
+  final String text;
+  final AppPalette palette;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: AppTextStyles.caption.copyWith(color: palette.inkFaint),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Desktop layout
+// ---------------------------------------------------------------------------
 
 class _DesktopLayout extends StatelessWidget {
   const _DesktopLayout({required this.game, required this.settings});
@@ -350,25 +462,36 @@ class _DesktopLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.bigGap),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Spacer(),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 720),
-            child: _BoardColumn(game: game, settings: settings),
-          ),
-          const SizedBox(width: AppSpacing.bigGap),
-          SizedBox(
-            width: 320,
-            child: MoveHistoryPanel(game: game),
-          ),
-          const Spacer(),
-        ],
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Hide the move history panel when the window is too narrow to avoid
+          // overflow — the panel reappears once there's enough room.
+          final showPanel = constraints.maxWidth >= 860;
+          final panelWidth = constraints.maxWidth >= 1000 ? 280.0 : 240.0;
+          return Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _BoardColumn(game: game, settings: settings),
+              ),
+              if (showPanel) ...[
+                const SizedBox(width: AppSpacing.bigGap),
+                SizedBox(
+                  width: panelWidth,
+                  child: MoveHistoryPanel(game: game),
+                ),
+              ],
+            ],
+          );
+        },
       ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Mobile layout
+// ---------------------------------------------------------------------------
 
 class _MobileLayout extends StatefulWidget {
   const _MobileLayout({
@@ -392,52 +515,71 @@ class _MobileLayoutState extends State<_MobileLayout> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: _PlayerStrip(
-              game: widget.game, side: rust.Color.b, label: 'Opponent'),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-          child: BoardWidget(game: widget.game, settings: widget.settings),
-        ),
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: _PlayerStrip(
-              game: widget.game, side: rust.Color.w, label: 'You'),
-        ),
-        const AppDivider(),
-        Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: AppSegmented<int>(
-            equalWidth: true,
-            value: _tabIndex,
-            onChanged: (v) => setState(() => _tabIndex = v),
-            options: const [
-              AppSegmentOption(value: 0, label: 'Moves'),
-              AppSegmentOption(value: 1, label: 'Actions'),
-            ],
-          ),
-        ),
-        Expanded(
-          child: IndexedStack(
-            index: _tabIndex,
-            children: [
-              MoveHistoryPanel(game: widget.game),
-              _ActionsPanel(
-                game: widget.game,
-                onSettings: widget.onOpenSettings,
-                onNewGame: widget.onOpenNewGame,
+    // Use a Column with Expanded body so the bottom panel fills remaining space.
+    // The board is constrained to fit in ~45% of the window height so it never
+    // overflows vertically on small screens.
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Limit board to at most 45% of available height (the rest is UI chrome).
+        final maxBoardSize = constraints.maxHeight * 0.45;
+        return Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xs),
+              child: _PlayerStrip(
+                  game: widget.game, side: rust.Color.b, label: 'Opponent'),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: maxBoardSize),
+                child: BoardWidget(
+                    game: widget.game, settings: widget.settings),
               ),
-            ],
-          ),
-        ),
-      ],
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.lg, AppSpacing.xs, AppSpacing.lg, AppSpacing.lg),
+              child: _PlayerStrip(
+                  game: widget.game, side: rust.Color.w, label: 'You'),
+            ),
+            const AppDivider(),
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: AppSegmented<int>(
+                equalWidth: true,
+                value: _tabIndex,
+                onChanged: (v) => setState(() => _tabIndex = v),
+                options: const [
+                  AppSegmentOption(value: 0, label: 'Moves'),
+                  AppSegmentOption(value: 1, label: 'Actions'),
+                ],
+              ),
+            ),
+            Expanded(
+              child: IndexedStack(
+                index: _tabIndex,
+                children: [
+                  MoveHistoryPanel(game: widget.game),
+                  _ActionsPanel(
+                    game: widget.game,
+                    onSettings: widget.onOpenSettings,
+                    onNewGame: widget.onOpenNewGame,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Board column (desktop) with scrub banner
+// ---------------------------------------------------------------------------
 
 class _BoardColumn extends StatelessWidget {
   const _BoardColumn({required this.game, required this.settings});
@@ -452,13 +594,84 @@ class _BoardColumn extends StatelessWidget {
       children: [
         _PlayerStrip(game: game, side: rust.Color.b, label: 'Opponent'),
         const SizedBox(height: AppSpacing.sm),
-        BoardWidget(game: game, settings: settings),
+        Expanded(
+          child: ListenableBuilder(
+            listenable: game,
+            builder: (context, _) {
+              final isAtLive = game.isAtLive;
+              return Stack(
+                clipBehavior: Clip.none,
+                alignment: Alignment.center,
+                children: [
+                  // The board sizes itself via AspectRatio; the Stack fills
+                  // the full Expanded height so the board is centered.
+                  Center(child: BoardWidget(game: game, settings: settings)),
+                  if (!isAtLive)
+                    Positioned(
+                      top: -34,
+                      child: _ScrubBanner(onGoLive: game.scrubLive),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
         const SizedBox(height: AppSpacing.sm),
         _PlayerStrip(game: game, side: rust.Color.w, label: 'You'),
       ],
     );
   }
 }
+
+class _ScrubBanner extends StatelessWidget {
+  const _ScrubBanner({required this.onGoLive});
+  final VoidCallback onGoLive;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = AppTheme.of(context).accent;
+    // Approximates Svelte's color-mix(in oklab, var(--c-accent) 88%, black).
+    final bg = Color.lerp(accent.base, const Color(0xFF000000), 0.12)!;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Viewing past position',
+            style: TextStyle(
+              fontFamily: AppFontFamilies.sans,
+              fontSize: 12,
+              color: accent.ink,
+            ),
+          ),
+          const SizedBox(width: 8),
+          GestureDetector(
+            onTap: onGoLive,
+            child: Text(
+              '← back to live',
+              style: TextStyle(
+                fontFamily: AppFontFamilies.sans,
+                fontSize: 12,
+                color: const Color(0xFFD4A84B),
+                decoration: TextDecoration.underline,
+                decorationColor: const Color(0xFFD4A84B),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Player strip
+// ---------------------------------------------------------------------------
 
 class _PlayerStrip extends StatelessWidget {
   const _PlayerStrip({
@@ -475,58 +688,93 @@ class _PlayerStrip extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = AppTheme.of(context);
     final palette = theme.palette;
-    return ListenableBuilder(
-      listenable: game,
-      builder: (_, __) {
-        final live = game.live;
-        final mode = live?.mode ?? rust.GameMode.hvh;
-        final hc = live?.humanColor;
-        final ai = mode == rust.GameMode.hva && hc != null && hc != side;
-        final aiBadge = ai && live?.aiDifficulty != null
-            ? ' · AI ${live!.aiDifficulty}'
-            : '';
-        final thinking = game.thinking && live?.turn == side;
-        return AppPanel(
-          padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
-          child: Row(
-            children: [
-              Container(
-                width: 12,
-                height: 12,
-                margin: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                  color: side == rust.Color.w
-                      ? const Color(0xFFF7EEDB)
-                      : const Color(0xFF1F1813),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: const Color(0x33000000), width: 1),
-                ),
-              ),
-              Text(
-                ai ? 'Computer$aiBadge' : label,
-                style: AppTextStyles.body.copyWith(color: palette.ink),
-              ),
-              if (thinking)
-                Padding(
-                  padding: const EdgeInsets.only(left: AppSpacing.sm),
-                  child: Text(
-                    'thinking…',
-                    style: AppTextStyles.caption.copyWith(
-                        color: palette.inkMute, fontStyle: FontStyle.italic),
+    return ConstrainedBox(
+      constraints: const BoxConstraints(maxWidth: 720),
+      child: ListenableBuilder(
+        listenable: game,
+        builder: (_, __) {
+          final live = game.live;
+          final mode = live?.mode ?? rust.GameMode.hvh;
+          final hc = live?.humanColor;
+          final isAi = mode == rust.GameMode.hva && hc != null && hc != side;
+          final thinking = game.thinking && live?.turn == side;
+          return AppPanel(
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xl, vertical: AppSpacing.sm),
+            child: Row(
+              children: [
+                Container(
+                  width: 12,
+                  height: 12,
+                  margin: const EdgeInsets.only(right: 8),
+                  decoration: BoxDecoration(
+                    color: side == rust.Color.w
+                        ? const Color(0xFFF7EEDB)
+                        : const Color(0xFF1F1813),
+                    shape: BoxShape.circle,
+                    border:
+                        Border.all(color: const Color(0x33000000), width: 1),
                   ),
                 ),
-              const Spacer(),
-              CapturesRow(game: game, side: side),
-              const SizedBox(width: AppSpacing.lg),
-              ClockPanel(game: game, side: side),
-            ],
-          ),
-        );
-      },
+                // Left portion wrapped in Flexible so it shrinks at narrow widths.
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          isAi ? 'Computer' : label,
+                          style: AppTextStyles.body.copyWith(color: palette.ink),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isAi && live?.aiDifficulty != null) ...[
+                        const SizedBox(width: 6),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: palette.walnutDeep,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'AI · ${live!.aiDifficulty}',
+                            style: AppTextStyles.badge.copyWith(
+                              color: palette.bgElev,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ),
+                      ],
+                      if (thinking)
+                        Padding(
+                          padding: const EdgeInsets.only(left: AppSpacing.sm),
+                          child: Text(
+                            'thinking…',
+                            style: AppTextStyles.caption.copyWith(
+                                color: palette.inkMute,
+                                fontStyle: FontStyle.italic),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                const Spacer(),
+                CapturesRow(game: game, side: side),
+                const SizedBox(width: AppSpacing.lg),
+                ClockPanel(game: game, side: side),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Actions panel (mobile tab)
+// ---------------------------------------------------------------------------
 
 class _ActionsPanel extends StatelessWidget {
   const _ActionsPanel({
@@ -620,8 +868,6 @@ class _ActionsPanel extends StatelessWidget {
 }
 
 Future<void> _showPgnDialog(BuildContext context, String pgn) async {
-  // Inline PGN preview dialog. The full file-save flow lives in
-  // GameOverDialog (Phase 5b); this is a quick text preview/export.
   final palette = AppTheme.of(context).palette;
   await showAppDialog(
     context,
@@ -661,6 +907,10 @@ Future<void> _showPgnDialog(BuildContext context, String pgn) async {
     ),
   );
 }
+
+// ---------------------------------------------------------------------------
+// Keyboard intents
+// ---------------------------------------------------------------------------
 
 class _NewGameIntent extends Intent {
   const _NewGameIntent();

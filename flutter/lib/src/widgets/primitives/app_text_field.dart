@@ -58,6 +58,17 @@ class _AppTextFieldState extends State<AppTextField> {
     final palette = theme.palette;
     final accent = theme.accent;
 
+    return MouseRegion(
+      cursor: SystemMouseCursors.text,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _focus.requestFocus(),
+        child: _buildField(palette, accent),
+      ),
+    );
+  }
+
+  Widget _buildField(AppPalette palette, AppAccent accent) {
     return AnimatedContainer(
       duration: AppDurations.fast,
       width: widget.width,

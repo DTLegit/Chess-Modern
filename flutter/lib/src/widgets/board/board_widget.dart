@@ -1,3 +1,5 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/widgets.dart';
 
 import '../../rust/api.dart' as rust;
@@ -25,145 +27,132 @@ class BoardWidget extends StatefulWidget {
 }
 
 class _BoardWidgetState extends State<BoardWidget>
-    with SingleTickerProviderStateMixin {
-  // Drag state
-  String? _dragFrom;
-  Offset _dragOffset = Offset.zero;
-  Offset _dragStart = Offset.zero;
-  bool _dragMoved = false;
+    with TickerProviderStateMixin {
   double _boardSize = 0;
 
-  // Check pulse animation
+  // Check-pulse animation — only runs while the king is in check.
   late final AnimationController _pulseCtrl = AnimationController(
     vsync: this,
     duration: AppDurations.checkPulse,
-  )..repeat(reverse: true);
+  );
+
+  // Piece movement animation — slides the last-moved piece from its origin.
+  late final AnimationController _moveCtrl = AnimationController(
+    vsync: this,
+    duration: AppDurations.pieceMove,
+  );
+
+  bool _wasInCheck = false;
+
+  // Animation state for the sliding piece overlay.
+  rust.Move? _lastAnimMove;
+  String? _animFrom;
+  String? _animTo;
+  rust.Piece? _animPiece;
+  bool _animating = false;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.game.addListener(_onGameChanged);
+    _moveCtrl.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _animating = false;
+          _animFrom = null;
+          _animTo = null;
+          _animPiece = null;
+        });
+      }
+    });
+  }
 
   @override
   void dispose() {
+    widget.game.removeListener(_onGameChanged);
     _pulseCtrl.dispose();
+    _moveCtrl.dispose();
     super.dispose();
   }
 
-  // 0.6% threshold for entering drag mode (Svelte uses the same).
-  bool _crossedThreshold(double dx, double dy, double size) {
-    final pct = 0.006;
-    return dx.abs() > size * pct || dy.abs() > size * pct;
+  void _onGameChanged() {
+    final inCheck = widget.game.view?.inCheck ?? false;
+    if (inCheck && !_wasInCheck) {
+      _pulseCtrl.repeat(reverse: true);
+    } else if (!inCheck && _wasInCheck) {
+      _pulseCtrl
+        ..stop()
+        ..reset();
+    }
+    _wasInCheck = inCheck;
+
+    // Trigger piece movement animation when lastMove changes.
+    final newMove = widget.game.lastMove;
+    if (newMove != null && newMove != _lastAnimMove) {
+      _lastAnimMove = newMove;
+      setState(() {
+        _animFrom = newMove.from;
+        _animTo = newMove.to;
+        _animPiece = widget.game.board[newMove.to];
+        _animating = true;
+      });
+      _moveCtrl
+        ..reset()
+        ..forward();
+    }
   }
 
   String? _squareAt(Offset local, double size, rust.Color orientation) {
     return xyToSquare(local.dx / size, local.dy / size, orientation);
   }
 
-  void _onPointerDown(
-    PointerDownEvent e,
-    rust.Color orientation,
-    Map<String, rust.Piece> board,
-    rust.Color? turn,
-  ) {
-    final sq = _squareAt(e.localPosition, _boardSize, orientation);
-    if (sq == null) return;
-    final piece = board[sq];
-    if (piece == null) return;
-    if (turn != null && piece.color != turn) return;
-    if (widget.game.inputLocked) return;
-    setState(() {
-      _dragFrom = sq;
-      _dragStart = e.localPosition;
-      _dragOffset = e.localPosition;
-      _dragMoved = false;
-    });
-    widget.game.select(sq);
-  }
-
-  void _onPointerMove(PointerMoveEvent e) {
-    if (_dragFrom == null) return;
-    final dx = e.localPosition.dx - _dragStart.dx;
-    final dy = e.localPosition.dy - _dragStart.dy;
-    if (!_dragMoved && _crossedThreshold(dx, dy, _boardSize)) {
-      setState(() => _dragMoved = true);
-    }
-    if (_dragMoved) {
-      setState(() => _dragOffset = e.localPosition);
-    }
-  }
-
-  void _onPointerUp(PointerUpEvent e, rust.Color orientation) {
-    final from = _dragFrom;
-    if (from == null) return;
-    final wasDrag = _dragMoved;
-    setState(() {
-      _dragFrom = null;
-      _dragMoved = false;
-    });
-    if (!wasDrag) return;
-    final to = _squareAt(e.localPosition, _boardSize, orientation);
-    if (to == null || to == from) return;
-    widget.game.tryMove(from, to);
-  }
-
-  void _onPointerCancel() {
-    if (_dragFrom == null) return;
-    setState(() {
-      _dragFrom = null;
-      _dragMoved = false;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: Listenable.merge([widget.game, widget.settings]),
-      builder: (context, _) {
-        final theme = AppTheme.of(context);
-        final palette = theme.palette;
-        final boardPalette = theme.board;
-        final view = widget.game.view;
-        final board = widget.game.board;
-        final orientation = widget.game.orientation;
-        final selected = widget.game.selected;
-        final lastMove = widget.game.lastMove;
-        final showLegalMoves = widget.settings.value.showLegalMoves;
-        final showCoordinates = widget.settings.value.showCoordinates;
-        final showLastMove = widget.settings.value.showLastMove;
-        final inCheck = view?.inCheck ?? false;
-        final turn = view?.turn;
-        final pendingPromotion = widget.game.pendingPromotion;
+    return RepaintBoundary(
+      child: ListenableBuilder(
+        listenable: Listenable.merge([widget.game, widget.settings]),
+        builder: (context, _) {
+          final theme = AppTheme.of(context);
+          final palette = theme.palette;
+          final boardPalette = theme.board;
+          final boardTheme = widget.settings.value.boardTheme;
+          final bezelConfig = boardBezelFor(boardTheme);
+          final view = widget.game.view;
+          final board = widget.game.board;
+          final orientation = widget.game.orientation;
+          final selected = widget.game.selected;
+          final lastMove = widget.game.lastMove;
+          final showLegalMoves = widget.settings.value.showLegalMoves;
+          final showCoordinates = widget.settings.value.showCoordinates;
+          final showLastMove = widget.settings.value.showLastMove;
+          final inCheck = view?.inCheck ?? false;
+          final turn = view?.turn;
+          final pendingPromotion = widget.game.pendingPromotion;
 
-        return Container(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          decoration: BoxDecoration(
-            color: boardPalette.bezel,
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                boardPalette.bezel,
-                Color.lerp(boardPalette.bezel, const Color(0xFF000000), 0.15)!,
-              ],
+          return Container(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [bezelConfig.topColor, bezelConfig.bottomColor],
+              ),
+              borderRadius: BorderRadius.circular(AppRadii.lg),
+              boxShadow: palette.shadowBoard,
             ),
-            borderRadius: BorderRadius.circular(AppRadii.lg),
-            boxShadow: palette.shadowBoard,
-          ),
-          child: AspectRatio(
-            aspectRatio: 1,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                _boardSize = constraints.maxWidth;
-                final cell = _boardSize / 8;
-                return Listener(
-                  behavior: HitTestBehavior.opaque,
-                  onPointerDown: (e) =>
-                      _onPointerDown(e, orientation, board, turn),
-                  onPointerMove: _onPointerMove,
-                  onPointerUp: (e) => _onPointerUp(e, orientation),
-                  onPointerCancel: (_) => _onPointerCancel(),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.deferToChild,
+            child: AspectRatio(
+              aspectRatio: 1,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  _boardSize = constraints.maxWidth;
+                  final cell = _boardSize / 8;
+                  // Click-only interaction: tap any square to select/move.
+                  return GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTapUp: (details) {
                       final sq = _squareAt(
                           details.localPosition, _boardSize, orientation);
-                      if (sq != null && _dragFrom == null) {
+                      if (sq != null && !widget.game.inputLocked) {
                         widget.game.select(sq);
                       }
                     },
@@ -171,13 +160,14 @@ class _BoardWidgetState extends State<BoardWidget>
                       borderRadius: BorderRadius.circular(AppRadii.tiny),
                       child: Stack(
                         children: [
-                          // Squares
+                          // Board squares
                           for (final sq in allSquares)
                             _Square(
                               sq: sq,
                               cell: cell,
                               orientation: orientation,
                               boardPalette: boardPalette,
+                              grain: boardGrainFor(boardTheme),
                               highlights: theme.highlights,
                               selected: selected == sq,
                               isLastMove: showLastMove &&
@@ -189,16 +179,77 @@ class _BoardWidgetState extends State<BoardWidget>
                               showCoordinates: showCoordinates,
                               pulse: _pulseCtrl,
                             ),
-                          // Pieces (skip the dragged piece — drawn separately)
+
+                          // Static pieces — the piece at _animTo is hidden
+                          // during the slide animation and replaced by the
+                          // AnimatedBuilder overlay below.
                           for (final entry in board.entries)
-                            if (entry.key != _dragFrom || !_dragMoved)
-                              _Piece(
-                                sq: entry.key,
-                                piece: entry.value,
-                                cell: cell,
-                                orientation: orientation,
+                            if (entry.key != _animTo || !_animating)
+                              Positioned(
+                                key: ValueKey('piece-${entry.key}'),
+                                left: squareXY(entry.key, orientation).col *
+                                    cell,
+                                top: squareXY(entry.key, orientation).row *
+                                    cell,
+                                width: cell,
+                                height: cell,
+                                child: IgnorePointer(
+                                  child: AnimatedScale(
+                                    scale:
+                                        selected == entry.key ? 1.08 : 1.0,
+                                    duration: AppDurations.fast,
+                                    curve: AppCurves.easeOut,
+                                    child: Padding(
+                                      padding:
+                                          EdgeInsets.all(cell * 0.06),
+                                      child: PieceWidget(
+                                          piece: entry.value),
+                                    ),
+                                  ),
+                                ),
                               ),
-                          // Legal-move hints
+
+                          // Sliding animation overlay for the last-moved piece.
+                          if (_animating &&
+                              _animPiece != null &&
+                              _animFrom != null &&
+                              _animTo != null)
+                            AnimatedBuilder(
+                              animation: _moveCtrl,
+                              builder: (_, child) {
+                                final fromXY =
+                                    squareXY(_animFrom!, orientation);
+                                final toXY =
+                                    squareXY(_animTo!, orientation);
+                                final t = AppCurves.easeOut
+                                    .transform(_moveCtrl.value);
+                                final left = lerpDouble(
+                                    fromXY.col * cell,
+                                    toXY.col * cell,
+                                    t)!;
+                                final top = lerpDouble(
+                                    fromXY.row * cell,
+                                    toXY.row * cell,
+                                    t)!;
+                                return Positioned(
+                                  left: left,
+                                  top: top,
+                                  width: cell,
+                                  height: cell,
+                                  child: child!,
+                                );
+                              },
+                              child: IgnorePointer(
+                                child: Padding(
+                                  padding: EdgeInsets.all(cell * 0.06),
+                                  child: PieceWidget(piece: _animPiece!),
+                                ),
+                              ),
+                            ),
+
+                          // Legal-move hints.
+                          // Positioned MUST be the direct Stack child —
+                          // IgnorePointer is placed inside it.
                           if (showLegalMoves && selected != null)
                             for (final sq in widget.game.legalForSelected)
                               _Hint(
@@ -208,14 +259,8 @@ class _BoardWidgetState extends State<BoardWidget>
                                 isCapture: board.containsKey(sq),
                                 highlights: theme.highlights,
                               ),
-                          // Dragged piece (lifted)
-                          if (_dragMoved && _dragFrom != null && board[_dragFrom!] != null)
-                            _DraggedPiece(
-                              piece: board[_dragFrom!]!,
-                              cell: cell,
-                              position: _dragOffset,
-                            ),
-                          // Promotion overlay (Phase 5a)
+
+                          // Promotion overlay
                           if (pendingPromotion != null)
                             PromotionOverlay(
                               boardSize: _boardSize,
@@ -226,16 +271,20 @@ class _BoardWidgetState extends State<BoardWidget>
                         ],
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 }
+
+// ---------------------------------------------------------------------------
+// Square
+// ---------------------------------------------------------------------------
 
 class _Square extends StatelessWidget {
   const _Square({
@@ -243,6 +292,7 @@ class _Square extends StatelessWidget {
     required this.cell,
     required this.orientation,
     required this.boardPalette,
+    required this.grain,
     required this.highlights,
     required this.selected,
     required this.isLastMove,
@@ -255,6 +305,7 @@ class _Square extends StatelessWidget {
   final double cell;
   final rust.Color orientation;
   final BoardPalette boardPalette;
+  final BoardGrainConfig grain;
   final AppHighlights highlights;
   final bool selected;
   final bool isLastMove;
@@ -268,6 +319,9 @@ class _Square extends StatelessWidget {
     final light = isLightSquare(sq);
     final base = light ? boardPalette.light : boardPalette.dark;
     final coordColor = light ? boardPalette.dark : boardPalette.light;
+    final grainColor = light ? grain.lightGrain : grain.darkGrain;
+    final highlightColor =
+        light ? grain.lightHighlight : grain.darkHighlight;
 
     return Positioned(
       left: xy.col * cell,
@@ -276,24 +330,42 @@ class _Square extends StatelessWidget {
       height: cell,
       child: Stack(
         children: [
-          ColoredBox(color: base),
-          if (isLastMove) ColoredBox(color: highlights.last),
-          if (selected) ColoredBox(color: highlights.select),
+          // SizedBox.expand forces each layer to fill the cell (ColoredBox/
+          // DecoratedBox with no child return size 0 under loose Stack constraints).
+          SizedBox.expand(child: ColoredBox(color: base)),
+          if (grainColor != const Color(0x00000000))
+            SizedBox.expand(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [grainColor, highlightColor],
+                  ),
+                ),
+              ),
+            ),
+          if (isLastMove)
+            SizedBox.expand(child: ColoredBox(color: highlights.last)),
+          if (selected)
+            SizedBox.expand(child: ColoredBox(color: highlights.select)),
           if (inCheck)
             AnimatedBuilder(
               animation: pulse,
               builder: (_, __) {
                 final t = pulse is Animation<double>
                     ? (pulse as Animation<double>).value
-                    : 1.0;
+                    : 0.0;
                 final opacity = 0.5 + 0.35 * t;
-                return DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: RadialGradient(
-                      colors: [
-                        Color.fromRGBO(194, 91, 79, opacity),
-                        const Color(0x00C25B4F),
-                      ],
+                return SizedBox.expand(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: RadialGradient(
+                        colors: [
+                          Color.fromRGBO(194, 91, 79, opacity),
+                          const Color(0x00C25B4F),
+                        ],
+                      ),
                     ),
                   ),
                 );
@@ -331,80 +403,9 @@ class _Square extends StatelessWidget {
   }
 }
 
-class _Piece extends StatelessWidget {
-  const _Piece({
-    required this.sq,
-    required this.piece,
-    required this.cell,
-    required this.orientation,
-  });
-
-  final String sq;
-  final rust.Piece piece;
-  final double cell;
-  final rust.Color orientation;
-
-  @override
-  Widget build(BuildContext context) {
-    final xy = squareXY(sq, orientation);
-    return AnimatedPositioned(
-      key: ValueKey('${piece.color}-${piece.kind}-$sq'),
-      duration: AppDurations.pieceMove,
-      curve: AppCurves.easeOut,
-      left: xy.col * cell,
-      top: xy.row * cell,
-      width: cell,
-      height: cell,
-      child: IgnorePointer(
-        child: Padding(
-          padding: EdgeInsets.all(cell * 0.06),
-          child: PieceWidget(piece: piece),
-        ),
-      ),
-    );
-  }
-}
-
-class _DraggedPiece extends StatelessWidget {
-  const _DraggedPiece({
-    required this.piece,
-    required this.cell,
-    required this.position,
-  });
-  final rust.Piece piece;
-  final double cell;
-  final Offset position;
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: position.dx - cell / 2,
-      top: position.dy - cell / 2,
-      width: cell,
-      height: cell,
-      child: IgnorePointer(
-        child: Transform.scale(
-          scale: 1.08,
-          child: Container(
-            decoration: const BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x5C000000),
-                  blurRadius: 22,
-                  offset: Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Padding(
-              padding: EdgeInsets.all(cell * 0.06),
-              child: PieceWidget(piece: piece),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// ---------------------------------------------------------------------------
+// Legal move hint
+// ---------------------------------------------------------------------------
 
 class _Hint extends StatelessWidget {
   const _Hint({
@@ -424,12 +425,15 @@ class _Hint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final xy = squareXY(sq, orientation);
-    return IgnorePointer(
-      child: Positioned(
-        left: xy.col * cell,
-        top: xy.row * cell,
-        width: cell,
-        height: cell,
+    // Positioned MUST be the direct Stack child — placing IgnorePointer
+    // outside of Positioned would break the positional layout because
+    // Positioned only functions as a direct Stack descendant.
+    return Positioned(
+      left: xy.col * cell,
+      top: xy.row * cell,
+      width: cell,
+      height: cell,
+      child: IgnorePointer(
         child: Center(
           child: isCapture
               ? Container(

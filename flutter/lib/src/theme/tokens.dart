@@ -376,3 +376,138 @@ BoardPalette boardPaletteFor(rust.BoardTheme theme) {
       return _midnightPalette;
   }
 }
+
+/// Per-theme grain overlay config for squares.
+/// Mimics CSS `linear-gradient` noise layers on the Svelte board.
+@immutable
+class BoardGrainConfig {
+  const BoardGrainConfig({
+    required this.lightGrain,
+    required this.darkGrain,
+    this.lightHighlight = const Color(0x00FFFFFF),
+    this.darkHighlight = const Color(0x00FFFFFF),
+  });
+  /// Subtle gradient overlay color on light squares.
+  final Color lightGrain;
+  /// Subtle gradient overlay color on dark squares.
+  final Color darkGrain;
+  final Color lightHighlight;
+  final Color darkHighlight;
+}
+
+const _woodGrain = BoardGrainConfig(
+  lightGrain: Color(0x14C8A060),
+  darkGrain: Color(0x1F000000),
+  lightHighlight: Color(0x0AFFFFFF),
+  darkHighlight: Color(0x0DFFFFFF),
+);
+
+const _slateGrain = BoardGrainConfig(
+  lightGrain: Color(0x0AFFFFFF),
+  darkGrain: Color(0x14000000),
+);
+
+const _marbleGrain = BoardGrainConfig(
+  lightGrain: Color(0x14FFFFFF),
+  darkGrain: Color(0x0A000000),
+  lightHighlight: Color(0x0CFFFFFF),
+);
+
+const _emeraldGrain = BoardGrainConfig(
+  lightGrain: Color(0x1400CC66),
+  darkGrain: Color(0x1F001F11),
+  darkHighlight: Color(0x0FFFFFFF),
+);
+
+const _obsidianGrain = BoardGrainConfig(
+  lightGrain: Color(0x14FFFFFF),
+  darkGrain: Color(0x1F000000),
+);
+
+const _sandstoneGrain = BoardGrainConfig(
+  lightGrain: Color(0x14D4A860),
+  darkGrain: Color(0x1F000000),
+  lightHighlight: Color(0x0AFFFFFF),
+);
+
+const _midnightGrain = BoardGrainConfig(
+  lightGrain: Color(0x14AABBEE),
+  darkGrain: Color(0x1F000714),
+);
+
+BoardGrainConfig boardGrainFor(rust.BoardTheme theme) {
+  switch (theme) {
+    case rust.BoardTheme.woodRealistic:
+      return const BoardGrainConfig(
+        lightGrain: Color(0x22C8A060),
+        darkGrain: Color(0x33000000),
+        lightHighlight: Color(0x14FFFFFF),
+        darkHighlight: Color(0x14FFFFFF),
+      );
+    case rust.BoardTheme.wood:
+      return _woodGrain;
+    case rust.BoardTheme.slateRealistic:
+      return const BoardGrainConfig(
+        lightGrain: Color(0x14FFFFFF),
+        darkGrain: Color(0x22000000),
+        lightHighlight: Color(0x0EFFFFFF),
+      );
+    case rust.BoardTheme.slate:
+      return _slateGrain;
+    case rust.BoardTheme.marble:
+      return _marbleGrain;
+    case rust.BoardTheme.emerald:
+      return _emeraldGrain;
+    case rust.BoardTheme.obsidian:
+      return _obsidianGrain;
+    case rust.BoardTheme.sandstone:
+      return _sandstoneGrain;
+    case rust.BoardTheme.midnight:
+      return _midnightGrain;
+  }
+}
+
+/// Per-theme bezel gradient configuration.
+@immutable
+class BoardBezelConfig {
+  const BoardBezelConfig({
+    required this.topColor,
+    required this.bottomColor,
+    this.innerHighlight = const Color(0x12FFFFFF),
+  });
+  final Color topColor;
+  final Color bottomColor;
+  final Color innerHighlight;
+}
+
+BoardBezelConfig boardBezelFor(rust.BoardTheme theme) {
+  final b = boardPaletteFor(theme).bezel;
+  // Each theme darkens the bezel 20% toward black at the bottom.
+  final darker = Color.lerp(b, const Color(0xFF000000), 0.2)!;
+  switch (theme) {
+    case rust.BoardTheme.wood:
+    case rust.BoardTheme.woodRealistic:
+    case rust.BoardTheme.sandstone:
+      return BoardBezelConfig(
+        topColor: b,
+        bottomColor: darker,
+        innerHighlight: const Color(0x18FFFFFF),
+      );
+    case rust.BoardTheme.slate:
+    case rust.BoardTheme.slateRealistic:
+    case rust.BoardTheme.marble:
+    case rust.BoardTheme.obsidian:
+    case rust.BoardTheme.midnight:
+      return BoardBezelConfig(
+        topColor: b,
+        bottomColor: darker,
+        innerHighlight: const Color(0x0EFFFFFF),
+      );
+    case rust.BoardTheme.emerald:
+      return BoardBezelConfig(
+        topColor: b,
+        bottomColor: darker,
+        innerHighlight: const Color(0x10FFFFFF),
+      );
+  }
+}

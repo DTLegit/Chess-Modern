@@ -40,12 +40,15 @@ const Map<String, _PathPair> _meridaPaths = {
 
 /// Build the SVG for a Merida piece, recolored by side.
 String meridaSvg(rust.PieceKind kind, rust.Color color) {
+  // The 'b' and 'q' path data in _meridaPaths were ported with their labels
+  // swapped — the entry keyed 'b' visually renders as the queen shape and
+  // vice versa. Fix by cross-mapping the keys here.
   final key = switch (kind) {
     rust.PieceKind.p => 'p',
     rust.PieceKind.n => 'n',
-    rust.PieceKind.b => 'b',
+    rust.PieceKind.b => 'q',
     rust.PieceKind.r => 'r',
-    rust.PieceKind.q => 'q',
+    rust.PieceKind.q => 'b',
     rust.PieceKind.k => 'k',
   };
   final paths = _meridaPaths[key]!;

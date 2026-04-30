@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/widgets.dart';
 
 import '../../theme/app_theme.dart';
@@ -183,7 +185,10 @@ Future<T?> showAppDialog<T>(
       transitionDuration: AppDurations.base,
       reverseTransitionDuration: AppDurations.fast,
       pageBuilder: (ctx, anim, secondary) {
-        return _DialogScrim(child: Builder(builder: builder));
+        return _DialogScrim(
+          barrierDismissible: barrierDismissible,
+          child: Builder(builder: builder),
+        );
       },
       transitionsBuilder: (ctx, anim, secondary, child) {
         final curve = CurvedAnimation(parent: anim, curve: AppCurves.easeOut);
@@ -208,21 +213,28 @@ Future<T?> showAppDialog<T>(
 }
 
 /// Centers the dialog and absorbs taps outside the dialog body for dismiss.
+/// Applies a backdrop blur to the content behind the dialog.
 class _DialogScrim extends StatelessWidget {
-  const _DialogScrim({required this.child});
+  const _DialogScrim({required this.child, this.barrierDismissible = true});
   final Widget child;
+  final bool barrierDismissible;
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.of(context).maybePop(),
-      behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.pageMargin),
-        child: GestureDetector(
-          // Absorb taps inside the dialog so they don't propagate to the scrim.
-          onTap: () {},
-          behavior: HitTestBehavior.opaque,
-          child: child,
+    return BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      child: GestureDetector(
+        onTap: barrierDismissible
+            ? () => Navigator.of(context).maybePop()
+            : null,
+        behavior: HitTestBehavior.opaque,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.pageMargin),
+          child: GestureDetector(
+            // Absorb taps inside the dialog so they don't propagate to the scrim.
+            onTap: () {},
+            behavior: HitTestBehavior.opaque,
+            child: child,
+          ),
         ),
       ),
     );

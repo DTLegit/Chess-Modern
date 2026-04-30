@@ -1,6 +1,0 @@
-# Stockfish sidecar binaries are downloaded by scripts/fetch-stockfish.sh
-# Naming convention (Tauri sidecar): stockfish-<rust-target-triple><.exe>
-#   stockfish-aarch64-apple-darwin
-#   stockfish-x86_64-apple-darwin
-#   stockfish-x86_64-pc-windows-msvc.exe
-#   stockfish-x86_64-unknown-linux-gnu

@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show Tooltip;
 import 'package:flutter/widgets.dart';
 
 import '../../theme/app_theme.dart';
@@ -56,7 +57,8 @@ class _AppButtonState extends State<AppButton> {
     final padV = s == AppButtonSize.small ? 7.0 : 10.0;
     final fontSize = s == AppButtonSize.small ? 12.0 : 13.0;
 
-    final colors = _resolveColors(theme, v, hovered: _hovered, pressed: _pressed);
+    final colors =
+        _resolveColors(theme, v, hovered: _hovered, pressed: _pressed);
 
     final translateY = (_enabled && _hovered && !_pressed) ? -1.0 : 0.0;
 
@@ -85,7 +87,36 @@ class _AppButtonState extends State<AppButton> {
       ),
     );
 
-    Widget body = AnimatedContainer(
+    // Primary button: add a subtle inset white highlight at the top edge
+    // (approximates CSS inset 0 1px 0 rgba(255,255,255,0.2) inner sheen).
+    if (v == AppButtonVariant.primary) {
+      content = Stack(
+        children: [
+          content,
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: 1,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [
+                  const Color(0x00FFFFFF),
+                  const Color(0x33FFFFFF),
+                  const Color(0x00FFFFFF),
+                ]),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    Widget body = AnimatedScale(
+      scale: (_pressed && _enabled) ? 0.95 : 1.0,
+      duration: const Duration(milliseconds: 70),
+      curve: Curves.easeOut,
+      child: AnimatedContainer(
       duration: AppDurations.fast,
       curve: AppCurves.easeOut,
       transform: Matrix4.translationValues(0, translateY, 0),
@@ -102,6 +133,7 @@ class _AppButtonState extends State<AppButton> {
             : (v == AppButtonVariant.primary ? theme.palette.shadowSm : null),
       ),
       child: content,
+    ),
     );
 
     if (widget.fullWidth) {
@@ -115,7 +147,7 @@ class _AppButtonState extends State<AppButton> {
       child: body,
     );
 
-    return Opacity(
+    Widget result = Opacity(
       opacity: _enabled ? 1.0 : 0.5,
       child: MouseRegion(
         cursor: _enabled
@@ -146,6 +178,12 @@ class _AppButtonState extends State<AppButton> {
         ),
       ),
     );
+
+    if (widget.tooltip != null) {
+      result = Tooltip(message: widget.tooltip!, child: result);
+    }
+
+    return result;
   }
 }
 
@@ -189,31 +227,36 @@ _ButtonColors _resolveColors(
           ],
         ),
       );
+
     case AppButtonVariant.ghost:
+      // On hover: accent-tinted background + accent-tinted border.
       return _ButtonColors(
-        bg: hovered ? palette.bgCard : palette.bgElev.withValues(alpha: 0.0),
+        bg: hovered
+            ? Color.alphaBlend(
+                accent.mid.withValues(alpha: 0.12), palette.bgCard)
+            : const Color(0x00000000),
         fg: palette.ink,
-        borderColor: palette.hairlineStrong,
+        borderColor: hovered
+            ? Color.alphaBlend(
+                accent.mid.withValues(alpha: 0.40), palette.hairlineStrong)
+            : palette.hairlineStrong,
       );
+
     case AppButtonVariant.subtle:
       return _ButtonColors(
         bg: hovered
-            ? Color.alphaBlend(accent.soft.withValues(alpha: 0.18), palette.bgElev)
+            ? Color.alphaBlend(
+                accent.soft.withValues(alpha: 0.18), palette.bgElev)
             : palette.bgElev.withValues(alpha: 0.0),
         fg: hovered ? palette.ink : palette.inkSoft,
       );
+
+    // Danger: transparent bg + red border + red text; hover adds ~10% red fill.
     case AppButtonVariant.danger:
       return _ButtonColors(
-        bg: hovered ? const Color(0xFFD06A5E) : appRedSoft,
-        fg: const Color(0xFFFFFAEE),
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            hovered ? const Color(0xFFD06A5E) : appRedSoft,
-            const Color(0xFFA84A40),
-          ],
-        ),
+        bg: hovered ? const Color(0x1AC25B4F) : const Color(0x00000000),
+        fg: appRedSoft,
+        borderColor: appRedSoft,
       );
   }
 }

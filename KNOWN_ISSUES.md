@@ -18,8 +18,8 @@ packaging that are intentionally left as-is.
 ## Stockfish
 
 - **Desktop sidecar binaries are gitignored.** `scripts/fetch-stockfish.sh`
-  pulls Stockfish 17 from the upstream GitHub release for each desktop
-  triple.
+  pulls Stockfish 17 from the upstream GitHub release into
+  `crates/chess_bridge/binaries/` for each desktop triple.
 - **Android binaries are NDK source-built.** `scripts/build-stockfish-android.sh`
   cross-compiles per ABI (arm64-v8a, armeabi-v7a, x86_64). They land in
   `flutter/assets/stockfish/<abi>/stockfish` (gitignored) and bulk up the
@@ -28,7 +28,7 @@ packaging that are intentionally left as-is.
   forbids spawning external binaries, so AI levels 4–10 transparently use
   `fallback_custom_level` (the strongest custom-engine setting). Gameplay is
   fully functional but the engine is weaker than desktop Stockfish at high
-  levels. The About dialog calls this out.
+  levels.
 - **AI difficulty 4–10 transparently falls back to the custom engine** any
   time the bundled binary is missing or fails to spawn (the same fallback
   used on iOS). The user does not see an error, only a slightly weaker
@@ -48,10 +48,9 @@ packaging that are intentionally left as-is.
 
 ## Frontend behaviour
 
-- **Audio is procedurally synthesised**, just like the Svelte version, but
-  rendered to PCM WAV bytes and played via `audioplayers`. This avoids
-  shipping any audio assets but means the synth runs on the main isolate
-  the first time each `SoundKind` is hit (~5 ms blocking; cached afterward).
+- **Audio is procedurally synthesised** — rendered to PCM WAV bytes at
+  first use (~5 ms blocking; cached afterward) and played via `afplay` on
+  macOS or `audioplayers` on other platforms.
 - **PGN export on mobile (iOS / Android) falls back to "Copy PGN".** The
   desktop builds use the `file_selector` save dialog; mobile platforms
   copy the PGN to the system clipboard since `file_selector` is desktop-only.

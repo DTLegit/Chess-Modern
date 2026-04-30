@@ -10,13 +10,11 @@ import 'piece_widget.dart';
 /// In-board promotion picker overlay.
 ///
 /// Mirrors `legacy/svelte/lib/modals/Promotion.svelte`:
-/// - Positioned on the destination square as percentages of the board size.
-/// - Stacks 4 piece buttons (Q, N, R, B) vertically.
-/// - Direction is upward (toward player) when promoting on rank 8,
-///   downward when promoting on rank 1.
-/// - Semi-transparent dark backdrop with 2px blur covers the rest of the
-///   board; tapping it cancels.
-/// - 160ms scale-in (0.94 → 1.0) with `easeOut`.
+/// - Positioned on the destination square.
+/// - Unified container: border-radius 8, shadow-lg, overflow hidden,
+///   single border, bottom-only separators between choices.
+/// - Backdrop: rgba(20,14,8,0.18) barely-there tint (not a dark overlay).
+/// - 160ms scale-in (0.94 → 1.0) with easeOut.
 class PromotionOverlay extends StatefulWidget {
   const PromotionOverlay({
     super.key,
@@ -72,48 +70,58 @@ class _PromotionOverlayState extends State<PromotionOverlay>
 
   @override
   Widget build(BuildContext context) {
+    final theme = AppTheme.of(context);
     final size = widget.boardSize;
     final cell = size / 8;
     final destXY = squareXY(widget.pending.to, widget.orientation);
-    // Direction: if promoting on the top row (row 0), stack downward. Else
-    // stack upward toward the player.
     final stackDown = destXY.row == 0;
     final col = destXY.col;
     final startRow = stackDown ? destXY.row : (destXY.row - 3);
 
     return Stack(
       children: [
-        // Backdrop — taps cancel.
+        // Barely-there backdrop — matches Svelte rgba(20,14,8,0.18).
         Positioned.fill(
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () => widget.game.cancelPromotion(),
             child: FadeTransition(
               opacity: _anim,
-              child: const ColoredBox(color: Color(0x66000000)),
+              child: const ColoredBox(color: Color(0x2E140E08)),
             ),
           ),
         ),
-        // Picker tiles.
+        // Picker — unified rounded container like Svelte.
         Positioned(
           left: col * cell,
           top: startRow * cell,
           width: cell,
-          height: cell * 4,
           child: ScaleTransition(
             scale: Tween<double>(begin: 0.94, end: 1.0).animate(_anim),
             child: FadeTransition(
               opacity: _anim,
-              child: Column(
-                children: [
-                  for (final p in _choices)
-                    _Tile(
-                      cell: cell,
-                      color: widget.pending.color,
-                      kind: _kind(p),
-                      onTap: () => widget.game.commitPromotion(p),
-                    ),
-                ],
+              child: Container(
+                decoration: BoxDecoration(
+                  color: theme.palette.bgElev,
+                  border: Border.all(color: theme.palette.hairline, width: 1),
+                  borderRadius: BorderRadius.circular(8),
+                  boxShadow: theme.palette.shadowLg,
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < _choices.length; i++)
+                      _Tile(
+                        cell: cell,
+                        color: widget.pending.color,
+                        kind: _kind(_choices[i]),
+                        isLast: i == _choices.length - 1,
+                        onTap: () =>
+                            widget.game.commitPromotion(_choices[i]),
+                      ),
+                  ],
+                ),
               ),
             ),
           ),
@@ -128,11 +136,13 @@ class _Tile extends StatefulWidget {
     required this.cell,
     required this.color,
     required this.kind,
+    required this.isLast,
     required this.onTap,
   });
   final double cell;
   final rust.Color color;
   final rust.PieceKind kind;
+  final bool isLast;
   final VoidCallback onTap;
 
   @override
@@ -141,6 +151,7 @@ class _Tile extends StatefulWidget {
 
 class _TileState extends State<_Tile> {
   bool _hover = false;
+
   @override
   Widget build(BuildContext context) {
     final theme = AppTheme.of(context);
@@ -155,11 +166,18 @@ class _TileState extends State<_Tile> {
           duration: AppDurations.fast,
           width: widget.cell,
           height: widget.cell,
-          decoration: BoxDecoration(
-            color: _hover ? theme.accent.soft : theme.palette.bgElev,
-            border: Border.all(color: theme.palette.hairline, width: 1),
-          ),
+          // Gold-soft hover matching Svelte's var(--c-gold-soft).
+          color: _hover ? const Color(0x33D4A84B) : theme.palette.bgElev,
           padding: EdgeInsets.all(widget.cell * 0.10),
+          // Bottom separator between tiles (except last).
+          foregroundDecoration: widget.isLast
+              ? null
+              : BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(
+                        color: theme.palette.hairline, width: 1),
+                  ),
+                ),
           child: PieceWidget(
             piece: rust.Piece(color: widget.color, kind: widget.kind),
           ),

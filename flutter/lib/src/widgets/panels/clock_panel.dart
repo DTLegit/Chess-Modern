@@ -23,8 +23,9 @@ class ClockPanel extends StatelessWidget {
         final ms =
             (side == rust.Color.w ? clock.whiteMs : clock.blackMs).toInt();
         final active = clock.active == side && !clock.paused;
-        final isLow = ms < 30000; // < 30s — red tint per Svelte Clock.svelte
-        return _ClockBox(active: active, isLow: isLow, child: Text(_formatMs(ms)));
+        final isLow = ms < 30000;
+        return _ClockBox(
+            active: active, isLow: isLow, child: Text(_formatMs(ms)));
       },
     );
   }
@@ -46,6 +47,9 @@ class _ClockBox extends StatelessWidget {
     final palette = theme.palette;
     final accent = theme.accent;
 
+    // Gold-soft color approximation for active ring.
+    const goldSoft = Color(0xFFD4A84B);
+
     Color textColor = palette.ink;
     if (isLow) textColor = appRedSoft;
     if (active && !isLow) textColor = accent.mid;
@@ -53,32 +57,43 @@ class _ClockBox extends StatelessWidget {
     BoxDecoration decoration;
     if (active) {
       decoration = BoxDecoration(
+        // Svelte: linear-gradient(180deg, #fffaef, var(--c-bg-elev))
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [palette.bgElev, palette.bgCard],
+          colors: [const Color(0xFFFFFAEF), palette.bgElev],
         ),
-        border: Border.all(color: isLow ? appRedSoft : accent.soft, width: 1),
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        border: Border.all(
+          color: isLow ? appRedSoft : goldSoft,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(10),
         boxShadow: [
+          // Ring effect: 0 0 0 1px goldSoft/redSoft
+          BoxShadow(
+            color: isLow ? appRedSoft : goldSoft,
+            blurRadius: 0,
+            spreadRadius: 1,
+          ),
+          // Blur glow behind
           BoxShadow(
             color: isLow
-                ? const Color(0x38C25B4F) // accent_red glow
-                : const Color(0x2EC2933B), // accent_mid glow
+                ? const Color(0x38C25B4F)
+                : const Color(0x2EC2933B),
             blurRadius: 24,
           ),
         ],
       );
     } else {
       decoration = BoxDecoration(
-        color: palette.bgElev,
+        color: palette.bgCard,
         border: Border.all(color: palette.hairline, width: 1),
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        borderRadius: BorderRadius.circular(10),
       );
     }
 
     return AnimatedContainer(
-      duration: AppDurations.fast,
+      duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.xxl,
         vertical: AppSpacing.lg,
@@ -92,6 +107,10 @@ class _ClockBox extends StatelessWidget {
   }
 }
 
+/// Formats milliseconds to display string matching Clock.svelte:
+/// - Under 1 minute:  "5.3"  (seconds + tenth, no minutes prefix)
+/// - 1 min – 1 hour:  "m:ss"
+/// - 1 hour+:          "h:mm:ss"
 String _formatMs(int ms) {
   if (ms < 0) ms = 0;
   final totalSeconds = ms ~/ 1000;
@@ -103,7 +122,8 @@ String _formatMs(int ms) {
   }
   if (totalSeconds < 60) {
     final tenths = (ms ~/ 100) % 10;
-    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}.$tenths';
+    // Svelte shows just "s.t" (e.g. "5.3") without zero-padded minutes.
+    return '$s.$tenths';
   }
-  return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+  return '$m:${s.toString().padLeft(2, '0')}';
 }

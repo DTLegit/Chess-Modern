@@ -3,7 +3,6 @@ resolver = "2"
 members = [
     "crates/chess_core",
     "crates/chess_bridge",
-    "legacy/tauri",
 ]
 default-members = ["crates/chess_core", "crates/chess_bridge"]
 

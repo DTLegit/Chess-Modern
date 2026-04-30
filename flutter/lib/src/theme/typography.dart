@@ -142,15 +142,15 @@ class AppTextStyles {
     fontFeatures: [FontFeature.tabularFigures()],
   );
 
-  /// Clock face — mm:ss.d, big tabular figures.
+  /// Clock face — mm:ss.d, big tabular figures. Matches Svelte Clock.svelte 28px.
   static const TextStyle clock = TextStyle(
     fontFamily: AppFontFamilies.mono,
     fontFamilyFallback: AppFontFamilies.monoFallback,
-    fontSize: 18,
-    height: 1.1,
-    fontWeight: FontWeight.w600,
+    fontSize: 28,
+    height: 1.0,
+    fontWeight: FontWeight.w500,
     fontFeatures: [FontFeature.tabularFigures()],
-    letterSpacing: 0.3,
+    letterSpacing: -0.28, // -0.01em at 28px
   );
 
   /// AI badge / very tiny label.
