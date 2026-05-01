@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
 
+import '../../rust/api.dart' as rust;
 import '../../theme/app_theme.dart';
 import '../../theme/tokens.dart';
 import '../../theme/typography.dart';
@@ -60,78 +61,93 @@ class AppDialog extends StatelessWidget {
           )
         : body;
 
-    return Center(
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: width,
-          maxHeight: MediaQuery.of(context).size.height - 48,
-        ),
-        child: DefaultTextStyle.merge(
-          style: AppTextStyles.body.copyWith(color: palette.ink),
-          child: Container(
-            decoration: BoxDecoration(
-              color: palette.bgElev,
-              borderRadius: BorderRadius.circular(AppRadii.xl),
-              boxShadow: palette.shadowLg,
-              border: Border.all(color: palette.hairline, width: 1),
+    final isMobile = MediaQuery.of(context).size.width < 720;
+
+    Widget dialogContent = Container(
+      width: isMobile ? double.infinity : null,
+      decoration: BoxDecoration(
+        color: palette.bgElev,
+        borderRadius: BorderRadius.circular(isMobile ? AppRadii.lg : AppRadii.xl),
+        boxShadow: palette.shadowLg,
+        border: Border.all(color: palette.hairline, width: 1),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (effectiveTitle != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.bigGap,
+                AppSpacing.huge,
+                AppSpacing.lg,
+                AppSpacing.lg,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(child: effectiveTitle),
+                  if (showCloseButton)
+                    AppIconButton(
+                      icon: const _XIcon(),
+                      onPressed: onClose ??
+                          () => Navigator.of(context).maybePop(),
+                      tooltip: 'Close',
+                      size: 28,
+                      iconSize: 16,
+                    ),
+                ],
+              ),
             ),
-            clipBehavior: Clip.antiAlias,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (effectiveTitle != null)
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.bigGap,
-                      AppSpacing.huge,
-                      AppSpacing.lg,
-                      AppSpacing.lg,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Expanded(child: effectiveTitle),
-                        if (showCloseButton)
-                          AppIconButton(
-                            icon: const _XIcon(),
-                            onPressed: onClose ??
-                                () => Navigator.of(context).maybePop(),
-                            tooltip: 'Close',
-                            size: 28,
-                            iconSize: 16,
-                          ),
-                      ],
-                    ),
-                  ),
-                Flexible(
-                  child: SingleChildScrollView(child: bodyChild),
+          Flexible(
+            child: SingleChildScrollView(child: bodyChild),
+          ),
+          if (actions != null && actions!.isNotEmpty)
+            Container(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.bigGap,
+                AppSpacing.lg,
+                AppSpacing.bigGap,
+                AppSpacing.huge,
+              ),
+              decoration: BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: palette.hairline, width: 1),
                 ),
-                if (actions != null && actions!.isNotEmpty)
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(
-                      AppSpacing.bigGap,
-                      AppSpacing.lg,
-                      AppSpacing.bigGap,
-                      AppSpacing.huge,
-                    ),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        top: BorderSide(color: palette.hairline, width: 1),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        for (var i = 0; i < actions!.length; i++) ...[
-                          if (i > 0) const SizedBox(width: AppSpacing.sm),
-                          actions![i],
-                        ],
-                      ],
-                    ),
-                  ),
-              ],
+              ),
+              child: Wrap(
+                alignment: WrapAlignment.end,
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: actions!,
+              ),
             ),
+        ],
+      ),
+    );
+
+    if (theme.appTheme == rust.AppTheme.liquidGlass) {
+      dialogContent = ClipRRect(
+        borderRadius: BorderRadius.circular(isMobile ? AppRadii.lg : AppRadii.xl),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+          child: dialogContent,
+        ),
+      );
+    }
+
+    return Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: isMobile ? 16.0 : 0.0),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: width,
+            maxHeight: MediaQuery.of(context).size.height - 48,
+          ),
+          child: DefaultTextStyle.merge(
+            style: AppTextStyles.body.copyWith(color: palette.ink),
+            child: dialogContent,
           ),
         ),
       ),

@@ -963,7 +963,11 @@ impl SseDecode for crate::api::AppTheme {
         return match inner {
             0 => crate::api::AppTheme::Light,
             1 => crate::api::AppTheme::Dark,
-            2 => crate::api::AppTheme::Blue,
+            2 => crate::api::AppTheme::Black,
+            3 => crate::api::AppTheme::CasualLight,
+            4 => crate::api::AppTheme::CasualDark,
+            5 => crate::api::AppTheme::LiquidGlass,
+            6 => crate::api::AppTheme::Material,
             _ => unreachable!("Invalid variant for AppTheme: {}", inner),
         };
     }
@@ -1665,7 +1669,11 @@ impl flutter_rust_bridge::IntoDart for FrbWrapper<crate::api::AppTheme> {
         match self.0 {
             crate::api::AppTheme::Light => 0.into_dart(),
             crate::api::AppTheme::Dark => 1.into_dart(),
-            crate::api::AppTheme::Blue => 2.into_dart(),
+            crate::api::AppTheme::Black => 2.into_dart(),
+            crate::api::AppTheme::CasualLight => 3.into_dart(),
+            crate::api::AppTheme::CasualDark => 4.into_dart(),
+            crate::api::AppTheme::LiquidGlass => 5.into_dart(),
+            crate::api::AppTheme::Material => 6.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -2268,7 +2276,11 @@ impl SseEncode for crate::api::AppTheme {
             match self {
                 crate::api::AppTheme::Light => 0,
                 crate::api::AppTheme::Dark => 1,
-                crate::api::AppTheme::Blue => 2,
+                crate::api::AppTheme::Black => 2,
+                crate::api::AppTheme::CasualLight => 3,
+                crate::api::AppTheme::CasualDark => 4,
+                crate::api::AppTheme::LiquidGlass => 5,
+                crate::api::AppTheme::Material => 6,
                 _ => {
                     unimplemented!("");
                 }

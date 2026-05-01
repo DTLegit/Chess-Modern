@@ -179,11 +179,15 @@ pub enum BoardTheme {
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, PartialEq, Eq)]
-#[serde(rename_all = "lowercase")]
+#[serde(rename_all = "snake_case")]
 pub enum AppTheme {
     Light,
     Dark,
-    Blue,
+    Black,
+    CasualLight,
+    CasualDark,
+    LiquidGlass,
+    Material,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Type, PartialEq, Eq)]

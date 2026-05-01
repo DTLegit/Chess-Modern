@@ -69,17 +69,17 @@ class _AppButtonState extends State<AppButton> {
       ),
       child: IconTheme(
         data: IconThemeData(color: colors.fg, size: fontSize + 4),
-        child: Row(
+        child:         Row(
           mainAxisSize: widget.fullWidth ? MainAxisSize.max : MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (widget.leading != null) ...[
               widget.leading!,
-              const SizedBox(width: 6),
+              if (widget.label.isNotEmpty) const SizedBox(width: 6),
             ],
-            Text(widget.label),
+            if (widget.label.isNotEmpty) Text(widget.label),
             if (widget.trailing != null) ...[
-              const SizedBox(width: 6),
+              if (widget.label.isNotEmpty) const SizedBox(width: 6),
               widget.trailing!,
             ],
           ],
@@ -87,9 +87,11 @@ class _AppButtonState extends State<AppButton> {
       ),
     );
 
+    final isFlat = theme.palette.shadowSm.isEmpty;
+
     // Primary button: add a subtle inset white highlight at the top edge
     // (approximates CSS inset 0 1px 0 rgba(255,255,255,0.2) inner sheen).
-    if (v == AppButtonVariant.primary) {
+    if (v == AppButtonVariant.primary && !isFlat) {
       content = Stack(
         children: [
           content,
@@ -124,7 +126,7 @@ class _AppButtonState extends State<AppButton> {
       decoration: BoxDecoration(
         gradient: colors.gradient,
         color: colors.gradient == null ? colors.bg : null,
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        borderRadius: BorderRadius.circular(isFlat ? AppRadii.pill : AppRadii.md),
         border: colors.borderColor == null
             ? null
             : Border.all(color: colors.borderColor!, width: 1),
@@ -211,10 +213,11 @@ _ButtonColors _resolveColors(
 
   switch (v) {
     case AppButtonVariant.primary:
+      final isFlat = theme.palette.shadowSm.isEmpty;
       return _ButtonColors(
-        bg: accent.mid,
+        bg: isFlat ? (hovered ? accent.base : accent.mid) : accent.mid,
         fg: accent.ink,
-        gradient: LinearGradient(
+        gradient: isFlat ? null : LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
           colors: [

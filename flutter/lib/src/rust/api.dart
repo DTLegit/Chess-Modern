@@ -21,11 +21,6 @@ Stream<BackendEvent> subscribeEvents() =>
 /// Override the Stockfish spawner with an explicit binary path. The
 /// Flutter Android plugin code calls this after extracting the binary
 /// out of `assets/stockfish/<abi>/stockfish`, chmod 0755'ing it.
-///
-/// No-op today: hot-swapping the spawner on a live session would
-/// require a `SessionManager::replace_spawner` seam. We log and accept
-/// silently; for now Android needs to stage the binary and call
-/// [`bridge_init`] before the first AI request.
 void bridgeProvideExternalStockfish({required String binaryPath}) =>
     RustLib.instance.api
         .crateApiBridgeProvideExternalStockfish(binaryPath: binaryPath);
@@ -147,7 +142,11 @@ sealed class ApiError with _$ApiError implements FrbException {
 enum AppTheme {
   light,
   dark,
-  blue,
+  black,
+  casualLight,
+  casualDark,
+  liquidGlass,
+  material,
   ;
 }
 

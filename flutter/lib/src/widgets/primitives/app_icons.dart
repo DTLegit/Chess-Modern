@@ -221,3 +221,16 @@ class IconCopy extends AppStrokeIcon {
         RRect.fromRectAndRadius(r2, const Radius.circular(2)), p);
   }
 }
+
+class IconMenu extends AppStrokeIcon {
+  const IconMenu({super.key, super.size, super.color, super.strokeWidth});
+  @override
+  void paintIcon(Canvas canvas, Size s, Paint p) {
+    canvas.drawLine(Offset(s.width * 0.15, s.height * 0.30),
+        Offset(s.width * 0.85, s.height * 0.30), p);
+    canvas.drawLine(Offset(s.width * 0.15, s.height * 0.50),
+        Offset(s.width * 0.85, s.height * 0.50), p);
+    canvas.drawLine(Offset(s.width * 0.15, s.height * 0.70),
+        Offset(s.width * 0.85, s.height * 0.70), p);
+  }
+}

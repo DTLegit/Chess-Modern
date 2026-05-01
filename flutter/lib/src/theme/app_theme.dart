@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show ColorScheme;
 import 'package:flutter/widgets.dart';
 
 import '../rust/api.dart' as rust;
@@ -28,9 +29,14 @@ class AppThemeData {
   Brightness get brightness => palette.brightness;
 
   /// Build from a Rust Settings record.
-  factory AppThemeData.fromSettings(rust.Settings s) {
+  factory AppThemeData.fromSettings(
+    rust.Settings s, {
+    ColorScheme? lightDynamic,
+    ColorScheme? darkDynamic,
+    Brightness platformBrightness = Brightness.light,
+  }) {
     return AppThemeData(
-      palette: palettesFor(s.appTheme),
+      palette: palettesFor(s.appTheme, lightDynamic: lightDynamic, darkDynamic: darkDynamic, platformBrightness: platformBrightness),
       accent: accentFor(s.accent),
       highlights: const AppHighlights(),
       board: boardPaletteFor(s.boardTheme),

@@ -36,23 +36,31 @@ class AppSegmented<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = AppTheme.of(context);
     final palette = theme.palette;
+    final isFlat = palette.shadowSm.isEmpty;
+
+    Widget row = Row(
+      mainAxisSize: equalWidth ? MainAxisSize.max : MainAxisSize.min,
+      children: [
+        for (final opt in options)
+          equalWidth
+              ? Expanded(child: _segment(context, opt))
+              : _segment(context, opt),
+      ],
+    );
 
     return Container(
       padding: const EdgeInsets.all(3),
       decoration: BoxDecoration(
         color: palette.bgCard,
         border: Border.all(color: palette.hairline),
-        borderRadius: BorderRadius.circular(AppRadii.md),
+        borderRadius: BorderRadius.circular(isFlat ? AppRadii.pill : AppRadii.md),
       ),
-      child: Row(
-        mainAxisSize: equalWidth ? MainAxisSize.max : MainAxisSize.min,
-        children: [
-          for (final opt in options)
-            equalWidth
-                ? Expanded(child: _segment(context, opt))
-                : _segment(context, opt),
-        ],
-      ),
+      child: equalWidth
+          ? row
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: row,
+            ),
     );
   }
 
@@ -89,6 +97,7 @@ class _SegmentState<T> extends State<_Segment<T>> {
     final theme = AppTheme.of(context);
     final palette = theme.palette;
     final accent = theme.accent;
+    final isFlat = palette.shadowSm.isEmpty;
 
     final padH = widget.compact ? 10.0 : 14.0;
     final padV = widget.compact ? 6.0 : 8.0;
@@ -111,7 +120,7 @@ class _SegmentState<T> extends State<_Segment<T>> {
           curve: AppCurves.easeOut,
           padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
           decoration: BoxDecoration(
-            gradient: widget.selected
+            gradient: (widget.selected && !isFlat)
                 ? LinearGradient(
                     begin: Alignment.topCenter,
                     end: Alignment.bottomCenter,
@@ -119,12 +128,12 @@ class _SegmentState<T> extends State<_Segment<T>> {
                   )
                 : null,
             color: widget.selected
-                ? null
+                ? (isFlat ? accent.mid : null)
                 : (_hovered
                     ? Color.alphaBlend(
                         accent.soft.withValues(alpha: 0.16), palette.bgCard)
                     : null),
-            borderRadius: BorderRadius.circular(AppRadii.sm),
+            borderRadius: BorderRadius.circular(isFlat ? AppRadii.pill : AppRadii.sm),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -137,9 +146,13 @@ class _SegmentState<T> extends State<_Segment<T>> {
                 ),
                 const SizedBox(width: 6),
               ],
-              Text(
-                widget.option.label,
-                style: AppTextStyles.button.copyWith(color: fg),
+              Flexible(
+                child: Text(
+                  widget.option.label,
+                  style: AppTextStyles.button.copyWith(color: fg),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
               ),
             ],
           ),

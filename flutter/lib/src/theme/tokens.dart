@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart' show ColorScheme;
 import 'package:flutter/widgets.dart';
 
 import '../rust/api.dart' as rust;
@@ -52,7 +53,7 @@ class AppPalette {
 }
 
 /// app.css :root (light) — lines 7–77.
-const _lightPalette = AppPalette(
+const _casualLightPalette = AppPalette(
   bg: Color(0xFFF4EDE0),
   bgSoft: Color(0xFFEFE6D4),
   bgCard: Color(0xFFFBF6EC),
@@ -83,8 +84,28 @@ const _lightPalette = AppPalette(
   brightness: Brightness.light,
 );
 
+const _lightPalette = AppPalette(
+  bg: Color(0xFFFFFFFF),
+  bgSoft: Color(0xFFF4F4F5),
+  bgCard: Color(0xFFFFFFFF),
+  bgElev: Color(0xFFFFFFFF),
+  ink: Color(0xFF09090B),
+  inkSoft: Color(0xFF52525B),
+  inkMute: Color(0xFFA1A1AA),
+  inkFaint: Color(0xFFD4D4D8),
+  walnut: Color(0xFF6E4A2A),
+  walnutDeep: Color(0xFF3A2515),
+  hairline: Color(0xFFE4E4E7),
+  hairlineStrong: Color(0xFFD4D4D8),
+  shadowSm: [],
+  shadowMd: [],
+  shadowLg: [],
+  shadowBoard: [],
+  brightness: Brightness.light,
+);
+
 /// app.css [data-theme="dark"] — lines 79–104.
-const _darkPalette = AppPalette(
+const _casualDarkPalette = AppPalette(
   bg: Color(0xFF1A1B1E),
   bgSoft: Color(0xFF25262B),
   bgCard: Color(0xFF2C2E33),
@@ -115,46 +136,118 @@ const _darkPalette = AppPalette(
   brightness: Brightness.dark,
 );
 
-/// app.css [data-theme="blue"] — lines 106–131.
-const _bluePalette = AppPalette(
-  bg: Color(0xFF0F172A),
-  bgSoft: Color(0xFF1E293B),
-  bgCard: Color(0xFF293548),
-  bgElev: Color(0xFF3D4F63),
-  ink: Color(0xFFF8FAFC),
-  inkSoft: Color(0xFFE2E8F0),
-  inkMute: Color(0xFFB8C5D6),
-  inkFaint: Color(0xFF7C8FA3),
+const _darkPalette = AppPalette(
+  bg: Color(0xFF18181B),
+  bgSoft: Color(0xFF27272A),
+  bgCard: Color(0xFF18181B),
+  bgElev: Color(0xFF27272A),
+  ink: Color(0xFFFAFAFA),
+  inkSoft: Color(0xFFD4D4D8),
+  inkMute: Color(0xFFA1A1AA),
+  inkFaint: Color(0xFF71717A),
   walnut: Color(0xFF8A6642),
   walnutDeep: Color(0xFF5B3A20),
-  hairline: Color(0x1AFFFFFF),
-  hairlineStrong: Color(0x2EFFFFFF),
-  shadowSm: [
-    BoxShadow(color: Color(0x66000000), blurRadius: 2, offset: Offset(0, 1)),
-  ],
-  shadowMd: [
-    BoxShadow(color: Color(0x80000000), blurRadius: 16, offset: Offset(0, 4)),
-    BoxShadow(color: Color(0x4D000000), blurRadius: 2, offset: Offset(0, 1)),
-  ],
-  shadowLg: [
-    BoxShadow(color: Color(0x99000000), blurRadius: 44, offset: Offset(0, 14)),
-    BoxShadow(color: Color(0x66000000), blurRadius: 6, offset: Offset(0, 2)),
-  ],
-  shadowBoard: [
-    BoxShadow(color: Color(0xB3000000), blurRadius: 40, offset: Offset(0, 16)),
-    BoxShadow(color: Color(0x80000000), blurRadius: 4, offset: Offset(0, 2)),
-  ],
+  hairline: Color(0xFF3F3F46),
+  hairlineStrong: Color(0xFF52525B),
+  shadowSm: [],
+  shadowMd: [],
+  shadowLg: [],
+  shadowBoard: [],
   brightness: Brightness.dark,
 );
 
-AppPalette palettesFor(rust.AppTheme theme) {
+/// Charcoal Black Tactile Flat theme.
+const _blackPalette = AppPalette(
+  bg: Color(0xFF121212),
+  bgSoft: Color(0xFF1E1E1E),
+  bgCard: Color(0xFF121212),
+  bgElev: Color(0xFF1E1E1E),
+  ink: Color(0xFFFFFFFF),
+  inkSoft: Color(0xFFE4E4E7),
+  inkMute: Color(0xFFA1A1AA),
+  inkFaint: Color(0xFF71717A),
+  walnut: Color(0xFF8A6642),
+  walnutDeep: Color(0xFF5B3A20),
+  hairline: Color(0xFF27272A),
+  hairlineStrong: Color(0xFF3F3F46),
+  shadowSm: [],
+  shadowMd: [],
+  shadowLg: [],
+  shadowBoard: [],
+  brightness: Brightness.dark,
+);
+
+const _liquidGlassPalette = AppPalette(
+  bg: Color(0xFFF2F2F7), // iOS grouped background
+  bgSoft: Color(0xFFE5E5EA),
+  bgCard: Color(0x99FFFFFF), // translucent glass
+  bgElev: Color(0xCCFFFFFF),
+  ink: Color(0xFF000000),
+  inkSoft: Color(0xFF3A3A3C),
+  inkMute: Color(0xFF8E8E93),
+  inkFaint: Color(0xFFC7C7CC),
+  walnut: Color(0xFF8A6642),
+  walnutDeep: Color(0xFF5B3A20),
+  hairline: Color(0x403C3C43), // iOS separator
+  hairlineStrong: Color(0x593C3C43),
+  shadowSm: [],
+  shadowMd: [],
+  shadowLg: [
+    BoxShadow(color: Color(0x1A000000), blurRadius: 44, offset: Offset(0, 14)),
+  ],
+  shadowBoard: [],
+  brightness: Brightness.light,
+);
+
+AppPalette materialPaletteFor(ColorScheme? lightDynamic, ColorScheme? darkDynamic, Brightness brightness) {
+  final cs = brightness == Brightness.light 
+      ? (lightDynamic ?? ColorScheme.fromSeed(seedColor: const Color(0xFF6750A4)))
+      : (darkDynamic ?? ColorScheme.fromSeed(seedColor: const Color(0xFF6750A4), brightness: Brightness.dark));
+      
+  return AppPalette(
+    bg: cs.surface,
+    bgSoft: cs.surfaceContainerHighest,
+    bgCard: cs.surfaceContainer,
+    bgElev: cs.surfaceContainerHigh,
+    ink: cs.onSurface,
+    inkSoft: cs.onSurfaceVariant,
+    inkMute: cs.outline,
+    inkFaint: cs.outlineVariant,
+    walnut: const Color(0xFF8A6642),
+    walnutDeep: const Color(0xFF5B3A20),
+    hairline: cs.outlineVariant.withValues(alpha: 0.5),
+    hairlineStrong: cs.outline,
+    shadowSm: [],
+    shadowMd: [],
+    shadowLg: [
+      BoxShadow(color: cs.shadow.withValues(alpha: 0.2), blurRadius: 10, offset: const Offset(0, 4)),
+    ],
+    shadowBoard: [],
+    brightness: brightness,
+  );
+}
+
+AppPalette palettesFor(
+  rust.AppTheme theme, {
+  ColorScheme? lightDynamic,
+  ColorScheme? darkDynamic,
+  Brightness platformBrightness = Brightness.light,
+}) {
   switch (theme) {
     case rust.AppTheme.light:
       return _lightPalette;
     case rust.AppTheme.dark:
       return _darkPalette;
-    case rust.AppTheme.blue:
-      return _bluePalette;
+    case rust.AppTheme.black:
+      return _blackPalette;
+    case rust.AppTheme.casualLight:
+      return _casualLightPalette;
+    case rust.AppTheme.casualDark:
+      return _casualDarkPalette;
+    case rust.AppTheme.liquidGlass:
+      return _liquidGlassPalette;
+    case rust.AppTheme.material:
+      return materialPaletteFor(lightDynamic, darkDynamic, platformBrightness);
   }
 }
 

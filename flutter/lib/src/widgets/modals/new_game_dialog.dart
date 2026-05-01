@@ -134,13 +134,15 @@ class _NewGameDialogState extends State<NewGameDialog> {
           const AppLabel('Board theme'),
           const SizedBox(height: AppSpacing.sm),
           // Mini-board preview — updates on hover.
-          _NewGameBoardPreview(boardTheme: _previewTheme),
+          Center(child: _NewGameBoardPreview(boardTheme: _previewTheme)),
           const SizedBox(height: AppSpacing.md),
           // 3-col swatch grid.
-          _BoardThemePicker(
-            value: _boardTheme,
-            onChanged: (t) => setState(() => _boardTheme = t),
-            onHover: (t) => setState(() => _hoverTheme = t),
+          Center(
+            child: _BoardThemePicker(
+              value: _boardTheme,
+              onChanged: (t) => setState(() => _boardTheme = t),
+              onHover: (t) => setState(() => _hoverTheme = t),
+            ),
           ),
           const SizedBox(height: AppSpacing.huge),
           const AppLabel('Time control'),

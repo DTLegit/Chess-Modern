@@ -1,3 +1,4 @@
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/cupertino.dart' show DefaultCupertinoLocalizations;
 import 'package:flutter/material.dart' show DefaultMaterialLocalizations;
 import 'package:flutter/widgets.dart';
@@ -19,13 +20,17 @@ class _AppBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLight = palette.brightness == Brightness.light;
-    return Container(
+    return AnimatedContainer(
+      duration: AppDurations.base,
+      curve: AppCurves.easeOut,
       color: palette.bg,
       child: Stack(
         children: [
           // Subtle radial ambient: brightens center slightly.
           Positioned.fill(
-            child: DecoratedBox(
+            child: AnimatedContainer(
+              duration: AppDurations.base,
+              curve: AppCurves.easeOut,
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   center: const Alignment(0.0, -0.3),
@@ -42,7 +47,9 @@ class _AppBackground extends StatelessWidget {
           ),
           // Vignette: darkens edges slightly.
           Positioned.fill(
-            child: DecoratedBox(
+            child: AnimatedContainer(
+              duration: AppDurations.base,
+              curve: AppCurves.easeOut,
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   radius: 1.5,
@@ -75,48 +82,59 @@ class ChessApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: settings,
-      builder: (context, _) {
-        final themeData = AppThemeData.fromSettings(settings.value);
-        return WidgetsApp(
-          title: 'Chess',
-          color: themeData.palette.bg,
-          // Default page transition: 180ms fade matching Svelte modal/route motion.
-          pageRouteBuilder: <T>(RouteSettings rsettings, WidgetBuilder builder) {
-            return PageRouteBuilder<T>(
-              settings: rsettings,
-              transitionDuration: AppDurations.base,
-              reverseTransitionDuration: AppDurations.fast,
-              pageBuilder: (ctx, anim, secondary) => builder(ctx),
-              transitionsBuilder: (_, anim, __, child) {
-                return FadeTransition(
-                  opacity: CurvedAnimation(parent: anim, curve: AppCurves.easeOut),
-                  child: child,
+    return DynamicColorBuilder(
+      builder: (lightDynamic, darkDynamic) {
+        return ListenableBuilder(
+          listenable: settings,
+          builder: (context, _) {
+            final themeData = AppThemeData.fromSettings(
+              settings.value,
+              lightDynamic: lightDynamic,
+              darkDynamic: darkDynamic,
+              platformBrightness: MediaQuery.platformBrightnessOf(context),
+            );
+            return WidgetsApp(
+              title: 'Chess',
+              color: themeData.palette.bg,
+              // Default page transition: 180ms fade matching Svelte modal/route motion.
+              pageRouteBuilder: <T>(RouteSettings rsettings, WidgetBuilder builder) {
+                return PageRouteBuilder<T>(
+                  settings: rsettings,
+                  transitionDuration: AppDurations.base,
+                  reverseTransitionDuration: AppDurations.fast,
+                  pageBuilder: (ctx, anim, secondary) => builder(ctx),
+                  transitionsBuilder: (_, anim, __, child) {
+                    return FadeTransition(
+                      opacity: CurvedAnimation(parent: anim, curve: AppCurves.easeOut),
+                      child: child,
+                    );
+                  },
                 );
               },
+              localizationsDelegates: const [
+                DefaultMaterialLocalizations.delegate,
+                DefaultWidgetsLocalizations.delegate,
+                DefaultCupertinoLocalizations.delegate,
+              ],
+              builder: (context, child) {
+                return AppTheme(
+                  data: themeData,
+                  child: AnimatedDefaultTextStyle(
+                    duration: AppDurations.base,
+                    curve: AppCurves.easeOut,
+                    style: AppTextStyles.body.copyWith(color: themeData.palette.ink),
+                    child: _AppBackground(
+                      palette: themeData.palette,
+                      child: child ?? const SizedBox.shrink(),
+                    ),
+                  ),
+                );
+              },
+              home: HomeScreen(game: game, settings: settings),
             );
           },
-          localizationsDelegates: const [
-            DefaultMaterialLocalizations.delegate,
-            DefaultWidgetsLocalizations.delegate,
-            DefaultCupertinoLocalizations.delegate,
-          ],
-          builder: (context, child) {
-            return AppTheme(
-              data: themeData,
-              child: DefaultTextStyle(
-                style: AppTextStyles.body.copyWith(color: themeData.palette.ink),
-                child: _AppBackground(
-                  palette: themeData.palette,
-                  child: child ?? const SizedBox.shrink(),
-                ),
-              ),
-            );
-          },
-          home: HomeScreen(game: game, settings: settings),
         );
-      },
+      }
     );
   }
 }

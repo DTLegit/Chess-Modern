@@ -175,7 +175,11 @@ pub enum _MirrorBoardTheme {
 pub enum _MirrorAppTheme {
     Light,
     Dark,
-    Blue,
+    Black,
+    CasualLight,
+    CasualDark,
+    LiquidGlass,
+    Material,
 }
 
 #[frb(mirror(PieceSet))]
