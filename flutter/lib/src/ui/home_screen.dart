@@ -214,22 +214,25 @@ class _HomeScreenState extends State<HomeScreen> {
                     ignoring: _welcomeOpen,
                     child: ui,
                   ),
-                  AnimatedSwitcher(
-                    duration: AppDurations.base,
-                    switchInCurve: AppCurves.easeOut,
-                    switchOutCurve: AppCurves.easeOut,
-                    child: _welcomeOpen
-                        ? Positioned.fill(
-                            key: const ValueKey('welcome-screen'),
-                            child: WelcomeScreen(
+                  Positioned.fill(
+                    child: AnimatedSwitcher(
+                      duration: AppDurations.base,
+                      switchInCurve: AppCurves.easeOut,
+                      switchOutCurve: AppCurves.easeOut,
+                      child: _welcomeOpen
+                          ? WelcomeScreen(
+                              key: const ValueKey('welcome-screen'),
                               onNewGame: () {
                                 setState(() => _welcomeOpen = false);
                                 _openNewGameDialog();
                               },
-                              onSettings: () => _openAppearance(showBoardTheme: false),
+                              onSettings: () =>
+                                  _openAppearance(showBoardTheme: false),
+                            )
+                          : const SizedBox.shrink(
+                              key: ValueKey('empty-welcome'),
                             ),
-                          )
-                        : const SizedBox.shrink(key: ValueKey('empty-welcome')),
+                    ),
                   ),
                 ],
               );
